@@ -155,11 +155,13 @@
       border: 1px solid #ff9f43;
       border-radius: 10px;
       width: 90%;
-      max-width: 480px;
+      max-width: 550px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     .login-box { text-align: center; max-width: 360px; }
@@ -222,6 +224,50 @@
 
     .error-msg { color: #e74c3c; font-size: 0.85rem; margin-top: 5px; }
 
+    /* Calendario e Dettaglio Camera */
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 8px;
+      background: #121417;
+      border-radius: 8px;
+      border: 1px solid #2d333d;
+    }
+
+    .cal-day-cell {
+      border-radius: 6px;
+      padding: 6px 4px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .cal-day-cell.free {
+      background: #1e824c;
+      color: white;
+      border: 1px solid #2ecc71;
+    }
+
+    .cal-day-cell.busy {
+      background: #962d22;
+      color: white;
+      border: 1px solid #e74c3c;
+    }
+
+    .detail-booking-card {
+      background: #121417;
+      border: 1px solid #2d333d;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
     /* Registro Economico & Stampa */
     .master-view { background: #1c2026; padding: 20px; border-radius: 8px; }
     .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -276,7 +322,7 @@
 
     <main class="main-content no-print">
       <div class="legend-bar">
-        <span>Stato nel periodo selezionato:</span>
+        <span>Stato nel periodo selezionato (clicca su una stanza per dettagli):</span>
         <span class="badge-free">● Libera</span>
         <span class="badge-busy">● Occupata</span>
       </div>
@@ -336,6 +382,26 @@
         </thead>
         <tbody id="master-table-body"></tbody>
       </table>
+    </div>
+  </div>
+
+  <div id="room-detail-modal" class="modal hidden">
+    <div class="modal-box">
+      <h3 id="detail-room-title" class="modal-title">Dettaglio Camera</h3>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+        <h4 style="color:#ff9f43;">📅 Disponibilità Prossimi 30 Giorni</h4>
+        <button class="btn-gold" style="padding:6px 12px; font-size:0.85rem;" onclick="createBookingFromDetail()">➕ Nuova Prenotazione</button>
+      </div>
+
+      <div id="room-calendar-grid" class="cal-grid"></div>
+
+      <h4 style="color:#ff9f43; margin-top:10px;">📋 Prenotazioni Registrate in questa Camera</h4>
+      <div id="room-bookings-list" style="max-height:180px; overflow-y:auto;"></div>
+
+      <div class="modal-buttons" style="margin-top:15px;">
+        <button class="btn-cancel" style="width:100%;" onclick="closeRoomDetailModal()">Chiudi</button>
+      </div>
     </div>
   </div>
 
@@ -443,6 +509,7 @@
 
     let pendingMasterAction = null;
     let targetBookingId = null;
+    let currentSelectedRoomId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       const today = new Date().toISOString().split('T')[0];
@@ -487,26 +554,103 @@
 
         const card = document.createElement("div");
         card.className = `room-card ${activeBooking ? 'busy' : 'free'}`;
+        card.onclick = () => openRoomDetailModal(room.id);
 
         if (!activeBooking) {
-          card.onclick = () => openBookingModal(room, from, to);
           card.innerHTML = `
             <div class="room-number">${room.name}</div>
             <div class="room-type">${room.type}</div>
-            <small style="margin-top:6px; font-weight:bold; color:#2ecc71;">LIBERA</small>
+            <small style="margin-top:6px; font-weight:bold; color:#2ecc71;">LIBERA (Clicca p/ Calendario)</small>
           `;
         } else {
-          card.onclick = () => requestReleaseRoom(activeBooking);
           card.innerHTML = `
             <div class="room-number">${room.name}</div>
             <div class="room-guest">${activeBooking.guestName}</div>
             <div class="room-dates">📅 ${formatDate(activeBooking.checkIn)} ➔ ${formatDate(activeBooking.checkOut)}</div>
             <div class="room-type">${activeBooking.nights} ${activeBooking.nights === 1 ? 'notte' : 'notti'} | ${activeBooking.adults} Ad. ${activeBooking.children ? '/ ' + activeBooking.children + ' Bimbi' : ''}</div>
-            <small style="margin-top:4px; font-weight:bold; color:#ff9f43;">OCCUPATA (Clicca p/ Sbloccare)</small>
+            <small style="margin-top:4px; font-weight:bold; color:#ff9f43;">OCCUPATA (Clicca p/ Gestire)</small>
           `;
         }
         grid.appendChild(card);
       });
+    }
+
+    /* Modal Calendario & Dettaglio Camera */
+    function openRoomDetailModal(roomId) {
+      const room = ROOMS.find(r => r.id === roomId);
+      if (!room) return;
+
+      currentSelectedRoomId = roomId;
+      document.getElementById("detail-room-title").innerText = `🏡 ${room.name} (${room.type})`;
+
+      // Rendering Calendario 30 Giorni
+      const calendarGrid = document.getElementById("room-calendar-grid");
+      calendarGrid.innerHTML = "";
+
+      const startDateStr = document.getElementById("home-date-from").value || new Date().toISOString().split('T')[0];
+      let currDate = new Date(startDateStr);
+
+      for (let i = 0; i < 30; i++) {
+        const dateIso = currDate.toISOString().split('T')[0];
+        const dayNum = currDate.getDate();
+        const monthName = currDate.toLocaleDateString('it-IT', { month: 'short' });
+        const dayOfWeek = currDate.toLocaleDateString('it-IT', { weekday: 'short' });
+
+        const activeBooking = bookings.find(b => b.roomId === roomId && (dateIso >= b.checkIn && dateIso < b.checkOut));
+
+        const dayCell = document.createElement("div");
+        dayCell.className = `cal-day-cell ${activeBooking ? 'busy' : 'free'}`;
+        dayCell.title = activeBooking ? `Occupata da: ${activeBooking.guestName}` : 'Libera';
+        dayCell.innerHTML = `
+          <div style="font-size:0.65rem; opacity:0.85; text-transform:uppercase;">${dayOfWeek}</div>
+          <div style="font-size:0.85rem; font-weight:bold;">${dayNum} ${monthName}</div>
+          <div style="font-size:0.65rem; margin-top:2px;">${activeBooking ? '🔴 Occupata' : '🟢 Libera'}</div>
+        `;
+        calendarGrid.appendChild(dayCell);
+
+        currDate.setDate(currDate.getDate() + 1);
+      }
+
+      // Rendering Lista Prenotazioni Esistenti per la Camera
+      const bookingsList = document.getElementById("room-bookings-list");
+      bookingsList.innerHTML = "";
+
+      const roomBookings = bookings.filter(b => b.roomId === roomId).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
+
+      if (roomBookings.length === 0) {
+        bookingsList.innerHTML = `<p style="color:#a0a8b5; font-size:0.85rem; padding:8px 0;">Nessuna prenotazione futura per questa camera.</p>`;
+      } else {
+        roomBookings.forEach(b => {
+          const card = document.createElement("div");
+          card.className = "detail-booking-card";
+          card.innerHTML = `
+            <div>
+              <div style="font-weight:bold; color:#ff9f43; font-size:0.95rem;">👤 ${b.guestName} ${b.phone ? '(' + b.phone + ')' : ''}</div>
+              <div style="font-size:0.85rem; margin-top:3px;">📅 ${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights} ${b.nights === 1 ? 'notte' : 'notti'})</div>
+              <div style="font-size:0.8rem; color:#abb3c0; margin-top:2px;">👥 ${b.adults} Ad. ${b.children ? '/ ' + b.children + ' Bimbi' : ''} | Totale: € ${b.totalPrice.toFixed(2)}</div>
+            </div>
+            <div>
+              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">🗑️ Elimina</button>
+            </div>
+          `;
+          bookingsList.appendChild(card);
+        });
+      }
+
+      document.getElementById("room-detail-modal").classList.remove("hidden");
+    }
+
+    function closeRoomDetailModal() {
+      document.getElementById("room-detail-modal").classList.add("hidden");
+    }
+
+    function createBookingFromDetail() {
+      const room = ROOMS.find(r => r.id === currentSelectedRoomId);
+      if (!room) return;
+      const from = document.getElementById("home-date-from").value;
+      const to = document.getElementById("home-date-to").value;
+      closeRoomDetailModal();
+      openBookingModal(room, from, to);
     }
 
     function openBookingModal(room, checkIn, checkOut) {
@@ -633,6 +777,11 @@
       document.getElementById("master-modal").classList.remove("hidden");
     }
 
+    function requestReleaseRoomDirect(bookingId) {
+      const b = bookings.find(item => item.id === bookingId);
+      if (b) requestReleaseRoom(b);
+    }
+
     function openMasterModal(action) {
       pendingMasterAction = action;
       document.getElementById("master-prompt-text").innerText = "Inserisci il PIN Master per accedere al Registro:";
@@ -696,17 +845,21 @@
       });
     }
 
-    function requestReleaseRoomDirect(bookingId) {
-      const b = bookings.find(item => item.id === bookingId);
-      if (b) requestReleaseRoom(b);
-    }
-
     function deleteBooking(id) {
+      const deletedBooking = bookings.find(b => b.id === id);
+      const roomId = deletedBooking ? deletedBooking.roomId : null;
+
       bookings = bookings.filter(b => b.id !== id);
       localStorage.setItem("agri_bookings", JSON.stringify(bookings));
+
       renderRooms();
+
       if (!document.getElementById("master-report-section").classList.contains("hidden")) {
         renderMasterReport();
+      }
+
+      if (!document.getElementById("room-detail-modal").classList.contains("hidden") && roomId) {
+        openRoomDetailModal(roomId);
       }
     }
 
