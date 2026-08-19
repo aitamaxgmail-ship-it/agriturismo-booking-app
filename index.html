@@ -154,13 +154,13 @@
       background: #1c2026;
       border: 1px solid #ff9f43;
       border-radius: 10px;
-      width: 90%;
-      max-width: 550px;
+      width: 95%;
+      max-width: 600px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      max-height: 90vh;
+      max-height: 92vh;
       overflow-y: auto;
     }
 
@@ -224,37 +224,61 @@
 
     .error-msg { color: #e74c3c; font-size: 0.85rem; margin-top: 5px; }
 
-    /* Calendario e Dettaglio Camera */
+    /* Calendario Mensile */
+    .month-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .btn-nav-cal {
+      background: #252a33;
+      border: 1px solid #ff9f43;
+      color: #ff9f43;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .cal-header-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 0.75rem;
+      color: #ff9f43;
+      margin-bottom: 4px;
+    }
+
     .cal-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-      gap: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 8px;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
       background: #121417;
       border-radius: 8px;
+      padding: 6px;
       border: 1px solid #2d333d;
     }
 
     .cal-day-cell {
-      border-radius: 6px;
-      padding: 6px 4px;
+      min-height: 40px;
+      border-radius: 5px;
+      padding: 4px;
       text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
-    .cal-day-cell.free {
-      background: #1e824c;
-      color: white;
-      border: 1px solid #2ecc71;
-    }
-
-    .cal-day-cell.busy {
-      background: #962d22;
-      color: white;
-      border: 1px solid #e74c3c;
-    }
+    .cal-day-cell.empty { background: transparent; }
+    .cal-day-cell.free { background: #1e824c; color: white; border: 1px solid #2ecc71; }
+    .cal-day-cell.busy { background: #962d22; color: white; border: 1px solid #e74c3c; }
 
     .detail-booking-card {
       background: #121417;
@@ -322,7 +346,7 @@
 
     <main class="main-content no-print">
       <div class="legend-bar">
-        <span>Stato nel periodo selezionato (clicca su una stanza per dettagli):</span>
+        <span>Stato nel periodo selezionato (clicca p/ Calendario completo):</span>
         <span class="badge-free">● Libera</span>
         <span class="badge-busy">● Occupata</span>
       </div>
@@ -338,10 +362,10 @@
         </div>
       </div>
 
-      <h2>Registro Economico & Lista Prenotazioni</h2>
+      <h2>Registro Economico & Lista Prenotazioni (Inclusi Storici e Passati)</h2>
 
       <div class="card-dark no-print">
-        <h3>Filtra Registro o Configura Tariffe Stagionali</h3>
+        <h3>Filtra Registro (Nessun limite retroattivo)</h3>
         <div class="form-inline">
           <div class="form-group">
             <label>Dal:</label>
@@ -390,14 +414,24 @@
       <h3 id="detail-room-title" class="modal-title">Dettaglio Camera</h3>
 
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-        <h4 style="color:#ff9f43;">📅 Disponibilità Prossimi 30 Giorni</h4>
+        <h4 style="color:#ff9f43;">📅 Calendario Disponibilità</h4>
         <button class="btn-gold" style="padding:6px 12px; font-size:0.85rem;" onclick="createBookingFromDetail()">➕ Nuova Prenotazione</button>
+      </div>
+
+      <div class="month-nav">
+        <button class="btn-nav-cal" onclick="changeMonth(-1)">◀ Mese Prec.</button>
+        <span id="cal-month-title" style="font-weight:bold; color:#ff9f43;"></span>
+        <button class="btn-nav-cal" onclick="changeMonth(1)">Mese Succ. ▶</button>
+      </div>
+
+      <div class="cal-header-grid">
+        <div>LUN</div><div>MAR</div><div>MER</div><div>GIO</div><div>VEN</div><div>SAB</div><div>DOM</div>
       </div>
 
       <div id="room-calendar-grid" class="cal-grid"></div>
 
-      <h4 style="color:#ff9f43; margin-top:10px;">📋 Prenotazioni Registrate in questa Camera</h4>
-      <div id="room-bookings-list" style="max-height:180px; overflow-y:auto;"></div>
+      <h4 style="color:#ff9f43; margin-top:10px;">📋 Prenotazioni della Camera</h4>
+      <div id="room-bookings-list" style="max-height:160px; overflow-y:auto;"></div>
 
       <div class="modal-buttons" style="margin-top:15px;">
         <button class="btn-cancel" style="width:100%;" onclick="closeRoomDetailModal()">Chiudi</button>
@@ -435,7 +469,7 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label>Check-in (Dal):</label>
+          <label>Check-in (Dal) - Non retroattivo:</label>
           <input type="date" id="book-checkin" onchange="updateBookingTotal()">
         </div>
         <div class="form-group">
@@ -511,6 +545,9 @@
     let targetBookingId = null;
     let currentSelectedRoomId = null;
 
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth(); // 0-indexed (0=Gen, 11=Dic)
+
     document.addEventListener("DOMContentLoaded", () => {
       const today = new Date().toISOString().split('T')[0];
       let tomorrow = new Date();
@@ -519,7 +556,9 @@
 
       document.getElementById("home-date-from").value = today;
       document.getElementById("home-date-to").value = tomorrowStr;
-      document.getElementById("report-date-from").value = today;
+      
+      // Il report parte da inizio anno corrente fino ad oggi (retroattivo di default)
+      document.getElementById("report-date-from").value = `${calYear}-01-01`;
       document.getElementById("report-date-to").value = tomorrowStr;
     });
 
@@ -575,7 +614,7 @@
       });
     }
 
-    /* Modal Calendario & Dettaglio Camera */
+    /* Modal Calendario Mensile & Dettaglio Camera */
     function openRoomDetailModal(roomId) {
       const room = ROOMS.find(r => r.id === roomId);
       if (!room) return;
@@ -583,42 +622,16 @@
       currentSelectedRoomId = roomId;
       document.getElementById("detail-room-title").innerText = `🏡 ${room.name} (${room.type})`;
 
-      // Rendering Calendario 30 Giorni
-      const calendarGrid = document.getElementById("room-calendar-grid");
-      calendarGrid.innerHTML = "";
+      renderCalendarMonth();
 
-      const startDateStr = document.getElementById("home-date-from").value || new Date().toISOString().split('T')[0];
-      let currDate = new Date(startDateStr);
-
-      for (let i = 0; i < 30; i++) {
-        const dateIso = currDate.toISOString().split('T')[0];
-        const dayNum = currDate.getDate();
-        const monthName = currDate.toLocaleDateString('it-IT', { month: 'short' });
-        const dayOfWeek = currDate.toLocaleDateString('it-IT', { weekday: 'short' });
-
-        const activeBooking = bookings.find(b => b.roomId === roomId && (dateIso >= b.checkIn && dateIso < b.checkOut));
-
-        const dayCell = document.createElement("div");
-        dayCell.className = `cal-day-cell ${activeBooking ? 'busy' : 'free'}`;
-        dayCell.title = activeBooking ? `Occupata da: ${activeBooking.guestName}` : 'Libera';
-        dayCell.innerHTML = `
-          <div style="font-size:0.65rem; opacity:0.85; text-transform:uppercase;">${dayOfWeek}</div>
-          <div style="font-size:0.85rem; font-weight:bold;">${dayNum} ${monthName}</div>
-          <div style="font-size:0.65rem; margin-top:2px;">${activeBooking ? '🔴 Occupata' : '🟢 Libera'}</div>
-        `;
-        calendarGrid.appendChild(dayCell);
-
-        currDate.setDate(currDate.getDate() + 1);
-      }
-
-      // Rendering Lista Prenotazioni Esistenti per la Camera
+      // Rendering Lista Prenotazioni per la Camera
       const bookingsList = document.getElementById("room-bookings-list");
       bookingsList.innerHTML = "";
 
       const roomBookings = bookings.filter(b => b.roomId === roomId).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
 
       if (roomBookings.length === 0) {
-        bookingsList.innerHTML = `<p style="color:#a0a8b5; font-size:0.85rem; padding:8px 0;">Nessuna prenotazione futura per questa camera.</p>`;
+        bookingsList.innerHTML = `<p style="color:#a0a8b5; font-size:0.85rem; padding:8px 0;">Nessuna prenotazione registrata per questa camera.</p>`;
       } else {
         roomBookings.forEach(b => {
           const card = document.createElement("div");
@@ -640,6 +653,58 @@
       document.getElementById("room-detail-modal").classList.remove("hidden");
     }
 
+    function renderCalendarMonth() {
+      const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+      document.getElementById("cal-month-title").innerText = `${monthNames[calMonth]} ${calYear}`;
+
+      const calendarGrid = document.getElementById("room-calendar-grid");
+      calendarGrid.innerHTML = "";
+
+      const firstDayOfMonth = new Date(calYear, calMonth, 1);
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+      // Calcola offset giorno inizio settimana (0 = Lunedì, 6 = Domenica)
+      let startDayOfWeek = firstDayOfMonth.getDay() - 1;
+      if (startDayOfWeek === -1) startDayOfWeek = 6;
+
+      // Celle vuote prima del 1° del mese
+      for (let i = 0; i < startDayOfWeek; i++) {
+        const emptyCell = document.createElement("div");
+        emptyCell.className = "cal-day-cell empty";
+        calendarGrid.appendChild(emptyCell);
+      }
+
+      // Celle dei giorni del mese
+      for (let day = 1; day <= daysInMonth; day++) {
+        const mStr = String(calMonth + 1).padStart(2, '0');
+        const dStr = String(day).padStart(2, '0');
+        const dateIso = `${calYear}-${mStr}-${dStr}`;
+
+        const activeBooking = bookings.find(b => b.roomId === currentSelectedRoomId && (dateIso >= b.checkIn && dateIso < b.checkOut));
+
+        const dayCell = document.createElement("div");
+        dayCell.className = `cal-day-cell ${activeBooking ? 'busy' : 'free'}`;
+        dayCell.title = activeBooking ? `Occupata da: ${activeBooking.guestName}` : `${day}/${calMonth+1}/${calYear}: Libera`;
+        dayCell.innerHTML = `
+          <div style="font-size:0.85rem; font-weight:bold;">${day}</div>
+          <div style="font-size:0.6rem; opacity:0.9; margin-top:2px;">${activeBooking ? '🔴' : '🟢'}</div>
+        `;
+        calendarGrid.appendChild(dayCell);
+      }
+    }
+
+    function changeMonth(delta) {
+      calMonth += delta;
+      if (calMonth > 11) {
+        calMonth = 0;
+        calYear++;
+      } else if (calMonth < 0) {
+        calMonth = 11;
+        calYear--;
+      }
+      renderCalendarMonth();
+    }
+
     function closeRoomDetailModal() {
       document.getElementById("room-detail-modal").classList.add("hidden");
     }
@@ -658,20 +723,23 @@
       document.getElementById("book-room-id").value = room.id;
       
       const today = new Date().toISOString().split('T')[0];
+      
+      // Imposta min su oggi per NON consentire prenotazioni retroattive
       document.getElementById("book-checkin").min = today;
       document.getElementById("book-checkout").min = today;
 
-      document.getElementById("book-checkin").value = checkIn;
+      const validCheckIn = (checkIn >= today) ? checkIn : today;
+      document.getElementById("book-checkin").value = validCheckIn;
       
-      if (checkOut <= checkIn) {
-        let nextDay = new Date(checkIn);
+      if (checkOut <= validCheckIn) {
+        let nextDay = new Date(validCheckIn);
         nextDay.setDate(nextDay.getDate() + 1);
         document.getElementById("book-checkout").value = nextDay.toISOString().split('T')[0];
       } else {
         document.getElementById("book-checkout").value = checkOut;
       }
 
-      const rates = getRatesForPeriod(checkIn, room);
+      const rates = getRatesForPeriod(validCheckIn, room);
       document.getElementById("book-rate-adult").value = rates.adultRate;
       document.getElementById("book-rate-child").value = rates.childRate;
 
@@ -723,8 +791,9 @@
         return;
       }
 
+      // Blocco rigido prenotazioni retroattive
       if (checkIn < today) {
-        alert("Errore: Non puoi inserire una prenotazione nel passato!");
+        alert("Errore: Le prenotazioni non possono essere effettuate in date passate!");
         return;
       }
 
@@ -811,6 +880,7 @@
       }
     }
 
+    /* Rendering Registro Economico (Accetta tutte le date, anche retroattive/passate) */
     function renderMasterReport() {
       document.querySelector(".main-content").classList.add("hidden");
       document.getElementById("master-report-section").classList.remove("hidden");
