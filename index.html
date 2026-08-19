@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionale Agriturismo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Modal Login Staff -->
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <h2>Accesso Dipendenti</h2>
+      <p>Inserisci la password per accedere:</p>
+      <input type="password" id="staff-pass-input" placeholder="Password staff">
+      <button onclick="loginStaff()">Accedi</button>
+      <p id="login-error" class="error-msg"></p>
+    </div>
+  </div>
+
+  <!-- Contenuto Principale App -->
+  <div id="app-container" class="hidden">
+    <header>
+      <h1>Gestione Camere Agriturismo</h1>
+      <button class="btn-master" onclick="openMasterModal()">Area Riservata Master</button>
+    </header>
+
+    <main>
+      <div id="rooms-grid" class="grid-container"></div>
+    </main>
+  </div>
+
+  <!-- Modal PIN Direzione -->
+  <div id="master-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Area Direzione</h2>
+      <input type="password" id="master-pin-input" placeholder="PIN Direzione">
+      <button onclick="loginMaster()">Verifica PIN</button>
+      <button onclick="closeMasterModal()">Annulla</button>
+      <p id="master-error" class="error-msg"></p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
