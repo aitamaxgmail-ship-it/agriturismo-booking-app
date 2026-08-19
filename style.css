@@ -13,7 +13,7 @@ body {
 
 .hidden { display: none !important; }
 
-/* Barra di Navigazione */
+/* Navigation Bar */
 .top-bar {
   background: #1c2026;
   border: 1px solid #2d333d;
@@ -35,21 +35,28 @@ body {
 
 .bar-controls {
   display: flex;
+  gap: 15px;
   align-items: center;
-  gap: 10px;
 }
 
-.bar-controls input {
+.date-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.date-group input, .form-group input {
   background: #252a33;
   border: 1px solid #3b4250;
   color: white;
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: 5px;
 }
 
 .bar-actions { display: flex; gap: 10px; }
 
-.btn-bar {
+.btn-bar, .btn-back {
   background: #252a33;
   border: 1px solid #ff9f43;
   color: #ff9f43;
@@ -59,7 +66,7 @@ body {
   font-weight: bold;
 }
 
-.btn-bar:hover {
+.btn-bar:hover, .btn-back:hover {
   background: #ff9f43;
   color: #121417;
 }
@@ -73,18 +80,17 @@ body {
   font-size: 0.95rem;
 }
 
-.badge { font-weight: bold; }
-.badge-free { color: #2ecc71; }
-.badge-busy { color: #e74c3c; }
+.badge-free { color: #2ecc71; font-weight: bold; }
+.badge-busy { color: #e74c3c; font-weight: bold; }
 
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
 }
 
 .room-card {
-  aspect-ratio: 1;
+  min-height: 120px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -93,7 +99,6 @@ body {
   text-align: center;
   padding: 10px;
   cursor: pointer;
-  font-weight: bold;
   border: 2px solid transparent;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   transition: transform 0.15s;
@@ -113,10 +118,11 @@ body {
   border-color: #e74c3c;
 }
 
-.room-number { font-size: 1.4rem; margin-bottom: 4px; }
+.room-number { font-size: 1.4rem; font-weight: bold; margin-bottom: 2px; }
 .room-type { font-size: 0.75rem; opacity: 0.9; }
+.room-guest { font-size: 0.85rem; margin-top: 5px; font-weight: bold; }
 
-/* Modali e Popup */
+/* Modali */
 .modal {
   position: fixed;
   top: 0; left: 0;
@@ -133,15 +139,14 @@ body {
   border: 1px solid #ff9f43;
   border-radius: 10px;
   width: 90%;
-  max-width: 440px;
-  padding: 22px;
+  max-width: 480px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.login-box { text-align: center; max-width: 350px; }
-
+.login-box { text-align: center; max-width: 360px; }
 .brand-title { font-size: 1.3rem; font-weight: bold; color: #ff9f43; }
 .sub-text { color: #a0a8b5; font-size: 0.9rem; }
 
@@ -161,12 +166,21 @@ input, select, textarea {
   background: #121417;
   border: 1px solid #3b4250;
   color: white;
-  padding: 9px;
+  padding: 8px;
   border-radius: 6px;
   font-size: 0.95rem;
 }
 
 input:focus, textarea:focus { border-color: #ff9f43; outline: none; }
+
+.price-summary {
+  background: #252a33;
+  padding: 10px;
+  border-radius: 6px;
+  justify-content: space-between;
+  align-items: center;
+  color: #ff9f43;
+}
 
 .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
 
@@ -192,19 +206,20 @@ input:focus, textarea:focus { border-color: #ff9f43; outline: none; }
 
 .error-msg { color: #e74c3c; font-size: 0.85rem; margin-top: 5px; }
 
-/* Tabella Registro Master */
+/* Registro Economico & Stampa */
 .master-view { background: #1c2026; padding: 20px; border-radius: 8px; }
 .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.card-dark { background: #121417; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-.form-inline { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.card-dark { background: #121417; padding: 15px; border-radius: 6px; margin: 15px 0; }
+.form-inline { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.divider { border: 0; height: 1px; background: #2d333d; margin: 15px 0; }
 
-.report-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.report-table th, .report-table td { border: 1px solid #2d333d; padding: 10px; text-align: left; }
+.report-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.report-table th, .report-table td { border: 1px solid #2d333d; padding: 10px; text-align: left; font-size: 0.9rem; }
 .report-table th { background: #121417; color: #ff9f43; }
 
 @media print {
   .no-print { display: none !important; }
   body { background: white; color: black; }
   .master-view { background: white; }
-  .report-table th, .report-table td { border: 1px solid black; }
+  .report-table th, .report-table td { border: 1px solid black; color: black; }
 }
