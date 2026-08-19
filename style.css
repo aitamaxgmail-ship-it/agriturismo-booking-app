@@ -9,30 +9,26 @@ button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; 
 .btn-secondary { background: #757575; color: white; }
 
 .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
-.card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+/* Schede Camere Cliccabili */
+.room-card { padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; color: white; }
+.room-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+.room-card.free { background: #2e7d32; }
+.room-card.busy { background: #c62828; cursor: default; }
 
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal-content { background: white; padding: 25px; border-radius: 8px; width: 320px; display: flex; flex-direction: column; gap: 10px; }
-.modal-content input, .modal-content select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+.modal-content { background: white; padding: 25px; border-radius: 8px; width: 320px; display: flex; flex-direction: column; gap: 10px; color: #333; }
+.modal-content input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
 
-/* Status Camere */
-.status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 5px; }
-.status-free { background: #e8f5e9; color: #2e7d32; }
-.status-busy { background: #ffebee; color: #c62828; }
-.status-clean { background: #fffde7; color: #f57f17; }
-
-/* Tabella Stampa Master */
+/* Registro Master */
 .report-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
 .report-table th, .report-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
 .report-table th { background: #eee; }
 .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
 .form-row input { padding: 6px; }
 
-/* Configurazione Stampa */
 @media print {
   .no-print { display: none !important; }
   body { background: white; padding: 0; }
   #master-report-section { display: block !important; }
-  .report-table { border: 1px solid #000; }
-  .report-table th, .report-table td { border: 1px solid #000; }
 }
