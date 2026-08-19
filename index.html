@@ -10,53 +10,78 @@
 
   <!-- Modal Login Staff -->
   <div id="login-modal" class="modal">
-    <div class="modal-content">
-      <h2>Accesso Dipendenti</h2>
+    <div class="modal-box login-box">
+      <div class="brand-title">
+        <span class="icon">🔑</span> Agriturismo Booking
+      </div>
+      <p class="sub-text">Inserisci la password di accesso:</p>
       <input type="password" id="staff-pass-input" placeholder="Password staff">
-      <button onclick="loginStaff()">Accedi</button>
+      <button class="btn-gold" onclick="loginStaff()">Accedi</button>
       <p id="login-error" class="error-msg"></p>
     </div>
   </div>
 
-  <!-- Contenuto Principale -->
+  <!-- Contenuto Principale App -->
   <div id="app-container" class="hidden">
-    <header class="no-print">
-      <h1>Gestione Agriturismo</h1>
-      <button class="btn-master" onclick="openMasterModal()">Area Riservata Master</button>
+    
+    <!-- Barra Superiore di Controllo -->
+    <header class="top-bar no-print">
+      <div class="brand-badge">
+        <span class="icon">🏡</span> Agriturismo
+      </div>
+
+      <div class="bar-controls">
+        <label>Data Visto:</label>
+        <input type="date" id="view-date" onchange="renderRooms()">
+      </div>
+
+      <div class="bar-actions">
+        <button class="btn-bar" onclick="openMasterModal('report')">📊 Stampa / Report</button>
+        <button class="btn-bar" onclick="openMasterModal('list')">📋 Lista Prenotazioni</button>
+      </div>
     </header>
 
-    <main class="no-print">
+    <!-- Griglia Stato Camere -->
+    <main class="main-content no-print">
+      <div class="legend-bar">
+        <span>Stato Camere:</span>
+        <span class="badge badge-free">● Libera</span>
+        <span class="badge badge-busy">● Occupata</span>
+      </div>
+
       <div id="rooms-grid" class="grid-container"></div>
     </main>
 
-    <!-- Area Riservata Master (Contabilità & Listini) -->
-    <div id="master-report-section" class="hidden">
+    <!-- Area Master / Report & Contabilità -->
+    <div id="master-report-section" class="hidden master-view">
       <div class="report-header">
-        <h2>Registro Prenotazioni, Acconti e Saldi</h2>
-        <button class="btn-primary no-print" onclick="window.print()">Stampa Report</button>
-        <button class="btn-secondary no-print" onclick="closeMasterReport()">Chiudi Master</button>
-      </div>
-
-      <!-- Configurazione Prezzi Stagionali a Persona -->
-      <div class="card no-print" style="margin: 20px 0;">
-        <h3>Imposta Tariffa a Persona per Periodo</h3>
-        <div class="form-row">
-          <input type="date" id="season-start">
-          <input type="date" id="season-end">
-          <input type="number" id="season-pp-price" placeholder="€ / Persona a Notte">
-          <button onclick="saveSeasonPrice()">Salva Periodo</button>
+        <h2>Registro Economico & Lista Prenotazioni</h2>
+        <div>
+          <button class="btn-gold no-print" onclick="window.print()">🖨️ Stampa</button>
+          <button class="btn-cancel no-print" onclick="closeMasterReport()">Chiudi</button>
         </div>
       </div>
 
-      <!-- Tabella Contabilità -->
+      <!-- Configurazione Prezzi Stagionali -->
+      <div class="card-dark no-print">
+        <h3>Imposta Tariffa Stagionale (€ / Persona a notte)</h3>
+        <div class="form-inline">
+          <input type="date" id="season-start">
+          <input type="date" id="season-end">
+          <input type="number" id="season-pp-price" placeholder="€ Persona/Notte">
+          <button class="btn-gold" onclick="saveSeasonPrice()">Salva Periodo</button>
+        </div>
+      </div>
+
+      <!-- Tabella Prenotazioni -->
       <table class="report-table">
         <thead>
           <tr>
             <th>Camera</th>
-            <th>Ospite</th>
-            <th>Persone</th>
-            <th>Notti</th>
-            <th>€/Pers/Notte</th>
+            <th>Referente</th>
+            <th>Telefono</th>
+            <th>Ospiti</th>
+            <th>Periodo</th>
             <th>Totale</th>
             <th>Acconto</th>
             <th>Saldo</th>
@@ -68,30 +93,64 @@
     </div>
   </div>
 
-  <!-- Modal Prenotazione -->
+  <!-- Modal Prenota Camera -->
   <div id="booking-modal" class="modal hidden">
-    <div class="modal-content">
-      <h3 id="modal-room-title">Prenota Camera</h3>
+    <div class="modal-box">
+      <h3 id="modal-room-title" class="modal-title">Prenota Camera</h3>
       <input type="hidden" id="book-room-id">
-      <input type="text" id="book-guest-name" placeholder="Nome Referente">
-      <input type="number" id="book-guests-count" placeholder="Numero Persone" min="1">
-      <label>Check-in:</label>
-      <input type="date" id="book-checkin">
-      <label>Check-out:</label>
-      <input type="date" id="book-checkout">
-      <input type="number" id="book-deposit" placeholder="Acconto versato (€)" value="0">
-      <button onclick="saveBooking()">Conferma Prenotazione</button>
-      <button class="btn-secondary" onclick="closeBookingModal()">Annulla</button>
+
+      <div class="form-group">
+        <label>Nome cliente:</label>
+        <input type="text" id="book-guest-name" placeholder="Es. Famiglia Rossi">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ospiti:</label>
+          <input type="number" id="book-guests-count" value="2" min="1">
+        </div>
+        <div class="form-group">
+          <label>Telefono:</label>
+          <input type="text" id="book-phone" placeholder="Es. 3331234567">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Check-in:</label>
+          <input type="date" id="book-checkin">
+        </div>
+        <div class="form-group">
+          <label>Check-out:</label>
+          <input type="date" id="book-checkout">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Acconto (€):</label>
+        <input type="number" id="book-deposit" value="0">
+      </div>
+
+      <div class="form-group">
+        <label>Note (Allergie, richieste, orari...):</label>
+        <textarea id="book-notes" rows="2" placeholder="Es. Culla in camera..."></textarea>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn-gold" onclick="saveBooking()">Conferma prenotazione</button>
+        <button class="btn-cancel" onclick="closeBookingModal()">Annulla</button>
+      </div>
     </div>
   </div>
 
-  <!-- Modal PIN Direzione -->
+  <!-- Modal Autenticazione Master -->
   <div id="master-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>Area Direzione</h2>
-      <input type="password" id="master-pin-input" placeholder="PIN Direzione">
-      <button onclick="loginMaster()">Accedi al Registro</button>
-      <button class="btn-secondary" onclick="closeMasterModal()">Annulla</button>
+    <div class="modal-box login-box">
+      <div class="brand-title">🔒 Area Riservata Direzione</div>
+      <p class="sub-text">Inserisci il PIN Master:</p>
+      <input type="password" id="master-pin-input" placeholder="PIN Master">
+      <button class="btn-gold" onclick="loginMaster()">Accedi</button>
+      <button class="btn-cancel" onclick="closeMasterModal()">Annulla</button>
       <p id="master-error" class="error-msg"></p>
     </div>
   </div>
