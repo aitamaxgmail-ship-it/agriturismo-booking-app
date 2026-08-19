@@ -191,15 +191,6 @@
 
     input:focus, textarea:focus { border-color: #ff9f43; outline: none; }
 
-    .price-summary {
-      background: #252a33;
-      padding: 10px;
-      border-radius: 6px;
-      justify-content: space-between;
-      align-items: center;
-      color: #ff9f43;
-    }
-
     .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
 
     .btn-gold {
@@ -401,6 +392,7 @@
             <th>Totale</th>
             <th>Acconto</th>
             <th>Saldo</th>
+            <th>Note</th>
             <th class="no-print">Azioni</th>
           </tr>
         </thead>
@@ -431,7 +423,7 @@
       <div id="room-calendar-grid" class="cal-grid"></div>
 
       <h4 style="color:#ff9f43; margin-top:10px;">📋 Prenotazioni della Camera</h4>
-      <div id="room-bookings-list" style="max-height:160px; overflow-y:auto;"></div>
+      <div id="room-bookings-list" style="max-height:180px; overflow-y:auto;"></div>
 
       <div class="modal-buttons" style="margin-top:15px;">
         <button class="btn-cancel" style="width:100%;" onclick="closeRoomDetailModal()">Chiudi</button>
@@ -443,6 +435,9 @@
     <div class="modal-box">
       <h3 id="modal-room-title" class="modal-title">Prenota Camera</h3>
       <input type="hidden" id="book-room-id">
+      <input type="hidden" id="book-rate-adult">
+      <input type="hidden" id="book-rate-child">
+      <input type="hidden" id="book-deposit" value="0">
 
       <div class="form-group">
         <label>Nome referente cliente:</label>
@@ -459,49 +454,28 @@
       <div class="form-row">
         <div class="form-group">
           <label>Adulti:</label>
-          <input type="number" id="book-adults" value="2" min="1" onchange="updateBookingTotal()">
+          <input type="number" id="book-adults" value="2" min="1">
         </div>
         <div class="form-group">
           <label>Bambini:</label>
-          <input type="number" id="book-children" value="0" min="0" onchange="updateBookingTotal()">
+          <input type="number" id="book-children" value="0" min="0">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Check-in (Dal) - Non retroattivo:</label>
-          <input type="date" id="book-checkin" onchange="updateBookingTotal()">
+          <input type="date" id="book-checkin">
         </div>
         <div class="form-group">
           <label>Check-out (Al):</label>
-          <input type="date" id="book-checkout" onchange="updateBookingTotal()">
+          <input type="date" id="book-checkout">
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Tariffa Adulto (€/notte):</label>
-          <input type="number" id="book-rate-adult" oninput="updateBookingTotal()">
-        </div>
-        <div class="form-group">
-          <label>Tariffa Bambino (€/notte):</label>
-          <input type="number" id="book-rate-child" oninput="updateBookingTotal()">
-        </div>
-      </div>
-
-      <div class="form-row price-summary">
-        <div>Notti: <span id="summary-nights">1</span></div>
-        <div>Totale Calcolato: <strong>€ <span id="summary-total">0.00</span></strong></div>
-      </div>
-
-      <div class="form-group">
-        <label>Acconto Versato (€):</label>
-        <input type="number" id="book-deposit" value="0" min="0">
       </div>
 
       <div class="form-group">
         <label>Note (Allergie, culla, orari...):</label>
-        <textarea id="book-notes" rows="2" placeholder="Es. Richiesta culla extra..."></textarea>
+        <textarea id="book-notes" rows="3" placeholder="Es. Richiesta culla extra, intolleranza lattosio..."></textarea>
       </div>
 
       <div class="modal-buttons">
@@ -546,7 +520,7 @@
     let currentSelectedRoomId = null;
 
     let calYear = new Date().getFullYear();
-    let calMonth = new Date().getMonth(); // 0-indexed (0=Gen, 11=Dic)
+    let calMonth = new Date().getMonth();
 
     document.addEventListener("DOMContentLoaded", () => {
       const today = new Date().toISOString().split('T')[0];
@@ -557,7 +531,6 @@
       document.getElementById("home-date-from").value = today;
       document.getElementById("home-date-to").value = tomorrowStr;
       
-      // Il report parte da inizio anno corrente fino ad oggi (retroattivo di default)
       document.getElementById("report-date-from").value = `${calYear}-01-01`;
       document.getElementById("report-date-to").value = tomorrowStr;
     });
@@ -624,7 +597,7 @@
 
       renderCalendarMonth();
 
-      // Rendering Lista Prenotazioni per la Camera
+      // Rendering Lista Prenotazioni per la Camera (Con Note visibili)
       const bookingsList = document.getElementById("room-bookings-list");
       bookingsList.innerHTML = "";
 
@@ -637,10 +610,11 @@
           const card = document.createElement("div");
           card.className = "detail-booking-card";
           card.innerHTML = `
-            <div>
+            <div style="flex: 1;">
               <div style="font-weight:bold; color:#ff9f43; font-size:0.95rem;">👤 ${b.guestName} ${b.phone ? '(' + b.phone + ')' : ''}</div>
               <div style="font-size:0.85rem; margin-top:3px;">📅 ${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights} ${b.nights === 1 ? 'notte' : 'notti'})</div>
-              <div style="font-size:0.8rem; color:#abb3c0; margin-top:2px;">👥 ${b.adults} Ad. ${b.children ? '/ ' + b.children + ' Bimbi' : ''} | Totale: € ${b.totalPrice.toFixed(2)}</div>
+              <div style="font-size:0.8rem; color:#abb3c0; margin-top:2px;">👥 ${b.adults} Ad. ${b.children ? '/ ' + b.children + ' Bimbi' : ''}</div>
+              ${b.notes ? `<div style="font-size:0.82rem; color:#ffeaa7; margin-top:4px; background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px; border-left: 3px solid #ff9f43;">📝 <strong>Note:</strong> ${b.notes}</div>` : ''}
             </div>
             <div>
               <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">🗑️ Elimina</button>
@@ -663,18 +637,15 @@
       const firstDayOfMonth = new Date(calYear, calMonth, 1);
       const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
 
-      // Calcola offset giorno inizio settimana (0 = Lunedì, 6 = Domenica)
       let startDayOfWeek = firstDayOfMonth.getDay() - 1;
       if (startDayOfWeek === -1) startDayOfWeek = 6;
 
-      // Celle vuote prima del 1° del mese
       for (let i = 0; i < startDayOfWeek; i++) {
         const emptyCell = document.createElement("div");
         emptyCell.className = "cal-day-cell empty";
         calendarGrid.appendChild(emptyCell);
       }
 
-      // Celle dei giorni del mese
       for (let day = 1; day <= daysInMonth; day++) {
         const mStr = String(calMonth + 1).padStart(2, '0');
         const dStr = String(day).padStart(2, '0');
@@ -721,10 +692,14 @@
     function openBookingModal(room, checkIn, checkOut) {
       document.getElementById("modal-room-title").innerText = `Prenota ${room.name}`;
       document.getElementById("book-room-id").value = room.id;
-      
+      document.getElementById("book-guest-name").value = "";
+      document.getElementById("book-phone").value = "";
+      document.getElementById("book-adults").value = 2;
+      document.getElementById("book-children").value = 0;
+      document.getElementById("book-notes").value = "";
+
       const today = new Date().toISOString().split('T')[0];
       
-      // Imposta min su oggi per NON consentire prenotazioni retroattive
       document.getElementById("book-checkin").min = today;
       document.getElementById("book-checkout").min = today;
 
@@ -743,32 +718,11 @@
       document.getElementById("book-rate-adult").value = rates.adultRate;
       document.getElementById("book-rate-child").value = rates.childRate;
 
-      updateBookingTotal();
       document.getElementById("booking-modal").classList.remove("hidden");
     }
 
     function closeBookingModal() {
       document.getElementById("booking-modal").classList.add("hidden");
-    }
-
-    function updateBookingTotal() {
-      const checkIn = new Date(document.getElementById("book-checkin").value);
-      const checkOut = new Date(document.getElementById("book-checkout").value);
-      const adults = parseInt(document.getElementById("book-adults").value) || 0;
-      const children = parseInt(document.getElementById("book-children").value) || 0;
-      const rateAdult = parseFloat(document.getElementById("book-rate-adult").value) || 0;
-      const rateChild = parseFloat(document.getElementById("book-rate-child").value) || 0;
-
-      let nights = 0;
-      if (checkOut > checkIn) {
-        nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-      }
-
-      const dailyTotal = (adults * rateAdult) + (children * rateChild);
-      const grandTotal = dailyTotal * nights;
-
-      document.getElementById("summary-nights").innerText = nights;
-      document.getElementById("summary-total").innerText = grandTotal.toFixed(2);
     }
 
     function saveBooking() {
@@ -782,16 +736,15 @@
       const rateAdult = parseFloat(document.getElementById("book-rate-adult").value) || 0;
       const rateChild = parseFloat(document.getElementById("book-rate-child").value) || 0;
       const deposit = parseFloat(document.getElementById("book-deposit").value) || 0;
-      const notes = document.getElementById("book-notes").value;
+      const notes = document.getElementById("book-notes").value.trim();
 
       const today = new Date().toISOString().split('T')[0];
 
       if (!guestName || !checkIn || !checkOut) {
-        alert("Compila tutti i campi obbligatori!");
+        alert("Compila tutti i campi obbligatori (Nome e Date)!");
         return;
       }
 
-      // Blocco rigido prenotazioni retroattive
       if (checkIn < today) {
         alert("Errore: Le prenotazioni non possono essere effettuate in date passate!");
         return;
@@ -880,7 +833,7 @@
       }
     }
 
-    /* Rendering Registro Economico (Accetta tutte le date, anche retroattive/passate) */
+    /* Rendering Registro Economico (Con Prezzi, Totali e Note) */
     function renderMasterReport() {
       document.querySelector(".main-content").classList.add("hidden");
       document.getElementById("master-report-section").classList.remove("hidden");
@@ -907,6 +860,7 @@
             <td><strong>€ ${b.totalPrice.toFixed(2)}</strong></td>
             <td style="color:#2ecc71;">€ ${b.deposit.toFixed(2)}</td>
             <td style="color:#e74c3c;"><strong>€ ${b.balance.toFixed(2)}</strong></td>
+            <td>${b.notes || '-'}</td>
             <td class="no-print">
               <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;">Elimina</button>
             </td>
