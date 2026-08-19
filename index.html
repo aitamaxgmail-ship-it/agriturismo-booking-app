@@ -12,7 +12,6 @@
   <div id="login-modal" class="modal">
     <div class="modal-content">
       <h2>Accesso Dipendenti</h2>
-      <p>Inserisci la password per accedere:</p>
       <input type="password" id="staff-pass-input" placeholder="Password staff">
       <button onclick="loginStaff()">Accedi</button>
       <p id="login-error" class="error-msg"></p>
@@ -23,72 +22,64 @@
   <div id="app-container" class="hidden">
     <header class="no-print">
       <h1>Gestione Agriturismo</h1>
-      <div>
-        <button class="btn-primary" onclick="openBookingModal()">+ Nuova Prenotazione</button>
-        <button class="btn-master" onclick="openMasterModal()">Area Direzione (Master)</button>
-      </div>
+      <button class="btn-master" onclick="openMasterModal()">Area Riservata Master</button>
     </header>
 
     <main class="no-print">
       <div id="rooms-grid" class="grid-container"></div>
     </main>
 
-    <!-- Vista Report Stampa Master -->
+    <!-- Area Riservata Master (Contabilità & Listini) -->
     <div id="master-report-section" class="hidden">
       <div class="report-header">
-        <h2>Report Economico & Presenze Agriturismo</h2>
+        <h2>Registro Prenotazioni, Acconti e Saldi</h2>
         <button class="btn-primary no-print" onclick="window.print()">Stampa Report</button>
         <button class="btn-secondary no-print" onclick="closeMasterReport()">Chiudi Master</button>
       </div>
 
-      <!-- Configurazione Prezzi Stagionali -->
+      <!-- Configurazione Prezzi Stagionali a Persona -->
       <div class="card no-print" style="margin: 20px 0;">
-        <h3>Aggiungi Periodo Stagionale / Prezzo</h3>
+        <h3>Imposta Tariffa a Persona per Periodo</h3>
         <div class="form-row">
           <input type="date" id="season-start">
           <input type="date" id="season-end">
-          <input type="number" id="price-quad" placeholder="Quadrupla (€)">
-          <input type="number" id="price-trip" placeholder="Tripla (€)">
-          <input type="number" id="price-matr" placeholder="Matrimoniale (€)">
-          <input type="number" id="price-spa" placeholder="SPA Notte (€)">
-          <button onclick="saveSeasonPrice()">Salva Listino</button>
+          <input type="number" id="season-pp-price" placeholder="€ / Persona a Notte">
+          <button onclick="saveSeasonPrice()">Salva Periodo</button>
         </div>
       </div>
 
-      <!-- Tabella Totali e Pro-Capite -->
+      <!-- Tabella Contabilità -->
       <table class="report-table">
         <thead>
           <tr>
-            <th>Camera/Unità</th>
-            <th>Ospite Referente</th>
-            <th>Ospiti Real</th>
-            <th>Notti/Ore</th>
-            <th>Totale Camera</th>
-            <th>€ / Persona</th>
+            <th>Camera</th>
+            <th>Ospite</th>
+            <th>Persone</th>
+            <th>Notti</th>
+            <th>€/Pers/Notte</th>
+            <th>Totale</th>
+            <th>Acconto</th>
+            <th>Saldo</th>
+            <th class="no-print">Azioni</th>
           </tr>
         </thead>
         <tbody id="master-table-body"></tbody>
-        <tfoot>
-          <tr>
-            <td colspan="4"><strong>TOTALE GENERALE AGRITURISMO</strong></td>
-            <td id="grand-total" colspan="2"><strong>€ 0.00</strong></td>
-          </tr>
-        </tfoot>
       </table>
     </div>
   </div>
 
-  <!-- Modal Nuova Prenotazione -->
+  <!-- Modal Prenotazione -->
   <div id="booking-modal" class="modal hidden">
     <div class="modal-content">
-      <h2>Inserisci Prenotazione</h2>
-      <select id="book-room-id"></select>
+      <h3 id="modal-room-title">Prenota Camera</h3>
+      <input type="hidden" id="book-room-id">
       <input type="text" id="book-guest-name" placeholder="Nome Referente">
-      <input type="number" id="book-guests-count" placeholder="Numero Ospiti Reali">
+      <input type="number" id="book-guests-count" placeholder="Numero Persone" min="1">
       <label>Check-in:</label>
       <input type="date" id="book-checkin">
       <label>Check-out:</label>
       <input type="date" id="book-checkout">
+      <input type="number" id="book-deposit" placeholder="Acconto versato (€)" value="0">
       <button onclick="saveBooking()">Conferma Prenotazione</button>
       <button class="btn-secondary" onclick="closeBookingModal()">Annulla</button>
     </div>
@@ -99,7 +90,7 @@
     <div class="modal-content">
       <h2>Area Direzione</h2>
       <input type="password" id="master-pin-input" placeholder="PIN Direzione">
-      <button onclick="loginMaster()">Accedi al Master</button>
+      <button onclick="loginMaster()">Accedi al Registro</button>
       <button class="btn-secondary" onclick="closeMasterModal()">Annulla</button>
       <p id="master-error" class="error-msg"></p>
     </div>
