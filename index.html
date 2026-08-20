@@ -2,113 +2,129 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Agriturismo & Ristorante</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #121519; color: #e1e6ed; padding: 15px; }
+    
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden; /* Impedisce lo scorrimento orizzontale */
+      background-color: #121519;
+      color: #e1e6ed;
+      padding: 10px;
+    }
 
     /* Utility & Classi Generali */
     .hidden { display: none !important; }
-    .card-dark { background: #1a1d24; border: 1px solid #2d333d; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-    .divider { border: 0; height: 1px; background: #2d333d; margin: 15px 0; }
+    .card-dark { background: #1a1d24; border: 1px solid #2d333d; padding: 12px; border-radius: 12px; margin-bottom: 12px; }
+    .divider { border: 0; height: 1px; background: #2d333d; margin: 12px 0; }
 
-    /* Header & Filtri (Stile Foto 1) */
-    .main-header { margin-bottom: 15px; }
-    .brand-title { font-size: 1.4rem; font-weight: bold; color: #f97316; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-    .sync-badge { font-size: 0.75rem; color: #22c55e; font-weight: normal; display: flex; align-items: center; gap: 4px; }
+    /* Header & Filtri (Responsive Mobile) */
+    .main-header { margin-bottom: 12px; width: 100%; }
+    .brand-title { font-size: 1.25rem; font-weight: bold; color: #f97316; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
     
-    .filter-box { background: #1a1d24; border: 1px solid #2d333d; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
-    .filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-    .filter-group { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+    .sync-badge { font-size: 0.75rem; color: #22c55e; font-weight: normal; display: flex; align-items: center; gap: 4px; background: #1a1d24; padding: 4px 8px; border-radius: 20px; border: 1px solid #2d333d; }
     
-    input, select, textarea { background: #0f1115; border: 1px solid #333a45; border-radius: 8px; color: #fff; padding: 8px 12px; font-size: 0.9rem; outline: none; width: 100%; }
+    .filter-box { background: #1a1d24; border: 1px solid #2d333d; border-radius: 12px; padding: 10px; margin-bottom: 12px; width: 100%; }
+    .filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%; }
+    .filter-group { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; flex: 1 1 130px; min-width: 0; }
+    
+    input, select, textarea { background: #0f1115; border: 1px solid #333a45; border-radius: 8px; color: #fff; padding: 8px 10px; font-size: 0.85rem; outline: none; width: 100%; max-width: 100%; }
     input:focus, select:focus, textarea:focus { border-color: #f97316; }
 
-    .btn-registro { background: #1a1d24; border: 1.5px solid #f97316; color: #f97316; border-radius: 8px; padding: 8px 16px; font-weight: bold; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; width: fit-content; }
+    .btn-registro { background: #1a1d24; border: 1.5px solid #f97316; color: #f97316; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 8px; }
     .btn-registro:hover { background: #f97316; color: #fff; }
 
     /* Box Check-out (Stile Foto 1 - Bordo Rosso) */
-    .checkout-box { background: #1a1d24; border: 1px solid #ef4444; border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; }
-    .checkout-title { color: #f97316; font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .checkout-box { background: #1a1d24; border: 1px solid #ef4444; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; width: 100%; }
+    .checkout-title { color: #f97316; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
     .checkout-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .checkout-chip { background: #882424; color: #fff; border: 1px solid #ef4444; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; }
+    .checkout-chip { background: #882424; color: #fff; border: 1px solid #ef4444; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
 
     /* Legenda */
-    .legend-bar { display: flex; gap: 15px; font-size: 0.85rem; margin-bottom: 15px; align-items: center; }
+    .legend-bar { display: flex; gap: 12px; font-size: 0.8rem; margin-bottom: 12px; align-items: center; }
     .badge-free { color: #22c55e; font-weight: bold; }
     .badge-busy { color: #ef4444; font-weight: bold; }
 
-    /* Grid Camere (Stile Foto 1 - Blocchi di colore pieni) */
-    .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    @media (min-width: 600px) { .grid-container { grid-template-columns: repeat(5, 1fr); } }
+    /* Grid Camere (Responsive Adattato a Mobile e Desktop) */
+    .grid-container { 
+      display: grid; 
+      grid-template-columns: repeat(2, minmax(0, 1fr)); 
+      gap: 8px; 
+      width: 100%;
+    }
+    @media (min-width: 600px) { 
+      .grid-container { grid-template-columns: repeat(5, minmax(0, 1fr)); } 
+      .btn-registro { width: fit-content; margin-top: 0; }
+    }
 
     .room-card {
       border-radius: 10px;
-      padding: 12px 6px;
+      padding: 10px 4px;
       text-align: center;
       cursor: pointer;
-      min-height: 120px;
+      min-height: 110px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: transform 0.15s ease;
+      word-break: break-word;
     }
-    .room-card:hover { transform: translateY(-2px); }
 
     .room-card.free {
-      background-color: #15803d; /* Verde Pieno */
+      background-color: #15803d; /* Verde Pieno Foto 1 */
       color: #ffffff;
       border: 1px solid #22c55e;
     }
     .room-card.busy {
-      background-color: #882424; /* Rosso Pieno */
+      background-color: #882424; /* Rosso Pieno Foto 1 */
       color: #ffffff;
       border: 1px solid #ef4444;
     }
 
-    .room-number { font-size: 1.15rem; font-weight: bold; }
-    .room-guest { font-size: 0.85rem; font-weight: bold; margin: 2px 0; }
-    .room-dates { font-size: 0.72rem; opacity: 0.9; margin: 2px 0; }
-    .room-type { font-size: 0.75rem; opacity: 0.85; }
-    .room-status { font-size: 0.75rem; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px; }
+    .room-number { font-size: 1.05rem; font-weight: bold; }
+    .room-guest { font-size: 0.8rem; font-weight: bold; margin: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .room-dates { font-size: 0.68rem; opacity: 0.9; margin: 1px 0; }
+    .room-type { font-size: 0.72rem; opacity: 0.85; }
+    .room-status { font-size: 0.72rem; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px; }
 
-    /* Modali & Altro */
+    /* Modali & Overlay */
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
-    .modal-box { background: #1a1d24; border: 1px solid #333a45; border-radius: 12px; padding: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; color: #e1e6ed; }
-    .login-box { max-width: 350px; text-align: center; }
+    .modal-box { background: #1a1d24; border: 1px solid #333a45; border-radius: 12px; padding: 16px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; color: #e1e6ed; }
+    .login-box { max-width: 330px; text-align: center; }
 
-    .form-group { display: flex; flex-direction: column; margin-bottom: 12px; }
-    .form-group label { font-size: 0.8rem; color: #a0a8b5; margin-bottom: 4px; }
-    .form-row { display: flex; gap: 10px; }
-    .form-row .form-group { flex: 1; }
+    .form-group { display: flex; flex-direction: column; margin-bottom: 10px; }
+    .form-group label { font-size: 0.75rem; color: #a0a8b5; margin-bottom: 4px; }
+    .form-row { display: flex; gap: 8px; }
+    .form-row .form-group { flex: 1; min-width: 0; }
 
-    button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; font-weight: 600; font-size: 0.85rem; }
+    button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 12px; font-weight: 600; font-size: 0.85rem; }
     .btn-gold { background: #f97316; color: #fff; }
     .btn-cancel { background: #333a45; color: #fff; }
     .btn-back { background: #2d333d; color: #f97316; }
 
     /* Calendario Dettaglio Camera */
     .month-nav { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
-    .cal-header-grid, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-    .cal-header-grid div { font-size: 0.65rem; color: #a0a8b5; font-weight: bold; padding: 2px 0; }
-    .cal-day-cell { background: #0f1115; border: 1px solid #2d333d; border-radius: 4px; padding: 4px 2px; font-size: 0.7rem; min-height: 38px; display: flex; flex-direction: column; justify-content: space-between; }
+    .cal-header-grid, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
+    .cal-header-grid div { font-size: 0.6rem; color: #a0a8b5; font-weight: bold; padding: 2px 0; }
+    .cal-day-cell { background: #0f1115; border: 1px solid #2d333d; border-radius: 4px; padding: 3px 1px; font-size: 0.65rem; min-height: 35px; display: flex; flex-direction: column; justify-content: space-between; }
     .cal-day-cell.busy { border-color: #ef4444; background: #3b1111; }
     .cal-day-cell.free { border-color: #22c55e; background: #0c381e; }
     .cal-day-cell.empty { background: transparent; border: none; }
 
     .detail-booking-card { background: #0f1115; border: 1px solid #2d333d; padding: 8px; border-radius: 6px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
     .booking-actions { display: flex; flex-direction: column; gap: 4px; }
-    .btn-sm-meal { background: #16a34a; color: white; padding: 2px 6px; font-size: 0.7rem; }
-    .btn-sm-edit { background: #d97706; color: white; padding: 2px 6px; font-size: 0.7rem; }
-    .btn-sm-del { background: #dc2626; color: white; padding: 2px 6px; font-size: 0.7rem; }
+    .btn-sm-meal { background: #16a34a; color: white; padding: 3px 6px; font-size: 0.7rem; }
+    .btn-sm-edit { background: #d97706; color: white; padding: 3px 6px; font-size: 0.7rem; }
+    .btn-sm-del { background: #dc2626; color: white; padding: 3px 6px; font-size: 0.7rem; }
 
-    .price-summary-box { background: #0f1115; border: 1px dashed #333a45; border-radius: 6px; padding: 8px; margin: 10px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; text-align: center; }
-    .price-summary-item span { display: block; font-size: 0.65rem; color: #a0a8b5; }
-    .price-summary-item strong { font-size: 0.85rem; }
+    .price-summary-box { background: #0f1115; border: 1px dashed #333a45; border-radius: 6px; padding: 8px; margin: 10px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; text-align: center; }
+    .price-summary-item span { display: block; font-size: 0.6rem; color: #a0a8b5; }
+    .price-summary-item strong { font-size: 0.8rem; }
 
-    .report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; margin-top: 10px; }
-    .report-table th, .report-table td { border: 1px solid #2d333d; padding: 8px; }
+    .report-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: left; margin-top: 10px; }
+    .report-table th, .report-table td { border: 1px solid #2d333d; padding: 6px; }
     .report-table th { background: #1a1d24; color: #f97316; }
     .report-table tbody tr:nth-child(even) { background: #0f1115; }
 
@@ -127,7 +143,7 @@
   <!-- LOGIN STAFF -->
   <div id="login-modal" class="modal">
     <div class="modal-box login-box">
-      <div style="font-size:1.3rem; font-weight:bold; color:#f97316; margin-bottom:6px;">🏡 Agriturismo & Ristorante</div>
+      <div style="font-size:1.2rem; font-weight:bold; color:#f97316; margin-bottom:6px;">🏡 Agriturismo & Ristorante</div>
       <p style="font-size:0.8rem; color:#a0a8b5; margin-bottom:12px;">Inserisci la password Staff per accedere:</p>
       <input type="password" id="staff-pass-input" placeholder="Password Staff">
       <button class="btn-gold" style="width:100%; margin-top:10px;" onclick="loginStaff()">Accedi</button>
@@ -141,7 +157,7 @@
     <header class="main-header no-print">
       <div class="brand-title">
         <span>🏡 Agriturismo & Ristorante</span>
-        <span class="sync-badge">● Sincronizzato</span>
+        <span id="sync-status" class="sync-badge">🟢 Cloud Sincronizzato</span>
       </div>
 
       <div class="filter-box">
@@ -204,8 +220,8 @@
         <div class="filter-row" style="margin-top:8px;">
           <input type="date" id="season-start" style="width:auto;">
           <input type="date" id="season-end" style="width:auto;">
-          <input type="number" id="season-adult-price" placeholder="€ / Adulto" style="width:110px;">
-          <input type="number" id="season-child-price" placeholder="€ / Bambino" style="width:110px;">
+          <input type="number" id="season-adult-price" placeholder="€ / Adulto" style="width:100px;">
+          <input type="number" id="season-child-price" placeholder="€ / Bambino" style="width:100px;">
           <button class="btn-gold" onclick="saveSeasonPrice()">Salva Tariffe</button>
         </div>
       </div>
@@ -425,9 +441,12 @@
     </div>
   </div>
 
-  <!-- LOGICA JAVASCRIPT CON SINCRONIZZAZIONE ATTIVA -->
+  <!-- LOGICA JAVASCRIPT CON CLOUD SYNC AUTOMATICO -->
   <script>
     const CONFIG = { STAFF_PASS: "max78", MASTER_PIN: "nikita78" };
+    
+    // API endpoint per sincronizzazione in tempo reale tra dispositivi diversi
+    const CLOUD_SYNC_URL = "https://kvdb.io/2H42PAG2d5LzZJ4a7bV7b2/agri_data_master_v1";
 
     const ROOMS = [
       { id: "101", name: "101", type: "Quadrupla", defaultAdultRate: 35, defaultChildRate: 20 },
@@ -452,25 +471,63 @@
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
 
-    /* SINCRONIZZAZIONE IN TEMPO REALE */
-    function syncDataSave() {
+    /* SISTEMA DI SINCRONIZZAZIONE CLOUD TRA PC E CELLULARE */
+    async function syncDataSave() {
       localStorage.setItem("agri_bookings", JSON.stringify(bookings));
       localStorage.setItem("agri_seasons", JSON.stringify(seasonalPrices));
+
+      const payload = { bookings, seasonalPrices, lastUpdate: Date.now() };
+
+      try {
+        updateSyncBadge("🟡 Sincronizzazione...");
+        await fetch(CLOUD_SYNC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        updateSyncBadge("🟢 Cloud Sincronizzato");
+      } catch (err) {
+        updateSyncBadge("🟠 Locale (Offline)");
+      }
     }
 
-    window.addEventListener("storage", (event) => {
-      if (event.key === "agri_bookings" || event.key === "agri_seasons") {
-        bookings = JSON.parse(localStorage.getItem("agri_bookings")) || [];
-        seasonalPrices = JSON.parse(localStorage.getItem("agri_seasons")) || [];
-        renderRooms();
-        if (!document.getElementById("master-report-section").classList.contains("hidden")) {
-          renderMasterReport();
+    async function fetchCloudData() {
+      try {
+        const response = await fetch(CLOUD_SYNC_URL);
+        if (response.ok) {
+          const cloudData = await response.json();
+          if (cloudData && cloudData.bookings) {
+            const currentStr = JSON.stringify(bookings);
+            const cloudStr = JSON.stringify(cloudData.bookings);
+            if (currentStr !== cloudStr) {
+              bookings = cloudData.bookings;
+              seasonalPrices = cloudData.seasonalPrices || [];
+              localStorage.setItem("agri_bookings", JSON.stringify(bookings));
+              localStorage.setItem("agri_seasons", JSON.stringify(seasonalPrices));
+              
+              renderRooms();
+              if (!document.getElementById("master-report-section").classList.contains("hidden")) {
+                renderMasterReport();
+              }
+              if (currentSelectedRoomId && !document.getElementById("room-detail-modal").classList.contains("hidden")) {
+                openRoomDetailModal(currentSelectedRoomId);
+              }
+            }
+          }
         }
-        if (currentSelectedRoomId && !document.getElementById("room-detail-modal").classList.contains("hidden")) {
-          openRoomDetailModal(currentSelectedRoomId);
-        }
+        updateSyncBadge("🟢 Cloud Sincronizzato");
+      } catch (err) {
+        updateSyncBadge("🟠 Locale (Offline)");
       }
-    });
+    }
+
+    function updateSyncBadge(text) {
+      const badge = document.getElementById("sync-status");
+      if (badge) badge.innerText = text;
+    }
+
+    // Polling automatico ogni 3 secondi per aggiornare tutti i dispositivi
+    setInterval(fetchCloudData, 3000);
 
     document.addEventListener("DOMContentLoaded", () => {
       const today = new Date().toISOString().split('T')[0];
@@ -483,6 +540,8 @@
       
       document.getElementById("report-date-from").value = `${calYear}-01-01`;
       document.getElementById("report-date-to").value = tomorrowStr;
+
+      fetchCloudData();
     });
 
     function formatDate(dateStr) {
