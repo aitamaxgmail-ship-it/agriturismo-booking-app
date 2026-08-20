@@ -4,960 +4,876 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Agriturismo & Ristorante</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    
-    html, body {
-      width: 100%;
-      max-width: 100vw;
-      overflow-x: hidden; /* Impedisce lo scorrimento orizzontale */
-      background-color: #121519;
-      color: #e1e6ed;
-      padding: 10px;
-    }
 
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    html, body {
+      background-color: #12141d;
+      color: #e2e8f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 50px;
+    }
+    
     /* Utility & Classi Generali */
     .hidden { display: none !important; }
-    .card-dark { background: #1a1d24; border: 1px solid #2d333d; padding: 12px; border-radius: 12px; margin-bottom: 12px; }
-    .divider { border: 0; height: 1px; background: #2d333d; margin: 12px 0; }
-
+    .card-no-print { background: #1e2230; border: 1px solid #2d3348; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+    
     /* Header & Filtri (Responsive Mobile) */
-    .main-header { margin-bottom: 12px; width: 100%; }
-    .brand-title { font-size: 1.25rem; font-weight: bold; color: #f97316; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .brand-title { font-size: 1.4rem; font-weight: bold; color: #ff9800; }
     
-    .sync-badge { font-size: 0.75rem; color: #22c55e; font-weight: normal; display: flex; align-items: center; gap: 4px; background: #1a1d24; padding: 4px 8px; border-radius: 20px; border: 1px solid #2d333d; }
+    .sync-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; font-weight: normal; display: inline-flex; align-items: center; gap: 4px; background: #1e2230; border: 1px solid #2d3348; }
     
-    .filter-box { background: #1a1d24; border: 1px solid #2d333d; border-radius: 12px; padding: 10px; margin-bottom: 12px; width: 100%; }
-    .filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%; }
-    .filter-group { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; flex: 1 1 130px; min-width: 0; }
+    .filter-box { background: #1e2230; border: 1px solid #2d3348; border-radius: 10px; padding: 12px; margin-bottom: 15px; width: 100%; }
+    .filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .filter-group { flex: 1; min-width: 140px; }
+    .filter-group label { display: block; font-size: 0.75rem; color: #a0aec0; margin-bottom: 4px; }
+    .filter-group input { width: 100%; background: #0f111a; border: 1px solid #2d3348; color: #fff; padding: 8px; border-radius: 6px; font-size: 0.85rem; }
     
-    input, select, textarea { background: #0f1115; border: 1px solid #333a45; border-radius: 8px; color: #fff; padding: 8px 10px; font-size: 0.85rem; outline: none; width: 100%; max-width: 100%; }
-    input:focus, select:focus, textarea:focus { border-color: #f97316; }
-
-    .btn-registro { background: #1a1d24; border: 1.5px solid #f97316; color: #f97316; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 8px; }
-    .btn-registro:hover { background: #f97316; color: #fff; }
-
-    /* Box Check-out (Stile Foto 1 - Bordo Rosso) */
-    .checkout-box { background: #1a1d24; border: 1px solid #ef4444; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; width: 100%; }
-    .checkout-title { color: #f97316; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-    .checkout-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .checkout-chip { background: #882424; color: #fff; border: 1px solid #ef4444; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
-
     /* Legenda */
-    .legend-bar { display: flex; gap: 12px; font-size: 0.8rem; margin-bottom: 12px; align-items: center; }
-    .badge-free { color: #22c55e; font-weight: bold; }
-    .badge-busy { color: #ef4444; font-weight: bold; }
-
-    /* Grid Camere (Responsive Adattato a Mobile e Desktop) */
-    .grid-container { 
-      display: grid; 
-      grid-template-columns: repeat(2, minmax(0, 1fr)); 
-      gap: 8px; 
-      width: 100%;
+    .legend { display: flex; gap: 15px; font-size: 0.85rem; margin-bottom: 15px; align-items: center; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot.free { background-color: #2e7d32; }
+    .dot.busy { background-color: #c62828; }
+    
+    /* Griglia Camere */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
     }
-    @media (min-width: 600px) { 
-      .grid-container { grid-template-columns: repeat(5, minmax(0, 1fr)); } 
-      .btn-registro { width: fit-content; margin-top: 0; }
+    
+    @media (min-width: 768px) {
+      .grid-container {
+        grid-template-columns: repeat(5, 1fr);
+      }
     }
-
+    
     .room-card {
+      background: #1e2230;
       border-radius: 10px;
-      padding: 10px 4px;
-      text-align: center;
+      padding: 12px;
       cursor: pointer;
-      min-height: 110px;
+      transition: transform 0.15s, border-color 0.15s;
+      border: 2px solid transparent;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      word-break: break-word;
+      min-height: 110px;
     }
-
-    .room-card.free {
-      background-color: #15803d; /* Verde Pieno Foto 1 */
-      color: #ffffff;
-      border: 1px solid #22c55e;
-    }
-    .room-card.busy {
-      background-color: #882424; /* Rosso Pieno Foto 1 */
-      color: #ffffff;
-      border: 1px solid #ef4444;
-    }
-
-    .room-number { font-size: 1.05rem; font-weight: bold; }
-    .room-guest { font-size: 0.8rem; font-weight: bold; margin: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .room-dates { font-size: 0.68rem; opacity: 0.9; margin: 1px 0; }
-    .room-type { font-size: 0.72rem; opacity: 0.85; }
-    .room-status { font-size: 0.72rem; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px; }
-
-    /* Modali & Overlay */
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
-    .modal-box { background: #1a1d24; border: 1px solid #333a45; border-radius: 12px; padding: 16px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; color: #e1e6ed; }
-    .login-box { max-width: 330px; text-align: center; }
-
-    .form-group { display: flex; flex-direction: column; margin-bottom: 10px; }
-    .form-group label { font-size: 0.75rem; color: #a0a8b5; margin-bottom: 4px; }
-    .form-row { display: flex; gap: 8px; }
-    .form-row .form-group { flex: 1; min-width: 0; }
-
-    button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 12px; font-weight: 600; font-size: 0.85rem; }
-    .btn-gold { background: #f97316; color: #fff; }
-    .btn-cancel { background: #333a45; color: #fff; }
-    .btn-back { background: #2d333d; color: #f97316; }
-
+    .room-card:hover { transform: translateY(-2px); }
+    .room-card.free { border-color: #2e7d32; background: #1b382b; }
+    .room-card.busy { border-color: #c62828; background: #3b1e22; }
+    
+    .room-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 2px; }
+    .room-type { font-size: 0.75rem; color: #a0aec0; margin-bottom: 6px; }
+    .room-status { font-size: 0.75rem; font-weight: bold; margin-top: auto; letter-spacing: 0.5px; }
+    
+    /* Modali */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+    .modal-content { background: #1e2230; border: 1px solid #2d3348; border-radius: 12px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 20px; position: relative; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #2d3348; padding-bottom: 10px; }
+    .modal-title { font-size: 1.2rem; font-weight: bold; color: #ff9800; }
+    .close-btn { background: none; border: none; color: #a0aec0; font-size: 1.5rem; cursor: pointer; line-height: 1; }
+    .close-btn:hover { color: #fff; }
+    
+    /* Form Modali */
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.8rem; color: #a0aec0; margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; background: #0f111a; border: 1px solid #2d3348; color: #fff; padding: 10px; border-radius: 6px; font-size: 0.9rem; }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+    
+    button.btn { background: #ff9800; color: #000; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.95rem; }
+    button.btn:hover { background: #e68a00; }
+    button.btn-secondary { background: #2d3348; color: #fff; }
+    button.btn-secondary:hover { background: #3d4560; }
+    button.btn-danger { background: #c62828; color: #fff; }
+    button.btn-danger:hover { background: #b71c1c; }
+    
     /* Calendario Dettaglio Camera */
-    .month-nav { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
-    .cal-header-grid, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
-    .cal-header-grid div { font-size: 0.6rem; color: #a0a8b5; font-weight: bold; padding: 2px 0; }
-    .cal-day-cell { background: #0f1115; border: 1px solid #2d333d; border-radius: 4px; padding: 3px 1px; font-size: 0.65rem; min-height: 35px; display: flex; flex-direction: column; justify-content: space-between; }
-    .cal-day-cell.busy { border-color: #ef4444; background: #3b1111; }
-    .cal-day-cell.free { border-color: #22c55e; background: #0c381e; }
-    .cal-day-cell.empty { background: transparent; border: none; }
-
-    .detail-booking-card { background: #0f1115; border: 1px solid #2d333d; padding: 8px; border-radius: 6px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
-    .booking-actions { display: flex; flex-direction: column; gap: 4px; }
-    .btn-sm-meal { background: #16a34a; color: white; padding: 3px 6px; font-size: 0.7rem; }
-    .btn-sm-edit { background: #d97706; color: white; padding: 3px 6px; font-size: 0.7rem; }
-    .btn-sm-del { background: #dc2626; color: white; padding: 3px 6px; font-size: 0.7rem; }
-
-    .price-summary-box { background: #0f1115; border: 1px dashed #333a45; border-radius: 6px; padding: 8px; margin: 10px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; text-align: center; }
-    .price-summary-item span { display: block; font-size: 0.6rem; color: #a0a8b5; }
-    .price-summary-item strong { font-size: 0.8rem; }
-
-    .report-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: left; margin-top: 10px; }
-    .report-table th, .report-table td { border: 1px solid #2d333d; padding: 6px; }
-    .report-table th { background: #1a1d24; color: #f97316; }
-    .report-table tbody tr:nth-child(even) { background: #0f1115; }
-
-    .receipt-preview { width: 24px; height: 24px; object-fit: cover; border-radius: 3px; cursor: pointer; border: 1px solid #f97316; }
-    .error-msg { color: #ef4444; font-size: 0.8rem; margin-top: 6px; }
-
-    @media print {
-      .no-print, .main-header, .filter-box, .modal { display: none !important; }
-      body { background: white !important; color: black !important; padding: 0; }
-      .report-table th, .report-table td { border: 1px solid #000 !important; color: black !important; }
-    }
+    .calendar-box { margin-bottom: 15px; background: #0f111a; padding: 10px; border-radius: 8px; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #ff9800; font-weight: bold; font-size: 0.9rem; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .cal-day-head { font-size: 0.65rem; color: #a0aec0; padding: 2px 0; }
+    .cal-day { font-size: 0.75rem; padding: 6px 2px; border-radius: 4px; background: #1e2230; min-height: 35px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .cal-day.empty { background: transparent; }
+    .cal-day.busy { background: #3b1e22; color: #ff8a80; border: 1px solid #c62828; }
+    .cal-day.free { background: #1b382b; color: #a5d6a7; border: 1px solid #2e7d32; }
+    .cal-day .day-num { font-weight: bold; }
+    .cal-day .day-guest { font-size: 0.6rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+    
+    /* Detail Booking List */
+    .detail-booking-card { background: #0f111a; border: 1px solid #2d3348; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    
+    /* Price Summary Box */
+    .price-summary-box { background: #0f111a; border: 1px dashed #2d3348; padding: 10px; border-radius: 8px; margin-bottom: 12px; }
+    .price-summary-item { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; }
+    .price-summary-item.total { border-top: 1px solid #2d3348; padding-top: 6px; font-weight: bold; color: #ff9800; font-size: 0.95rem; margin-top: 6px; }
+    
+    /* Report & Tabelle */
+    .report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 10px; }
+    .report-table th, .report-table td { padding: 8px; text-align: left; border-bottom: 1px solid #2d3348; }
+    .report-table th { background: #0f111a; color: #a0aec0; }
+    
+    /* Login Screen */
+    .login-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+    .login-box { background: #1e2230; border: 1px solid #2d3348; padding: 25px; border-radius: 12px; width: 100%; max-width: 350px; text-align: center; }
+    .login-box h2 { color: #ff9800; margin-bottom: 15px; font-size: 1.3rem; }
+    .login-box input { text-align: center; font-size: 1.2rem; letter-spacing: 4px; margin-bottom: 15px; }
+    .error-msg { color: #ff5252; font-size: 0.8rem; margin-top: 8px; }
   </style>
 </head>
+
 <body>
 
-  <!-- LOGIN STAFF -->
-  <div id="login-modal" class="modal">
-    <div class="modal-box login-box">
-      <div style="font-size:1.2rem; font-weight:bold; color:#f97316; margin-bottom:6px;">🏡 Agriturismo & Ristorante</div>
-      <p style="font-size:0.8rem; color:#a0a8b5; margin-bottom:12px;">Inserisci la password Staff per accedere:</p>
-      <input type="password" id="staff-pass-input" placeholder="Password Staff">
-      <button class="btn-gold" style="width:100%; margin-top:10px;" onclick="loginStaff()">Accedi</button>
-      <p id="login-error" class="error-msg"></p>
+  <div id="login-screen" class="login-container">
+    <div class="login-box">
+      <h2>Agriturismo & Ristorante</h2>
+      <p style="font-size: 0.8rem; color: #a0aec0; margin-bottom: 15px;">Inserisci PIN per accedere</p>
+      <input type="password" id="staff-pin-input" placeholder="****" maxlength="8">
+      <button class="btn" onclick="loginWithPin()">Accedi</button>
+      <div id="login-error" class="error-msg hidden">PIN Errato</div>
     </div>
   </div>
 
-  <!-- APP PRINCIPALE -->
-  <div id="app-container" class="hidden">
+  <div id="app-container" class="hidden" style="max-width: 1100px; margin: 0 auto; padding: 15px;">
     
-    <header class="main-header no-print">
-      <div class="brand-title">
-        <span>🏡 Agriturismo & Ristorante</span>
-        <span id="sync-status" class="sync-badge">🟢 Cloud Sincronizzato</span>
-      </div>
-
-      <div class="filter-box">
-        <div class="filter-row">
-          <div class="filter-group">
-            <label>Dal:</label>
-            <input type="date" id="home-date-from" onchange="renderRooms()">
-          </div>
-          <div class="filter-group">
-            <label>Al:</label>
-            <input type="date" id="home-date-to" onchange="renderRooms()">
-          </div>
-        </div>
-        <button class="btn-registro" onclick="openMasterModal('report')">📋 Registro Economico</button>
-      </div>
+    <header id="main-header" class="card-no-print">
+      <div class="brand-title">Agriturismo & Ristorante</div>
+      <div id="sync-badge" class="sync-badge">🟡 Connessione...</div>
     </header>
 
-    <main class="main-content">
-      <div class="checkout-box">
-        <div class="checkout-title">🧹 Check-out di Oggi (Stanze da Pulire e Preparare):</div>
-        <div id="checkout-today-list" class="checkout-list">
-          <span style="color:#a0a8b5; font-size:0.8rem;">Nessuna camera in uscita oggi.</span>
+    <div class="filter-box">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="home-date-from">Dal:</label>
+          <input type="date" id="home-date-from" onchange="renderRooms()">
+        </div>
+        <div class="filter-group">
+          <label for="home-date-to">Al:</label>
+          <input type="date" id="home-date-to" onchange="renderRooms()">
         </div>
       </div>
+      <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.85rem;" onclick="requestMasterAuth('report')">📋 Registro Economico</button>
+      </div>
+    </div>
 
-      <div class="legend-bar">
-        <span>Stato periodo:</span>
-        <span class="badge-free">• Libera</span>
-        <span class="badge-busy">• Occupata</span>
+    <div id="checkout-today-box" class="card-no-print" style="border-color: #ff5252; background: #2a1b1d;">
+      <div style="font-size: 0.85rem; font-weight: bold; color: #ff5252; margin-bottom: 8px;">
+        🧹 Check-out di Oggi (Stanze da Pulire e Preparare):
+      </div>
+      <div id="checkout-list" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+    </div>
+
+    <div class="legend">
+      <span>Stato periodo:</span>
+      <div class="legend-item"><span class="dot free"></span> Libera</div>
+      <div class="legend-item"><span class="dot busy"></span> Occupata</div>
+    </div>
+
+    <div id="room-grid" class="grid-container"></div>
+
+    <div id="master-report-section" class="card-no-print hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="color: #ff9800;">📋 Registro Economico (Master)</h3>
+        <button class="btn btn-secondary" style="width: auto;" onclick="document.getElementById('master-report-section').classList.add('hidden')">Chiudi</button>
+      </div>
+      <div class="filter-row" style="margin-bottom: 15px;">
+        <div class="filter-group">
+          <label>Dal Data:</label>
+          <input type="date" id="report-date-from" onchange="renderMasterReport()">
+        </div>
+        <div class="filter-group">
+          <label>Al Data:</label>
+          <input type="date" id="report-date-to" onchange="renderMasterReport()">
+        </div>
+      </div>
+      <div id="master-report-body"></div>
+
+      <hr style="border: 0; border-top: 1px solid #2d3348; margin: 20px 0;">
+
+      <h4 style="color: #ff9800; margin-bottom: 10px;">🏷️ Gestione Tariffe Stagionali</h4>
+      <div class="filter-row" style="margin-bottom: 10px;">
+        <div class="filter-group"><label>Dal:</label><input type="date" id="season-start"></div>
+        <div class="filter-group"><label>Al:</label><input type="date" id="season-end"></div>
+        <div class="filter-group"><label>Prezzo Adulto/notte (€):</label><input type="number" id="season-adult-price" value="50"></div>
+        <div class="filter-group"><label>Prezzo Bambino/notte (€):</label><input type="number" id="season-child-price" value="25"></div>
+        <div class="filter-group" style="display: flex; align-items: flex-end;">
+          <button class="btn" onclick="saveSeasonalPrice()">Aggiungi Tariffa</button>
+        </div>
+      </div>
+      <div id="seasons-list" class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); margin-top: 10px;"></div>
+    </div>
+
+  </div>
+
+  <div id="room-detail-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="detail-room-title" class="modal-title">Dettaglio Camera</h3>
+        <button class="close-btn" onclick="document.getElementById('room-detail-modal').classList.add('hidden')">&times;</button>
+      </div>
+      
+      <div class="calendar-box">
+        <div class="calendar-header">
+          <button class="btn btn-secondary" style="width: auto; padding: 2px 8px;" onclick="changeMonth(-1)">&lt;</button>
+          <span id="calendar-month-year"></span>
+          <button class="btn btn-secondary" style="width: auto; padding: 2px 8px;" onclick="changeMonth(1)">&gt;</button>
+        </div>
+        <div class="calendar-grid">
+          <div class="cal-day-head">Lun</div><div class="cal-day-head">Mar</div><div class="cal-day-head">Mer</div><div class="cal-day-head">Gio</div><div class="cal-day-head">Ven</div><div class="cal-day-head">Sab</div><div class="cal-day-head">Dom</div>
+        </div>
+        <div id="calendar-grid" class="calendar-grid"></div>
       </div>
 
-      <div id="rooms-grid" class="grid-container"></div>
-    </main>
-
-    <!-- SEZIONE REGISTRO MASTER -->
-    <div id="master-report-section" class="hidden">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;" class="no-print">
-        <button class="btn-back" onclick="closeMasterReport()">⬅️ Torna al Menu</button>
-        <button class="btn-gold" onclick="window.print()">🖨️ Stampa Report</button>
+      <div style="margin-bottom: 15px;">
+        <button class="btn" onclick="openBookingModal()">➕ Nuova Prenotazione/Alloggio</button>
       </div>
 
-      <h2>Registro Economico - Soggiorni e Ristorante</h2>
+      <h4 style="color: #a0aec0; margin-bottom: 8px; font-size: 0.9rem;">Prenotazioni della Camera:</h4>
+      <div id="room-bookings-list"></div>
+    </div>
+  </div>
 
-      <div class="card-dark no-print">
-        <h3>Filtra Registro</h3>
-        <div class="filter-row" style="margin-top:8px;">
-          <div class="filter-group">
-            <label>Dal:</label>
-            <input type="date" id="report-date-from" onchange="renderMasterReport()">
+  <div id="booking-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="booking-modal-title" class="modal-title">Prenota Camera</h3>
+        <button class="close-btn" onclick="document.getElementById('booking-modal').classList.add('hidden')">&times;</button>
+      </div>
+
+      <form id="booking-form" onsubmit="event.preventDefault(); saveBooking();">
+        <input type="hidden" id="book-booking-id">
+        <div class="form-group">
+          <label for="book-guest-name">Nome Ospite / Riferimento *</label>
+          <input type="text" id="book-guest-name" placeholder="es. Mario Rossi" required>
+        </div>
+        <div class="form-group">
+          <label for="book-phone">Telefono</label>
+          <input type="text" id="book-phone" placeholder="es. 3331234567">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="book-checkin">Check-in *</label>
+            <input type="date" id="book-checkin" required onchange="calculateBookingTotal()">
           </div>
-          <div class="filter-group">
-            <label>Al:</label>
-            <input type="date" id="report-date-to" onchange="renderMasterReport()">
+          <div class="form-group">
+            <label for="book-checkout">Check-out *</label>
+            <input type="date" id="book-checkout" required onchange="calculateBookingTotal()">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="book-adults">Adulti *</label>
+            <input type="number" id="book-adults" value="1" min="1" required onchange="calculateBookingTotal()">
+          </div>
+          <div class="form-group">
+            <label for="book-children">Bambini</label>
+            <input type="number" id="book-children" value="0" min="0" onchange="calculateBookingTotal()">
           </div>
         </div>
 
-        <hr class="divider">
-
-        <h4>Imposta Tariffe Stagionali (€ / notte)</h4>
-        <div class="filter-row" style="margin-top:8px;">
-          <input type="date" id="season-start" style="width:auto;">
-          <input type="date" id="season-end" style="width:auto;">
-          <input type="number" id="season-adult-price" placeholder="€ / Adulto" style="width:100px;">
-          <input type="number" id="season-child-price" placeholder="€ / Bambino" style="width:100px;">
-          <button class="btn-gold" onclick="saveSeasonPrice()">Salva Tariffe</button>
+        <div class="price-summary-box">
+          <div class="price-summary-item"><span>Notti:</span> <strong id="summary-nights">0</strong></div>
+          <div class="price-summary-item"><span>Totale Soggiorno:</span> <strong id="summary-room-total">€ 0.00</strong></div>
+          <div class="price-summary-item"><span>Pasti Ristorante:</span> <strong id="summary-meals-total">€ 0.00</strong></div>
+          <div class="price-summary-item"><span>Acconto Versato:</span> <strong id="summary-deposit-display" style="color:#2e7d32;">€ 0.00</strong></div>
+          <div class="price-summary-item total"><span>Saldo da Pagare:</span> <strong id="summary-balance" style="color:#ff9800;">€ 0.00</strong></div>
         </div>
-      </div>
 
-      <div style="overflow-x:auto;">
-        <table class="report-table">
-          <thead>
-            <tr>
-              <th>Camera</th>
-              <th>Referente</th>
-              <th>Telefono</th>
-              <th>Adulti</th>
-              <th>Bambini</th>
-              <th>Periodo (Dal / Al)</th>
-              <th>Soggiorno (€)</th>
-              <th>Ristorante (€)</th>
-              <th>Totale Lordo (€)</th>
-              <th>Acconto (€)</th>
-              <th>Saldo (€)</th>
-              <th>Note</th>
-              <th class="no-print">Azioni</th>
-            </tr>
-          </thead>
-          <tbody id="master-table-body"></tbody>
-          <tfoot id="master-table-foot"></tfoot>
-        </table>
-      </div>
+        <div class="form-group">
+          <label for="book-deposit">Acconto Versato (€)</label>
+          <input type="number" id="book-deposit" value="0" step="0.01" min="0" onchange="calculateBookingTotal()">
+        </div>
+        <div class="form-group">
+          <label for="book-notes">Note / Richieste Speciali</label>
+          <textarea id="book-notes" rows="2" placeholder="es. Culla extra, intolleranze, ecc."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button type="submit" class="btn">Salva Prenotazione</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('booking-modal').classList.add('hidden')">Annulla</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- MODALE DETTAGLIO CAMERA -->
-  <div id="room-detail-modal" class="modal hidden">
-    <div class="modal-box">
-      <h3 id="detail-room-title" style="color:#f97316; margin-bottom:10px;">Dettaglio Camera</h3>
-
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h4 style="color:#f97316; font-size:0.85rem;">📅 Calendario Disponibilità</h4>
-        <button class="btn-gold" style="padding:4px 8px; font-size:0.75rem;" onclick="createBookingFromDetail()">➕ Nuova Prenotazione</button>
+  <div id="meal-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #ff9800;">🍽️ Pasti Ristorante</h3>
+        <button class="close-btn" onclick="document.getElementById('meal-modal').classList.add('hidden')">&times;</button>
       </div>
 
-      <div class="month-nav">
-        <button class="btn-cancel" style="padding:3px 8px; font-size:0.75rem;" onclick="changeMonth(-1)">◀ Mese Prec.</button>
-        <span id="cal-month-title" style="font-weight:bold; color:#f97316; font-size:0.85rem;"></span>
-        <button class="btn-cancel" style="padding:3px 8px; font-size:0.75rem;" onclick="changeMonth(1)">Mese Succ. ▶</button>
-      </div>
-
-      <div class="cal-header-grid">
-        <div>LUN</div><div>MAR</div><div>MER</div><div>GIO</div><div>VEN</div><div>SAB</div><div>DOM</div>
-      </div>
-
-      <div id="room-calendar-grid" class="cal-grid"></div>
-
-      <h4 style="color:#f97316; margin-top:10px; font-size:0.85rem;">📋 Prenotazioni della Camera</h4>
-      <div id="room-bookings-list" style="max-height:180px; overflow-y:auto;"></div>
-
-      <div style="margin-top:10px;">
-        <button class="btn-cancel" style="width:100%;" onclick="closeRoomDetailModal()">Chiudi</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODALE PRENOTAZIONE -->
-  <div id="booking-modal" class="modal hidden">
-    <div class="modal-box">
-      <h3 id="modal-room-title" style="color:#f97316; margin-bottom:10px;">Prenota Camera</h3>
-      <input type="hidden" id="book-room-id">
-      <input type="hidden" id="book-edit-id">
-
-      <div class="form-group">
-        <label>Nome referente cliente:</label>
-        <input type="text" id="book-guest-name" placeholder="Es. Mario Rossi">
-      </div>
-
-      <div class="form-row">
+      <form id="meal-form" onsubmit="event.preventDefault(); addMealEntry();">
+        <input type="hidden" id="meal-booking-id">
         <div class="form-group">
-          <label>Telefono:</label>
-          <input type="text" id="book-phone" placeholder="Es. 3331234567">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Adulti:</label>
-          <input type="number" id="book-adults" value="2" min="1" oninput="calculateBookingTotal()">
+          <label for="meal-date">Data Pasto *</label>
+          <input type="date" id="meal-date" required>
         </div>
         <div class="form-group">
-          <label>Bambini:</label>
-          <input type="number" id="book-children" value="0" min="0" oninput="calculateBookingTotal()">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Prezzo Adulto (€/notte):</label>
-          <input type="number" id="book-rate-adult" value="35" min="0" step="0.5" oninput="calculateBookingTotal()">
-        </div>
-        <div class="form-group">
-          <label>Prezzo Bambino (€/notte):</label>
-          <input type="number" id="book-rate-child" value="20" min="0" step="0.5" oninput="calculateBookingTotal()">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Check-in (Dal):</label>
-          <input type="date" id="book-checkin" onchange="calculateBookingTotal()">
-        </div>
-        <div class="form-group">
-          <label>Check-out (Al):</label>
-          <input type="date" id="book-checkout" onchange="calculateBookingTotal()">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Acconto Versato (€):</label>
-        <input type="number" id="book-deposit" value="0" min="0" step="1" oninput="calculateBookingTotal()">
-      </div>
-
-      <div class="price-summary-box">
-        <div class="price-summary-item">
-          <span>Notti</span>
-          <strong id="summary-nights">0</strong>
-        </div>
-        <div class="price-summary-item">
-          <span>Soggiorno</span>
-          <strong id="summary-total" style="color:#f97316;">€ 0.00</strong>
-        </div>
-        <div class="price-summary-item">
-          <span>Acconto</span>
-          <strong id="summary-deposit" style="color:#22c55e;">€ 0.00</strong>
-        </div>
-        <div class="price-summary-item">
-          <span>Saldo</span>
-          <strong id="summary-balance" style="color:#ef4444;">€ 0.00</strong>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Note:</label>
-        <textarea id="book-notes" rows="2" placeholder="Richieste speciali..."></textarea>
-      </div>
-
-      <div style="display:flex; gap:10px;">
-        <button class="btn-gold" style="flex:1;" onclick="saveBooking()">Salva Prenotazione</button>
-        <button class="btn-cancel" style="flex:1;" onclick="closeBookingModal()">Annulla</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODALE RISTORANTE -->
-  <div id="meal-modal" class="modal hidden">
-    <div class="modal-box">
-      <h3 id="meal-modal-title" style="color:#f97316; margin-bottom:10px;">🍽️ Pasti Ristorante</h3>
-      <input type="hidden" id="meal-booking-id">
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Data Pasto:</label>
-          <input type="date" id="meal-date">
-        </div>
-        <div class="form-group">
-          <label>Pasto:</label>
-          <select id="meal-type">
+          <label for="meal-type">Tipo Pasto *</label>
+          <select id="meal-type" required>
             <option value="Pranzo">Pranzo</option>
             <option value="Cena">Cena</option>
+            <option value="Extra Bar">Extra Bar / Altro</option>
           </select>
         </div>
-      </div>
+        <div class="form-group">
+          <label for="meal-notes">Descrizione Pasto / Note</label>
+          <input type="text" id="meal-notes" placeholder="es. 2 menù fissi + vino">
+        </div>
+        <div class="form-group">
+          <label for="meal-amount">Importo Coperto / Totale (€) *</label>
+          <input type="number" id="meal-amount" step="0.01" min="0" placeholder="es. 45.00" required>
+        </div>
+        <div class="form-group">
+          <label for="meal-receipt-file">Foto Scontrino / Ricevuta (opzionale)</label>
+          <input type="file" id="meal-receipt-file" accept="image/*">
+        </div>
 
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button type="submit" class="btn">Registra Pasto</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('meal-modal').classList.add('hidden')">Annulla</button>
+        </div>
+      </form>
+
+      <hr style="border: 0; border-top: 1px solid #2d3348; margin: 15px 0;">
+
+      <h4 style="color: #a0aec0; margin-bottom: 8px; font-size: 0.9rem;">Pasti già Registrati:</h4>
+      <div id="meal-list"></div>
+    </div>
+  </div>
+
+  <div id="master-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 350px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #ff9800;">🔐 Autorizzazione Master</h3>
+        <button class="close-btn" onclick="closeMasterModal()">&times;</button>
+      </div>
+      <p id="master-prompt-text" style="font-size: 0.85rem; color: #a0aec0; margin-bottom: 12px;"></p>
       <div class="form-group">
-        <label>Importo Scontrino (€):</label>
-        <input type="number" id="meal-amount" step="0.50" min="0" placeholder="Es. 45.50">
+        <input type="password" id="master-pin-input" placeholder="PIN Master" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px;">
       </div>
-
-      <div class="form-group">
-        <label>Foto Scontrino:</label>
-        <input type="file" id="meal-receipt-file" accept="image/*">
-      </div>
-
-      <div class="form-group">
-        <label>Note Pasto:</label>
-        <input type="text" id="meal-notes" placeholder="Es. Vini extra, dolce...">
-      </div>
-
-      <button class="btn-gold" style="width:100%; margin-bottom:10px;" onclick="saveMealEntry()">➕ Registra Pasto</button>
-
-      <hr class="divider">
-
-      <h4 style="color:#f97316; font-size:0.85rem;">Pasti e Scontrini Registrati:</h4>
-      <div id="meal-list" style="max-height:150px; overflow-y:auto;"></div>
-
-      <div style="margin-top:10px;">
-        <button class="btn-cancel" style="width:100%;" onclick="closeMealModal()">Chiudi</button>
+      <div id="master-error" class="error-msg hidden" style="margin-bottom: 10px;">PIN Master Errato!</div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn" onclick="submitMasterPin()">Conferma</button>
+        <button class="btn btn-secondary" onclick="closeMasterModal()">Annulla</button>
       </div>
     </div>
   </div>
 
-  <!-- MODALE PIN MASTER -->
-  <div id="master-modal" class="modal hidden">
-    <div class="modal-box login-box">
-      <div style="font-weight:bold; color:#f97316; margin-bottom:6px;">🔒 Autorizzazione Master</div>
-      <p id="master-prompt-text" style="font-size:0.8rem; color:#a0a8b5; margin-bottom:12px;">Inserisci il PIN Master:</p>
-      <input type="password" id="master-pin-input" placeholder="PIN Master">
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <button class="btn-gold" style="flex:1;" onclick="submitMasterPin()">Conferma</button>
-        <button class="btn-cancel" style="flex:1;" onclick="closeMasterModal()">Annulla</button>
-      </div>
-      <p id="master-error" class="error-msg"></p>
+  <div id="image-viewer-modal" class="modal-overlay hidden" onclick="closeImageViewer()">
+    <div class="modal-content" style="max-width: 90vw; max-height: 90vh; background: transparent; border: none; text-align: center; display: flex; justify-content: center; align-items: center;">
+      <img id="image-viewer-img" src="" alt="Scontrino" style="max-width: 100%; max-height: 85vh; border-radius: 8px; border: 2px solid #2d3348; object-fit: contain;">
     </div>
   </div>
 
-  <!-- VISUALIZZATORE IMMAGINE -->
-  <div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()">
-    <div class="modal-box" style="background:transparent; border:none; text-align:center;">
-      <img id="enlarged-receipt" src="" style="max-width:100%; max-height:80vh; border-radius:8px; border:2px solid #f97316;">
-      <p style="color:white; margin-top:8px;">Clicca per chiudere</p>
-    </div>
-  </div>
-
-  <!-- LOGICA JAVASCRIPT CON CLOUD SYNC AUTOMATICO -->
   <script>
-    const CONFIG = { STAFF_PASS: "max78", MASTER_PIN: "nikita78" };
-    
-    // API endpoint per sincronizzazione in tempo reale tra dispositivi diversi
-    const CLOUD_SYNC_URL = "https://kvdb.io/2H42PAG2d5LzZJ4a7bV7b2/agri_data_master_v1";
+    // INIZIALIZZAZIONE FIREBASE FIRESTORE
+    firebase.initializeApp({ projectId: "agriturismo-booking-app" });
+    const db = firebase.firestore();
+    const docRef = db.collection("agriturismo").doc("dati");
 
     const ROOMS = [
-      { id: "101", name: "101", type: "Quadrupla", defaultAdultRate: 35, defaultChildRate: 20 },
-      { id: "102", name: "102", type: "Tripla", defaultAdultRate: 35, defaultChildRate: 20 },
-      { id: "103", name: "103", type: "Quadrupla", defaultAdultRate: 35, defaultChildRate: 20 },
-      { id: "104", name: "104", type: "Matrimoniale", defaultAdultRate: 40, defaultChildRate: 20 },
-      { id: "105", name: "105", type: "Quadrupla", defaultAdultRate: 35, defaultChildRate: 20 },
-      { id: "106", name: "106", type: "Quadrupla", defaultAdultRate: 35, defaultChildRate: 20 },
-      { id: "107", name: "107", type: "Tripla", defaultAdultRate: 35, defaultChildRate: 20 },
-      { id: "108", name: "108", type: "Matrimoniale", defaultAdultRate: 40, defaultChildRate: 20 },
-      { id: "109", name: "109", type: "Tripla", defaultAdultRate: 35, defaultChildRate: 20 },
-      { id: "110", name: "110", type: "Suite SPA", defaultAdultRate: 50, defaultChildRate: 25 }
+      { id: "101", name: "Cam. 101", type: "Quadrupla", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "102", name: "Cam. 102", type: "Tripla", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "103", name: "Cam. 103", type: "Quadrupla", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "104", name: "Cam. 104", type: "Matrimoniale", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "105", name: "Cam. 105", type: "Quadrupla", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "106", name: "Cam. 106", type: "Quadrupla", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "107", name: "Cam. 107", type: "Tripla", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "108", name: "Cam. 108", type: "Matrimoniale", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "109", name: "Cam. 109", type: "Tripla", defaultAdultDate: 50, defaultChildDate: 25 },
+      { id: "110", name: "Cam. 110", type: "Suite SPA", defaultAdultDate: 70, defaultChildDate: 35 }
     ];
 
-    let bookings = JSON.parse(localStorage.getItem("agri_bookings")) || [];
-    let seasonalPrices = JSON.parse(localStorage.getItem("agri_seasons")) || [];
+    const STAFF_PASS = "1234";
+    const MASTER_PASS = "9999";
+
+    let bookings = JSON.parse(localStorage.getItem('agri_bookings')) || [];
+    let seasonalPrices = JSON.parse(localStorage.getItem('agri_seasons')) || [];
+
+    let currentSelectedRoomId = null;
+    let currentCalYear = new Date().getFullYear();
+    let currentCalMonth = new Date().getMonth();
 
     let pendingMasterAction = null;
     let targetBookingId = null;
-    let currentSelectedRoomId = null;
+    let currentConnectedRole = null;
 
-    let calYear = new Date().getFullYear();
-    let calMonth = new Date().getMonth();
+    // SINCRONIZZAZIONE IN TEMPO REALE CON FIRESTORE
+    function syncDataSave() {
+      localStorage.setItem('agri_bookings', JSON.stringify(bookings));
+      localStorage.setItem('agri_seasons', JSON.stringify(seasonalPrices));
 
-    /* SISTEMA DI SINCRONIZZAZIONE CLOUD TRA PC E CELLULARE */
-    async function syncDataSave() {
-      localStorage.setItem("agri_bookings", JSON.stringify(bookings));
-      localStorage.setItem("agri_seasons", JSON.stringify(seasonalPrices));
+      updateSyncBadge('🟡 Salvataggio...');
 
-      const payload = { bookings, seasonalPrices, lastUpdate: Date.now() };
-
-      try {
-        updateSyncBadge("🟡 Sincronizzazione...");
-        await fetch(CLOUD_SYNC_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        updateSyncBadge("🟢 Cloud Sincronizzato");
-      } catch (err) {
-        updateSyncBadge("🟠 Locale (Offline)");
-      }
+      docRef.set({
+        bookings: bookings,
+        seasonalPrices: seasonalPrices,
+        lastUpdate: Date.now()
+      }).then(() => {
+        updateSyncBadge('🟢 Cloud Sincronizzato');
+      }).catch((err) => {
+        console.error("Errore salvataggio:", err);
+        updateSyncBadge('🔴 Errore Sincro');
+      });
     }
 
-    async function fetchCloudData() {
-      try {
-        const response = await fetch(CLOUD_SYNC_URL);
-        if (response.ok) {
-          const cloudData = await response.json();
-          if (cloudData && cloudData.bookings) {
-            const currentStr = JSON.stringify(bookings);
-            const cloudStr = JSON.stringify(cloudData.bookings);
-            if (currentStr !== cloudStr) {
-              bookings = cloudData.bookings;
-              seasonalPrices = cloudData.seasonalPrices || [];
-              localStorage.setItem("agri_bookings", JSON.stringify(bookings));
-              localStorage.setItem("agri_seasons", JSON.stringify(seasonalPrices));
-              
-              renderRooms();
-              if (!document.getElementById("master-report-section").classList.contains("hidden")) {
-                renderMasterReport();
-              }
-              if (currentSelectedRoomId && !document.getElementById("room-detail-modal").classList.contains("hidden")) {
-                openRoomDetailModal(currentSelectedRoomId);
-              }
-            }
+    docRef.onSnapshot((doc) => {
+      if (doc.exists) {
+        const cloudData = doc.data();
+        if (cloudData && cloudData.bookings) {
+          bookings = cloudData.bookings;
+          seasonalPrices = cloudData.seasonalPrices || [];
+
+          localStorage.setItem('agri_bookings', JSON.stringify(bookings));
+          localStorage.setItem('agri_seasons', JSON.stringify(seasonalPrices));
+
+          renderRooms();
+          if (!document.getElementById("master-report-section").classList.contains("hidden")) {
+            renderMasterReport();
+          }
+          if (currentSelectedRoomId && !document.getElementById("room-detail-modal").classList.contains("hidden")) {
+            openRoomDetailModal(currentSelectedRoomId);
           }
         }
-        updateSyncBadge("🟢 Cloud Sincronizzato");
-      } catch (err) {
-        updateSyncBadge("🟠 Locale (Offline)");
       }
-    }
+      updateSyncBadge('🟢 Cloud Sincronizzato (Live)');
+    }, (err) => {
+      console.error("Errore sync live:", err);
+      updateSyncBadge('🟠 Offline / Errore');
+    });
 
     function updateSyncBadge(text) {
-      const badge = document.getElementById("sync-status");
+      const badge = document.getElementById("sync-badge");
       if (badge) badge.innerText = text;
     }
 
-    // Polling automatico ogni 3 secondi per aggiornare tutti i dispositivi
-    setInterval(fetchCloudData, 3000);
-
     document.addEventListener("DOMContentLoaded", () => {
-      const today = new Date().toISOString().split('T')[0];
-      let tomorrow = new Date();
+      const today = new Date();
+      const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-      document.getElementById("home-date-from").value = today;
+      const dateStr = today.toISOString().split("T")[0];
+      const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+      document.getElementById("home-date-from").value = dateStr;
       document.getElementById("home-date-to").value = tomorrowStr;
-      
-      document.getElementById("report-date-from").value = `${calYear}-01-01`;
+      document.getElementById("report-date-from").value = dateStr;
       document.getElementById("report-date-to").value = tomorrowStr;
-
-      fetchCloudData();
     });
 
-    function formatDate(dateStr) {
-      if (!dateStr) return '';
-      const parts = dateStr.split('-');
-      return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
-    }
-
-    function loginStaff() {
-      if (document.getElementById("staff-pass-input").value === CONFIG.STAFF_PASS) {
-        document.getElementById("login-modal").classList.add("hidden");
+    function loginWithPin() {
+      const pin = document.getElementById("staff-pin-input").value;
+      if (pin === STAFF_PASS || pin === MASTER_PASS) {
+        document.getElementById("login-screen").classList.add("hidden");
         document.getElementById("app-container").classList.remove("hidden");
+        currentConnectedRole = (pin === MASTER_PASS) ? 'MASTER' : 'STAFF';
         renderRooms();
       } else {
-        document.getElementById("login-error").innerText = "Password errata!";
+        document.getElementById("login-error").classList.remove("hidden");
       }
     }
 
     function renderRooms() {
-      const from = document.getElementById("home-date-from").value;
-      const to = document.getElementById("home-date-to").value;
-      const grid = document.getElementById("rooms-grid");
+      const fromVal = document.getElementById("home-date-from").value;
+      const toVal = document.getElementById("home-date-to").value;
+      const grid = document.getElementById("room-grid");
       grid.innerHTML = "";
 
-      renderTodayCheckouts();
+      renderHeaderCheckouts();
 
-      if (!from || !to) return;
+      if (!fromVal || !toVal) return;
 
       ROOMS.forEach(room => {
-        const activeBooking = bookings.find(b => 
-          b.roomId === room.id && (from < b.checkOut && to > b.checkIn)
-        );
+        const activeBooking = bookings.find(b => {
+          return b.roomId === room.id && (b.checkin < toVal && b.checkout > fromVal);
+        });
 
         const card = document.createElement("div");
         card.className = `room-card ${activeBooking ? 'busy' : 'free'}`;
         card.onclick = () => openRoomDetailModal(room.id);
 
-        if (!activeBooking) {
+        if (activeBooking) {
           card.innerHTML = `
-            <div class="room-number">Cam. ${room.name}</div>
-            <div class="room-type">${room.type}</div>
-            <div class="room-status">LIBERA</div>
+            <div>
+              <div class="room-name">${room.name}</div>
+              <div class="room-type" style="color: #ff8a80; font-weight: bold;">${activeBooking.guestName}</div>
+              <div style="font-size: 0.65rem; color: #ffcdd2;">${activeBooking.checkin.split('-').reverse().join('/')} ➔ ${activeBooking.checkout.split('-').reverse().join('/')}</div>
+              <div style="font-size: 0.65rem; color: #ffcdd2;">${activeBooking.nights}n | ${activeBooking.adults}A ${activeBooking.children ? '| ' + activeBooking.children + 'B' : ''}</div>
+            </div>
+            <div class="room-status">OCCUPATA</div>
           `;
         } else {
           card.innerHTML = `
-            <div class="room-number">Cam. ${room.name}</div>
-            <div class="room-guest">${activeBooking.guestName}</div>
-            <div class="room-dates">${formatDate(activeBooking.checkIn)} ➔ ${formatDate(activeBooking.checkOut)}</div>
-            <div class="room-dates">${activeBooking.nights}n | ${activeBooking.adults}A</div>
-            <div class="room-status">OCCUPATA</div>
+            <div>
+              <div class="room-name">${room.name}</div>
+              <div class="room-type">${room.type}</div>
+            </div>
+            <div class="room-status">LIBERA</div>
           `;
         }
         grid.appendChild(card);
       });
     }
 
-    function renderTodayCheckouts() {
-      const todayIso = new Date().toISOString().split('T')[0];
-      const todayCheckouts = bookings.filter(b => b.checkOut === todayIso);
-      const container = document.getElementById("checkout-today-list");
+    function renderHeaderCheckouts() {
+      const todayStr = new Date().toISOString().split("T")[0];
+      const container = document.getElementById("checkout-list");
+      container.innerHTML = "";
+
+      const todayCheckouts = bookings.filter(b => b.checkout === todayStr);
 
       if (todayCheckouts.length === 0) {
-        container.innerHTML = `<span style="color:#a0a8b5; font-size:0.8rem;">Nessuna camera in uscita oggi.</span>`;
-      } else {
-        container.innerHTML = todayCheckouts.map(b => `
-          <span class="checkout-chip">Cam. ${getRoomName(b.roomId)} (${b.guestName})</span>
-        `).join('');
+        container.innerHTML = `<span style="font-size: 0.8rem; color: #a0aec0;">Nessuna camera in uscita oggi.</span>`;
+        return;
       }
+
+      todayCheckouts.forEach(b => {
+        const room = ROOMS.find(r => r.id === b.roomId);
+        const span = document.createElement("span");
+        span.style = "background: #c62828; color: #fff; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-weight: bold;";
+        span.innerText = `${room ? room.name : 'Cam. ' + b.roomId} (${b.guestName})`;
+        container.appendChild(span);
+      });
     }
 
     function openRoomDetailModal(roomId) {
-      const room = ROOMS.find(r => r.id === roomId);
-      if (!room) return;
-
       currentSelectedRoomId = roomId;
-      document.getElementById("detail-room-title").innerText = `🏡 Camera ${room.name} (${room.type})`;
+      const room = ROOMS.find(r => r.id === roomId);
+      document.getElementById("detail-room-title").innerText = `Dettaglio Camera: ${room.name} (${room.type})`;
 
-      renderCalendarMonth();
+      renderRoomCalendar();
 
-      const bookingsList = document.getElementById("room-bookings-list");
-      bookingsList.innerHTML = "";
+      const bookingList = document.getElementById("room-bookings-list");
+      bookingList.innerHTML = "";
 
-      const roomBookings = bookings.filter(b => b.roomId === roomId).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
+      const roomBookings = bookings.filter(b => b.roomId === roomId).sort((a,b) => a.checkin.localeCompare(b.checkin));
 
       if (roomBookings.length === 0) {
-        bookingsList.innerHTML = `<p style="color:#a0a8b5; font-size:0.8rem; padding:6px 0;">Nessuna prenotazione registrata.</p>`;
+        bookingList.innerHTML = `<p style="font-size: 0.8rem; color: #a0aec0;">Nessuna prenotazione registrata per questa camera.</p>`;
       } else {
         roomBookings.forEach(b => {
-          const totalMeals = (b.meals || []).reduce((acc, m) => acc + m.amount, 0);
-          const card = document.createElement("div");
-          card.className = "detail-booking-card";
-          card.innerHTML = `
+          const div = document.createElement("div");
+          div.className = "detail-booking-card";
+
+          const totalMeals = (b.meals || []).reduce((sum, m) => sum + m.amount, 0);
+          const grandTotal = (b.roomTotal || 0) + totalMeals;
+          const balance = grandTotal - (b.deposit || 0);
+
+          div.innerHTML = `
             <div>
-              <div style="font-weight:bold; color:#f97316; font-size:0.85rem;">👤 ${b.guestName} ${b.phone ? '(' + b.phone + ')' : ''}</div>
-              <div style="font-size:0.75rem; margin-top:2px;">📅 ${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights}n)</div>
-              <div style="font-size:0.72rem; color:#a0a8b5;">👥 ${b.adults} Ad. ${b.children ? '/ ' + b.children + ' Bimbi' : ''}</div>
-              ${totalMeals > 0 ? `<div style="font-size:0.72rem; color:#22c55e; font-weight:bold; margin-top:2px;">🍽️ Ristorante: € ${totalMeals.toFixed(2)}</div>` : ''}
-              ${b.notes ? `<div style="font-size:0.72rem; color:#ffeaa7; margin-top:2px;">📝 ${b.notes}</div>` : ''}
+              <div style="font-weight: bold; color: #ff9800; font-size: 0.9rem;">${b.guestName} ${b.phone ? ' - 📞 ' + b.phone : ''}</div>
+              <div style="font-size: 0.75rem; color: #a0aec0;">${b.checkin.split('-').reverse().join('/')} ➔ ${b.checkout.split('-').reverse().join('/')} (${b.nights} notti)</div>
+              <div style="font-size: 0.75rem; color: #e2e8f0;">Ospiti: ${b.adults} Adulti${b.children ? ', ' + b.children + ' Bambini' : ''}</div>
+              <div style="font-size: 0.75rem; color: #a0aec0;">Tot: €${grandTotal.toFixed(2)} | Acc: €${(b.deposit||0).toFixed(2)} | <strong style="color: ${balance > 0 ? '#ff9800' : '#2e7d32'};">Saldo: €${balance.toFixed(2)}</strong></div>
+              ${b.notes ? `<div style="font-size: 0.7rem; color: #ff8a80; margin-top: 2px;">Note: ${b.notes}</div>` : ''}
             </div>
-            <div class="booking-actions">
-              <button class="btn-sm-meal" onclick="openMealModal('${b.id}')">🍽️ Pasti</button>
-              <button class="btn-sm-edit" onclick="requestEditRoomDirect('${b.id}')">✏️ Edit</button>
-              <button class="btn-sm-del" onclick="requestReleaseRoomDirect('${b.id}')">🗑️ Elimina</button>
+            <div style="display: flex; gap: 4px; flex-direction: column;">
+              <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="openMealModal('${b.id}')">🍽️ Ristorante (${(b.meals||[]).length})</button>
+              <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="requestMasterAuthDirect('edit', '${b.id}')">✏️ Modifica</button>
+              <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="requestMasterAuthDirect('delete', '${b.id}')">🗑️ Elimina</button>
             </div>
           `;
-          bookingsList.appendChild(card);
+          bookingList.appendChild(div);
         });
       }
 
       document.getElementById("room-detail-modal").classList.remove("hidden");
     }
 
-    function renderCalendarMonth() {
+    function renderRoomCalendar() {
       const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
-      document.getElementById("cal-month-title").innerText = `${monthNames[calMonth]} ${calYear}`;
+      document.getElementById("calendar-month-year").innerText = `${monthNames[currentCalMonth]} ${currentCalYear}`;
 
-      const calendarGrid = document.getElementById("room-calendar-grid");
-      calendarGrid.innerHTML = "";
+      const grid = document.getElementById("calendar-grid");
+      grid.innerHTML = "";
 
-      const firstDayOfMonth = new Date(calYear, calMonth, 1);
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const firstDayIndex = new Date(currentCalYear, currentCalMonth, 1).getDay();
+      const startDayOffset = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
 
-      let startDayOfWeek = firstDayOfMonth.getDay() - 1;
-      if (startDayOfWeek === -1) startDayOfWeek = 6;
+      const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
 
-      for (let i = 0; i < startDayOfWeek; i++) {
-        const emptyCell = document.createElement("div");
-        emptyCell.className = "cal-day-cell empty";
-        calendarGrid.appendChild(emptyCell);
+      for (let x = 0; x < startDayOffset; x++) {
+        const emptyDiv = document.createElement("div");
+        emptyDiv.className = "cal-day empty";
+        grid.appendChild(emptyDiv);
       }
 
+      const roomBookings = bookings.filter(b => b.roomId === currentSelectedRoomId);
+
       for (let day = 1; day <= daysInMonth; day++) {
-        const mStr = String(calMonth + 1).padStart(2, '0');
-        const dStr = String(day).padStart(2, '0');
-        const dateIso = `${calYear}-${mStr}-${dStr}`;
+        const dayDiv = document.createElement("div");
+        const monthStr = String(currentCalMonth + 1).padStart(2, '0');
+        const dayStr = String(day).padStart(2, '0');
+        const dateStr = `${currentCalYear}-${monthStr}-${dayStr}`;
 
-        const activeBooking = bookings.find(b => b.roomId === currentSelectedRoomId && (dateIso >= b.checkIn && dateIso < b.checkOut));
+        const activeBooking = roomBookings.find(b => b.checkin <= dateStr && b.checkout > dateStr);
 
-        const dayCell = document.createElement("div");
-        dayCell.className = `cal-day-cell ${activeBooking ? 'busy' : 'free'}`;
-        dayCell.innerHTML = `
-          <div style="font-weight:bold;">${day}</div>
-          <div style="font-size:0.55rem;">${activeBooking ? '🔴' : '🟢'}</div>
-        `;
-        calendarGrid.appendChild(dayCell);
+        if (activeBooking) {
+          dayDiv.className = "cal-day busy";
+          dayDiv.innerHTML = `<span class="day-num">${day}</span><span class="day-guest">${activeBooking.guestName}</span>`;
+        } else {
+          dayDiv.className = "cal-day free";
+          dayDiv.innerHTML = `<span class="day-num">${day}</span>`;
+        }
+
+        grid.appendChild(dayDiv);
       }
     }
 
     function changeMonth(delta) {
-      calMonth += delta;
-      if (calMonth > 11) { calMonth = 0; calYear++; }
-      else if (calMonth < 0) { calMonth = 11; calYear--; }
-      renderCalendarMonth();
-    }
-
-    function closeRoomDetailModal() {
-      document.getElementById("room-detail-modal").classList.add("hidden");
-    }
-
-    function createBookingFromDetail() {
-      const room = ROOMS.find(r => r.id === currentSelectedRoomId);
-      if (!room) return;
-      const from = document.getElementById("home-date-from").value;
-      const to = document.getElementById("home-date-to").value;
-      closeRoomDetailModal();
-      openBookingModal(room, from, to);
+      currentCalMonth += delta;
+      if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+      if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
+      renderRoomCalendar();
     }
 
     function calculateBookingTotal() {
+      const checkin = document.getElementById("book-checkin").value;
+      const checkout = document.getElementById("book-checkout").value;
       const adults = parseInt(document.getElementById("book-adults").value) || 0;
       const children = parseInt(document.getElementById("book-children").value) || 0;
-      const rateAdult = parseFloat(document.getElementById("book-rate-adult").value) || 0;
-      const rateChild = parseFloat(document.getElementById("book-rate-child").value) || 0;
       const deposit = parseFloat(document.getElementById("book-deposit").value) || 0;
-      const checkIn = document.getElementById("book-checkin").value;
-      const checkOut = document.getElementById("book-checkout").value;
 
-      let nights = 0;
-      if (checkIn && checkOut && checkOut > checkIn) {
-        nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
+      const bookingId = document.getElementById("book-booking-id").value;
+      let mealsTotal = 0;
+      if (bookingId) {
+        const existing = bookings.find(b => b.id === bookingId);
+        if (existing && existing.meals) {
+          mealsTotal = existing.meals.reduce((s, m) => s + m.amount, 0);
+        }
       }
 
-      const roomTotal = ((adults * rateAdult) + (children * rateChild)) * nights;
-      
-      const editId = document.getElementById("book-edit-id").value;
-      let mealsTotal = 0;
-      if (editId) {
-        const existing = bookings.find(b => b.id === editId);
-        if (existing && existing.meals) {
-          mealsTotal = existing.meals.reduce((acc, m) => acc + m.amount, 0);
-        }
+      if (!checkin || !checkout || checkout <= checkin) {
+        document.getElementById("summary-nights").innerText = "0";
+        document.getElementById("summary-room-total").innerText = "€ 0.00";
+        document.getElementById("summary-meals-total").innerText = `€ ${mealsTotal.toFixed(2)}`;
+        document.getElementById("summary-deposit-display").innerText = `€ ${deposit.toFixed(2)}`;
+        document.getElementById("summary-balance").innerText = `€ ${mealsTotal.toFixed(2)}`;
+        return;
+      }
+
+      const d1 = new Date(checkin);
+      const d2 = new Date(checkout);
+      const nights = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+
+      let roomTotal = 0;
+      let curr = new Date(d1);
+      while (curr < d2) {
+        const dateStr = curr.toISOString().split('T')[0];
+        const rates = getSeasonalPriceForPeriod(dateStr, currentSelectedRoomId);
+        roomTotal += (adults * rates.adultRate) + (children * rates.childRate);
+        curr.setDate(curr.getDate() + 1);
       }
 
       const grandTotal = roomTotal + mealsTotal;
       const balance = grandTotal - deposit;
 
       document.getElementById("summary-nights").innerText = nights;
-      document.getElementById("summary-total").innerText = `€ ${roomTotal.toFixed(2)}`;
-      document.getElementById("summary-deposit").innerText = `€ ${deposit.toFixed(2)}`;
+      document.getElementById("summary-room-total").innerText = `€ ${roomTotal.toFixed(2)}`;
+      document.getElementById("summary-meals-total").innerText = `€ ${mealsTotal.toFixed(2)}`;
+      document.getElementById("summary-deposit-display").innerText = `€ ${deposit.toFixed(2)}`;
       document.getElementById("summary-balance").innerText = `€ ${balance.toFixed(2)}`;
     }
 
-    function openBookingModal(room, checkIn, checkOut, editBooking = null) {
-      document.getElementById("book-edit-id").value = editBooking ? editBooking.id : "";
-      document.getElementById("modal-room-title").innerText = editBooking ? `Modifica Prenotazione Cam. ${room.name}` : `Prenota Camera ${room.name}`;
-      document.getElementById("book-room-id").value = room.id;
-      
-      document.getElementById("book-guest-name").value = editBooking ? editBooking.guestName : "";
-      document.getElementById("book-phone").value = editBooking ? (editBooking.phone || "") : "";
-      document.getElementById("book-adults").value = editBooking ? editBooking.adults : 2;
-      document.getElementById("book-children").value = editBooking ? editBooking.children : 0;
-      document.getElementById("book-deposit").value = editBooking ? editBooking.deposit : 0;
-      document.getElementById("book-notes").value = editBooking ? (editBooking.notes || "") : "";
+    function openBookingModal(bookingId = null) {
+      document.getElementById("booking-form").reset();
+      document.getElementById("book-booking-id").value = "";
 
-      document.getElementById("book-checkin").value = editBooking ? editBooking.checkIn : checkIn;
-      document.getElementById("book-checkout").value = editBooking ? editBooking.checkOut : checkOut;
-
-      if (editBooking) {
-        document.getElementById("book-rate-adult").value = editBooking.rateAdult;
-        document.getElementById("book-rate-child").value = editBooking.rateChild;
+      if (bookingId) {
+        const b = bookings.find(x => x.id === bookingId);
+        if (!b) return;
+        document.getElementById("booking-modal-title").innerText = `Modifica Prenotazione: ${b.guestName}`;
+        document.getElementById("book-booking-id").value = b.id;
+        document.getElementById("book-guest-name").value = b.guestName;
+        document.getElementById("book-phone").value = b.phone || "";
+        document.getElementById("book-checkin").value = b.checkin;
+        document.getElementById("book-checkout").value = b.checkout;
+        document.getElementById("book-adults").value = b.adults;
+        document.getElementById("book-children").value = b.children || 0;
+        document.getElementById("book-deposit").value = b.deposit || 0;
+        document.getElementById("book-notes").value = b.notes || "";
       } else {
-        const rates = getRatesForPeriod(checkIn, room);
-        document.getElementById("book-rate-adult").value = rates.adultRate;
-        document.getElementById("book-rate-child").value = rates.childRate;
+        document.getElementById("booking-modal-title").innerText = "Nuova Prenotazione";
+        document.getElementById("book-checkin").value = document.getElementById("home-date-from").value;
+        document.getElementById("book-checkout").value = document.getElementById("home-date-to").value;
       }
 
       calculateBookingTotal();
       document.getElementById("booking-modal").classList.remove("hidden");
     }
 
-    function closeBookingModal() {
-      document.getElementById("booking-modal").classList.add("hidden");
-    }
-
     function saveBooking() {
-      const editId = document.getElementById("book-edit-id").value;
-      const roomId = document.getElementById("book-room-id").value;
-      const guestName = document.getElementById("book-guest-name").value.trim();
-      const phone = document.getElementById("book-phone").value.trim();
+      const bookingId = document.getElementById("book-booking-id").value;
+      const guestName = document.getElementById("book-guest-name").value;
+      const phone = document.getElementById("book-phone").value;
+      const checkin = document.getElementById("book-checkin").value;
+      const checkout = document.getElementById("book-checkout").value;
       const adults = parseInt(document.getElementById("book-adults").value) || 1;
       const children = parseInt(document.getElementById("book-children").value) || 0;
-      const checkIn = document.getElementById("book-checkin").value;
-      const checkOut = document.getElementById("book-checkout").value;
-      const rateAdult = parseFloat(document.getElementById("book-rate-adult").value) || 0;
-      const rateChild = parseFloat(document.getElementById("book-rate-child").value) || 0;
       const deposit = parseFloat(document.getElementById("book-deposit").value) || 0;
-      const notes = document.getElementById("book-notes").value.trim();
+      const notes = document.getElementById("book-notes").value;
 
-      if (!guestName || !checkIn || !checkOut) {
-        alert("Compila tutti i campi obbligatori!");
+      if (checkout <= checkin) {
+        alert("La data di Check-out deve essere successiva alla data di Check-in!");
         return;
       }
 
-      if (checkOut <= checkIn) {
-        alert("La data di check-out deve essere successiva al check-in!");
+      const conflict = bookings.find(b => {
+        if (bookingId && b.id === bookingId) return false;
+        return b.roomId === currentSelectedRoomId && (b.checkin < checkout && b.checkout > checkin);
+      });
+
+      if (conflict) {
+        alert(`ATTENZIONE: La camera risulta già occupata in questo periodo da ${conflict.guestName}!`);
         return;
       }
 
-      const hasConflict = bookings.some(b => 
-        b.id !== editId && b.roomId === roomId && (checkIn < b.checkOut && checkOut > b.checkIn)
-      );
+      const d1 = new Date(checkin);
+      const d2 = new Date(checkout);
+      const nights = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
 
-      if (hasConflict) {
-        alert("Errore: La camera risulta già occupata in questo periodo!");
-        return;
+      let roomTotal = 0;
+      let curr = new Date(d1);
+      while (curr < d2) {
+        const dateStr = curr.toISOString().split('T')[0];
+        const rates = getSeasonalPriceForPeriod(dateStr, currentSelectedRoomId);
+        roomTotal += (adults * rates.adultRate) + (children * rates.childRate);
+        curr.setDate(curr.getDate() + 1);
       }
 
-      const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
-      const roomTotal = ((adults * rateAdult) + (children * rateChild)) * nights;
-      
       let existingMeals = [];
-      if (editId) {
-        const oldB = bookings.find(b => b.id === editId);
-        if (oldB && oldB.meals) existingMeals = oldB.meals;
+      if (bookingId) {
+        const old = bookings.find(b => b.id === bookingId);
+        if (old && old.meals) existingMeals = old.meals;
       }
 
-      const mealsTotal = existingMeals.reduce((acc, m) => acc + m.amount, 0);
-      const totalPrice = roomTotal + mealsTotal;
-      const balance = totalPrice - deposit;
-
-      if (editId) {
-        const index = bookings.findIndex(b => b.id === editId);
-        if (index !== -1) {
-          bookings[index] = {
-            ...bookings[index],
-            guestName, phone, adults, children, checkIn, checkOut, nights,
-            rateAdult, rateChild, totalPrice, deposit, balance, notes, meals: existingMeals
+      if (bookingId) {
+        const idx = bookings.findIndex(b => b.id === bookingId);
+        if (idx !== -1) {
+          bookings[idx] = {
+            ...bookings[idx],
+            guestName, phone, checkin, checkout, adults, children, nights,
+            roomTotal, deposit, notes, meals: existingMeals
           };
         }
       } else {
         const newBooking = {
-          id: Date.now().toString(),
-          roomId, guestName, phone, adults, children, checkIn, checkOut, nights,
-          rateAdult, rateChild, totalPrice, deposit, balance, notes, meals: []
+          id: "book_" + Date.now(),
+          roomId: currentSelectedRoomId,
+          guestName, phone, checkin, checkout, adults, children, nights,
+          roomTotal, deposit, notes, meals: []
         };
         bookings.push(newBooking);
       }
 
       syncDataSave();
-      closeBookingModal();
+      document.getElementById("booking-modal").classList.add("hidden");
+      openRoomDetailModal(currentSelectedRoomId);
       renderRooms();
-      if (currentSelectedRoomId) openRoomDetailModal(currentSelectedRoomId);
     }
 
-    /* RISTORANTE E PASTI */
     function openMealModal(bookingId) {
-      const b = bookings.find(item => item.id === bookingId);
-      if (!b) return;
-
       document.getElementById("meal-booking-id").value = bookingId;
-      document.getElementById("meal-modal-title").innerText = `🍽️ Pasti Ristorante - ${b.guestName}`;
+      document.getElementById("meal-form").reset();
       document.getElementById("meal-date").value = new Date().toISOString().split('T')[0];
-      document.getElementById("meal-amount").value = "";
-      document.getElementById("meal-notes").value = "";
-      document.getElementById("meal-receipt-file").value = "";
-
-      renderMealList(b);
+      renderMealsList(bookingId);
       document.getElementById("meal-modal").classList.remove("hidden");
     }
 
-    function closeMealModal() {
-      document.getElementById("meal-modal").classList.add("hidden");
-    }
-
-    function saveMealEntry() {
+    function addMealEntry() {
       const bookingId = document.getElementById("meal-booking-id").value;
       const date = document.getElementById("meal-date").value;
       const type = document.getElementById("meal-type").value;
+      const notes = document.getElementById("meal-notes").value;
       const amount = parseFloat(document.getElementById("meal-amount").value) || 0;
-      const notes = document.getElementById("meal-notes").value.trim();
       const fileInput = document.getElementById("meal-receipt-file");
 
-      if (!date || amount <= 0) {
-        alert("Inserisci data e importo valido!");
-        return;
-      }
+      if (!bookingId || amount <= 0) return;
 
-      const bIndex = bookings.findIndex(item => item.id === bookingId);
-      if (bIndex === -1) return;
+      const saveMealData = (receiptImgData) => {
+        const booking = bookings.find(b => b.id === bookingId);
+        if (!booking) return;
 
-      const saveEntry = (receiptImageData = null) => {
-        const newMeal = { id: Date.now().toString(), date, type, amount, notes, receiptImage: receiptImageData };
-
-        if (!bookings[bIndex].meals) bookings[bIndex].meals = [];
-        bookings[bIndex].meals.push(newMeal);
-
-        const roomTotal = ((bookings[bIndex].adults * bookings[bIndex].rateAdult) + (bookings[bIndex].children * bookings[bIndex].rateChild)) * bookings[bIndex].nights;
-        const mealsTotal = bookings[bIndex].meals.reduce((acc, m) => acc + m.amount, 0);
-        bookings[bIndex].totalPrice = roomTotal + mealsTotal;
-        bookings[bIndex].balance = bookings[bIndex].totalPrice - bookings[bIndex].deposit;
+        if (!booking.meals) booking.meals = [];
+        booking.meals.push({
+          id: "meal_" + Date.now(),
+          date, type, notes, amount, receiptImage: receiptImgData
+        });
 
         syncDataSave();
-        renderMealList(bookings[bIndex]);
-        renderRooms();
+        renderMealsList(bookingId);
+        document.getElementById("meal-form").reset();
+        document.getElementById("meal-date").value = new Date().toISOString().split('T')[0];
         if (currentSelectedRoomId) openRoomDetailModal(currentSelectedRoomId);
-
-        document.getElementById("meal-amount").value = "";
-        document.getElementById("meal-notes").value = "";
-        document.getElementById("meal-receipt-file").value = "";
       };
 
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) { saveEntry(e.target.result); };
+        reader.onload = (e) => saveMealData(e.target.result);
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        saveEntry(null);
+        saveMealData(null);
       }
     }
 
-    function renderMealList(booking) {
+    function renderMealsList(bookingId) {
       const container = document.getElementById("meal-list");
       container.innerHTML = "";
 
-      const meals = booking.meals || [];
-      if (meals.length === 0) {
-        container.innerHTML = `<p style="color:#a0a8b5; font-size:0.75rem;">Nessun pasto registrato.</p>`;
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking || !booking.meals || booking.meals.length === 0) {
+        container.innerHTML = `<p style="font-size: 0.8rem; color: #a0aec0;">Nessun pasto registrato.</p>`;
         return;
       }
 
-      meals.forEach(m => {
-        const item = document.createElement("div");
-        item.style = "background:#0f1115; border:1px solid #2d333d; padding:6px; margin-top:4px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;";
-        item.innerHTML = `
+      booking.meals.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "detail-booking-card";
+        div.innerHTML = `
           <div>
-            <strong style="color:#f97316; font-size:0.8rem;">${m.type} (${formatDate(m.date)})</strong>
-            <div style="font-size:0.75rem;">€ ${m.amount.toFixed(2)} ${m.notes ? '- ' + m.notes : ''}</div>
+            <div style="font-weight: bold; color: #ff9800; font-size: 0.85rem;">${m.type} (€${m.amount.toFixed(2)}) - ${m.date.split('-').reverse().join('/')}</div>
+            ${m.notes ? `<div style="font-size: 0.75rem; color: #a0aec0;">${m.notes}</div>` : ''}
+            ${m.receiptImage ? `<button class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.7rem; margin-top: 4px;" onclick="openImageViewer('${m.receiptImage}')">🖼️ Vedi Scontrino</button>` : ''}
           </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            ${m.receiptImage ? `<img src="${m.receiptImage}" class="receipt-preview" onclick="openImageViewer('${m.receiptImage}')">` : ''}
-            <button onclick="deleteMealEntry('${booking.id}', '${m.id}')" style="background:#dc2626; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-size:0.7rem;">🗑️</button>
+          <div>
+            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.7rem;" onclick="deleteMeal('${bookingId}', '${m.id}')">🗑️</button>
           </div>
         `;
-        container.appendChild(item);
+        container.appendChild(div);
       });
     }
 
-    function deleteMealEntry(bookingId, mealId) {
-      const bIndex = bookings.findIndex(item => item.id === bookingId);
-      if (bIndex === -1) return;
+    function deleteMeal(bookingId, mealId) {
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking || !booking.meals) return;
 
-      bookings[bIndex].meals = (bookings[bIndex].meals || []).filter(m => m.id !== mealId);
-
-      const roomTotal = ((bookings[bIndex].adults * bookings[bIndex].rateAdult) + (bookings[bIndex].children * bookings[bIndex].rateChild)) * bookings[bIndex].nights;
-      const mealsTotal = bookings[bIndex].meals.reduce((acc, m) => acc + m.amount, 0);
-      bookings[bIndex].totalPrice = roomTotal + mealsTotal;
-      bookings[bIndex].balance = bookings[bIndex].totalPrice - bookings[bIndex].deposit;
-
+      booking.meals = booking.meals.filter(m => m.id !== mealId);
       syncDataSave();
-      renderMealList(bookings[bIndex]);
-      renderRooms();
+      renderMealsList(bookingId);
       if (currentSelectedRoomId) openRoomDetailModal(currentSelectedRoomId);
     }
 
+    function deleteBooking(bookingId) {
+      bookings = bookings.filter(b => b.id !== bookingId);
+      syncDataSave();
+      if (currentSelectedRoomId) openRoomDetailModal(currentSelectedRoomId);
+      renderRooms();
+    }
+
     function openImageViewer(imgSrc) {
-      document.getElementById("enlarged-receipt").src = imgSrc;
+      document.getElementById("image-viewer-img").src = imgSrc;
       document.getElementById("image-viewer-modal").classList.remove("hidden");
     }
 
@@ -965,184 +881,234 @@
       document.getElementById("image-viewer-modal").classList.add("hidden");
     }
 
-    /* MASTER AUTORIZZAZIONI */
-    function requestReleaseRoomDirect(bookingId) {
-      const b = bookings.find(item => item.id === bookingId);
-      if (b) {
-        targetBookingId = bookingId;
-        pendingMasterAction = 'release';
-        document.getElementById("master-prompt-text").innerText = `Eliminare la prenotazione di ${b.guestName}? Inserisci PIN Master:`;
-        document.getElementById("master-modal").classList.remove("hidden");
-      }
-    }
-
-    function requestEditRoomDirect(bookingId) {
-      const b = bookings.find(item => item.id === bookingId);
-      if (b) {
-        targetBookingId = bookingId;
-        pendingMasterAction = 'edit';
-        document.getElementById("master-prompt-text").innerText = `Modificare la prenotazione di ${b.guestName}? Inserisci PIN Master:`;
-        document.getElementById("master-modal").classList.remove("hidden");
-      }
-    }
-
-    function openMasterModal(action) {
+    // AUTORIZZAZIONE MASTER
+    function requestMasterAuth(action) {
       pendingMasterAction = action;
-      document.getElementById("master-prompt-text").innerText = "Inserisci il PIN Master per accedere al Registro:";
+      targetBookingId = null;
+
+      if (currentConnectedRole === 'MASTER') {
+        submitMasterPinDirect();
+      } else {
+        document.getElementById("master-prompt-text").innerText = "Inserisci il PIN Master per accedere al Registro Economico.";
+        openMasterModal();
+      }
+    }
+
+    function requestMasterAuthDirect(action, bookingId) {
+      pendingMasterAction = action;
+      targetBookingId = bookingId;
+
+      const b = bookings.find(x => x.id === bookingId);
+      const guest = b ? b.guestName : '';
+
+      if (currentConnectedRole === 'MASTER') {
+        submitMasterPinDirect();
+      } else {
+        if (action === 'delete') {
+          document.getElementById("master-prompt-text").innerText = `Eliminare la prenotazione di ${guest}? Inserisci PIN Master.`;
+        } else if (action === 'edit') {
+          document.getElementById("master-prompt-text").innerText = `Modificare la prenotazione di ${guest}? Inserisci PIN Master.`;
+        }
+        openMasterModal();
+      }
+    }
+
+    function openMasterModal() {
+      document.getElementById("master-pin-input").value = "";
+      document.getElementById("master-error").classList.add("hidden");
       document.getElementById("master-modal").classList.remove("hidden");
     }
 
     function closeMasterModal() {
       document.getElementById("master-modal").classList.add("hidden");
-      document.getElementById("master-pin-input").value = "";
-      document.getElementById("master-error").innerText = "";
-      targetBookingId = null;
     }
 
     function submitMasterPin() {
-      if (document.getElementById("master-pin-input").value === CONFIG.MASTER_PIN) {
-        const action = pendingMasterAction;
-        const bookingId = targetBookingId;
+      const pin = document.getElementById("master-pin-input").value;
+      if (pin === MASTER_PASS) {
         closeMasterModal();
-
-        if (action === 'release' && bookingId) {
-          deleteBooking(bookingId);
-        } else if (action === 'edit' && bookingId) {
-          const b = bookings.find(item => item.id === bookingId);
-          const room = ROOMS.find(r => r.id === b.roomId);
-          if (b && room) {
-            closeRoomDetailModal();
-            openBookingModal(room, b.checkIn, b.checkOut, b);
-          }
-        } else if (action === 'report') {
-          renderMasterReport();
-        }
+        executeMasterAction();
       } else {
-        document.getElementById("master-error").innerText = "PIN Master errato!";
+        document.getElementById("master-error").classList.remove("hidden");
+      }
+    }
+
+    function submitMasterPinDirect() {
+      executeMasterAction();
+    }
+
+    function executeMasterAction() {
+      if (pendingMasterAction === 'report') {
+        document.getElementById("master-report-section").classList.remove("hidden");
+        renderMasterReport();
+      } else if (pendingMasterAction === 'delete' && targetBookingId) {
+        deleteBooking(targetBookingId);
+      } else if (pendingMasterAction === 'edit' && targetBookingId) {
+        openBookingModal(targetBookingId);
       }
     }
 
     function renderMasterReport() {
-      document.querySelector(".main-content").classList.add("hidden");
-      document.getElementById("master-report-section").classList.remove("hidden");
+      const fromVal = document.getElementById("report-date-from").value;
+      const toVal = document.getElementById("report-date-to").value;
+      const container = document.getElementById("master-report-body");
 
-      const from = document.getElementById("report-date-from").value;
-      const to = document.getElementById("report-date-to").value;
-      const tbody = document.getElementById("master-table-body");
-      const tfoot = document.getElementById("master-table-foot");
-      tbody.innerHTML = "";
+      if (!fromVal || !toVal) return;
 
       const filteredBookings = bookings.filter(b => {
-        if (!from || !to) return true;
-        return (from <= b.checkOut && to >= b.checkIn);
+        return (b.checkin <= toVal && b.checkout >= fromVal);
       });
 
-      let sumAdults = 0, sumChildren = 0, sumRoomTotal = 0, sumMealsTotal = 0, sumGrandTotal = 0, sumDeposit = 0, sumBalance = 0;
+      let sumAdults = 0, sumChildren = 0, sumNights = 0, sumRoomTotal = 0, sumMealsTotal = 0, sumDeposit = 0;
 
       filteredBookings.forEach(b => {
-        const mealsTotal = (b.meals || []).reduce((acc, m) => acc + m.amount, 0);
-        const roomTotal = ((b.adults * b.rateAdult) + (b.children * b.rateChild)) * b.nights;
-        const grandTotal = roomTotal + mealsTotal;
-        const dep = b.deposit || 0;
-        const bal = grandTotal - dep;
-
-        sumAdults += b.adults;
+        sumAdults += (b.adults || 0);
         sumChildren += (b.children || 0);
-        sumRoomTotal += roomTotal;
-        sumMealsTotal += mealsTotal;
-        sumGrandTotal += grandTotal;
-        sumDeposit += dep;
-        sumBalance += bal;
+        sumNights += (b.nights || 0);
+        sumRoomTotal += (b.roomTotal || 0);
+        const meals = (b.meals || []).reduce((s, m) => s + m.amount, 0);
+        sumMealsTotal += meals;
+        sumDeposit += (b.deposit || 0);
+      });
 
-        tbody.innerHTML += `
+      const grandTotal = sumRoomTotal + sumMealsTotal;
+      const restToPay = grandTotal - sumDeposit;
+
+      let html = `
+        <div class="price-summary-box" style="margin-bottom: 15px;">
+          <div class="price-summary-item"><span>Totale Adulti Ospitati:</span> <strong>${sumAdults}</strong></div>
+          <div class="price-summary-item"><span>Totale Bambini Ospitati:</span> <strong>${sumChildren}</strong></div>
+          <div class="price-summary-item"><span>Totale Notti Camere:</span> <strong>${sumNights}</strong></div>
+          <div class="price-summary-item"><span>Totale Incassi Camere:</span> <strong>€ ${sumRoomTotal.toFixed(2)}</strong></div>
+          <div class="price-summary-item"><span>Totale Incassi Ristorante:</span> <strong>€ ${sumMealsTotal.toFixed(2)}</strong></div>
+          <div class="price-summary-item"><span>Totale Acconti Ricevuti:</span> <strong style="color: #2e7d32;">€ ${sumDeposit.toFixed(2)}</strong></div>
+          <div class="price-summary-item total"><span>TOTALE GENERALE INCASSI:</span> <strong>€ ${grandTotal.toFixed(2)}</strong></div>
+          <div class="price-summary-item" style="margin-top: 4px;"><span>Rimasto da Incassare (Saldo):</span> <strong style="color: #ff9800;">€ ${restToPay.toFixed(2)}</strong></div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Camera</th>
+                <th>Ospite</th>
+                <th>Date</th>
+                <th>Notti</th>
+                <th>Soggiorno</th>
+                <th>Ristorante</th>
+                <th>Totale</th>
+                <th>Acconto</th>
+                <th>Saldo</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      filteredBookings.forEach(b => {
+        const room = ROOMS.find(r => r.id === b.roomId);
+        const meals = (b.meals || []).reduce((s, m) => s + m.amount, 0);
+        const total = (b.roomTotal || 0) + meals;
+        const balance = total - (b.deposit || 0);
+
+        html += `
           <tr>
-            <td><strong>${getRoomName(b.roomId)}</strong></td>
+            <td><strong>${room ? room.name : b.roomId}</strong></td>
             <td>${b.guestName}</td>
-            <td>${b.phone || '-'}</td>
-            <td><strong>${b.adults}</strong></td>
-            <td><strong>${b.children || 0}</strong></td>
-            <td>${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights}n)</td>
-            <td>€ ${roomTotal.toFixed(2)}</td>
-            <td>€ ${mealsTotal.toFixed(2)}</td>
-            <td><strong>€ ${grandTotal.toFixed(2)}</strong></td>
-            <td style="color:#22c55e;">€ ${dep.toFixed(2)}</td>
-            <td style="color:#ef4444;"><strong>€ ${bal.toFixed(2)}</strong></td>
-            <td>${b.notes || '-'}</td>
-            <td class="no-print">
-              <button onclick="requestEditRoomDirect('${b.id}')" style="background:#d97706; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-size:0.7rem;">Modifica</button>
-              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#dc2626; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-size:0.7rem;">Elimina</button>
+            <td>${b.checkin.split('-').reverse().join('/')} - ${b.checkout.split('-').reverse().join('/')}</td>
+            <td>${b.nights}</td>
+            <td>€${(b.roomTotal||0).toFixed(2)}</td>
+            <td>€${meals.toFixed(2)}</td>
+            <td><strong>€${total.toFixed(2)}</strong></td>
+            <td style="color: #2e7d32;">€${(b.deposit||0).toFixed(2)}</td>
+            <td style="color: ${balance > 0 ? '#ff9800' : '#2e7d32'};"><strong>€${balance.toFixed(2)}</strong></td>
+            <td>
+              <button class="btn btn-secondary" style="padding: 2px 6px; font-size: 0.7rem;" onclick="openBookingModal('${b.id}')">✏️</button>
+              <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.7rem;" onclick="deleteBookingMaster('${b.id}')">🗑️</button>
             </td>
           </tr>
         `;
       });
 
-      if (tfoot) {
-        tfoot.innerHTML = `
-          <tr>
-            <td colspan="3" style="text-align:right; font-weight:bold; color:#f97316;">Totali:</td>
-            <td style="color:#f97316;"><strong>${sumAdults} Ad.</strong></td>
-            <td style="color:#f97316;"><strong>${sumChildren} Bim.</strong></td>
-            <td></td>
-            <td><strong>€ ${sumRoomTotal.toFixed(2)}</strong></td>
-            <td><strong>€ ${sumMealsTotal.toFixed(2)}</strong></td>
-            <td><strong style="color:#f97316;">€ ${sumGrandTotal.toFixed(2)}</strong></td>
-            <td style="color:#22c55e;"><strong>€ ${sumDeposit.toFixed(2)}</strong></td>
-            <td style="color:#ef4444;"><strong>€ ${sumBalance.toFixed(2)}</strong></td>
-            <td colspan="2"></td>
-          </tr>
-        `;
-      }
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = html;
+      renderSeasonalPricesList();
     }
 
-    function deleteBooking(id) {
-      const deletedBooking = bookings.find(b => b.id === id);
-      const roomId = deletedBooking ? deletedBooking.roomId : null;
-
-      bookings = bookings.filter(b => b.id !== id);
-      syncDataSave();
-      renderRooms();
-
-      if (!document.getElementById("master-report-section").classList.contains("hidden")) {
+    function deleteBookingMaster(bookingId) {
+      if (confirm("Sei sicuro di voler eliminare questa prenotazione?")) {
+        deleteBooking(bookingId);
         renderMasterReport();
       }
-      if (!document.getElementById("room-detail-modal").classList.contains("hidden") && roomId) {
-        openRoomDetailModal(roomId);
-      }
     }
 
-    function closeMasterReport() {
-      document.getElementById("master-report-section").classList.add("hidden");
-      document.querySelector(".main-content").classList.remove("hidden");
-      renderRooms();
-    }
-
-    function saveSeasonPrice() {
+    function saveSeasonalPrice() {
       const start = document.getElementById("season-start").value;
       const end = document.getElementById("season-end").value;
-      const adultRate = parseFloat(document.getElementById("season-adult-price").value);
-      const childRate = parseFloat(document.getElementById("season-child-price").value) || 0;
+      const adultPrice = parseFloat(document.getElementById("season-adult-price").value) || 0;
+      const childPrice = parseFloat(document.getElementById("season-child-price").value) || 0;
 
-      if (!start || !end || isNaN(adultRate)) {
-        alert("Inserisci date e tariffa adulto valide!");
+      if (!start || !end || end < start) {
+        alert("Inserisci date valide per la tariffa stagionale!");
         return;
       }
 
-      seasonalPrices.push({ start, end, adultRate, childRate });
+      seasonalPrices.push({ id: "season_" + Date.now(), start, end, adultRate: adultPrice, childRate: childPrice });
       syncDataSave();
-      alert("Tariffa salvata!");
+      alert("Tariffa speciale aggiunta!");
+      renderSeasonalPricesList();
     }
 
-    function getRatesForPeriod(dateStr, room) {
+    function renderSeasonalPricesList() {
+      const container = document.getElementById("seasons-list");
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (seasonalPrices.length === 0) {
+        container.innerHTML = `<p style="font-size: 0.8rem; color: #a0aec0;">Nessuna tariffa speciale impostata (Tariffa base attiva).</p>`;
+        return;
+      }
+
+      seasonalPrices.forEach((s) => {
+        const div = document.createElement("div");
+        div.className = "detail-booking-card";
+        div.innerHTML = `
+          <div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: #ff9800;">${s.start.split('-').reverse().join('/')} ➔ ${s.end.split('-').reverse().join('/')}</div>
+            <div style="font-size: 0.75rem; color: #a0aec0;">Adulto: €${s.adultRate}/notte | Bambino: €${s.childRate}/notte</div>
+          </div>
+          <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.7rem;" onclick="deleteSeasonalPrice('${s.id}')">🗑️</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function deleteSeasonalPrice(id) {
+      seasonalPrices = seasonalPrices.filter(s => s.id !== id);
+      syncDataSave();
+      renderSeasonalPricesList();
+    }
+
+    function getSeasonalPriceForPeriod(dateStr, roomId) {
       const season = seasonalPrices.find(s => dateStr >= s.start && dateStr <= s.end);
+      if (season) {
+        return { adultRate: season.adultRate, childRate: season.childRate };
+      }
+      const room = ROOMS.find(r => r.id === roomId);
       return {
-        adultRate: season ? season.adultRate : room.defaultAdultRate,
-        childRate: season ? season.childRate : room.defaultChildRate
+        adultRate: room ? room.defaultAdultDate : 50,
+        childRate: room ? room.defaultChildDate : 25
       };
     }
 
     function getRoomName(roomId) {
       const room = ROOMS.find(r => r.id === roomId);
-      return room ? room.name : `Cam. ${roomId}`;
+      return room ? room.name : `Camera ${roomId}`;
     }
   </script>
 </body>
