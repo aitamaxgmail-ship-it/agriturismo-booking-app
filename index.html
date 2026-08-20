@@ -28,21 +28,25 @@
 
     .hidden { display: none !important; }
 
-    /* Fix Visibilità Selettori Data */
+    /* Fix Visibilità Selettori Data (Migliorata Leggibilità e Contrasto) */
     input[type="date"] {
       color-scheme: dark;
-      background: #252a33 !important;
+      background: #2b323d !important;
       color: #ffffff !important;
-      border: 1px solid #ff9f43 !important;
-      padding: 5px 8px;
-      border-radius: 5px;
-      font-size: 0.85rem;
+      border: 2px solid #ff9f43 !important;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: bold;
       outline: none;
+      box-shadow: 0 0 6px rgba(255, 159, 67, 0.4);
     }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(0.9);
+      filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(350deg);
       cursor: pointer;
+      transform: scale(1.15);
+      margin-left: 5px;
     }
 
     /* Top Navigation Bar */
@@ -322,7 +326,7 @@
       border-radius: 8px;
       padding: 8px;
       display: flex;
-      justify-content: space-around;
+      justify-style: space-around;
       align-items: center;
       margin-top: 4px;
       text-align: center;
