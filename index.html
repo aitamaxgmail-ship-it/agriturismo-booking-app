@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Gestionale Agriturismo - Camere e Ristorante</title>
+  
+  <!-- Firebase SDK JS (Compatibility Version per App Web Single-File) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -58,6 +63,17 @@
       font-size: 1.1rem;
       font-weight: bold;
       color: #ff9f43;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sync-indicator {
+      font-size: 0.7rem;
+      background: #1e824c;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
     }
 
     .bar-controls {
@@ -435,6 +451,7 @@
 </head>
 <body>
 
+  <!-- MODALE LOGIN STAFF -->
   <div id="login-modal" class="modal">
     <div class="modal-box login-box">
       <div class="brand-title">🔑 Accesso Agriturismo</div>
@@ -447,8 +464,12 @@
 
   <div id="app-container" class="hidden">
     
+    <!-- BARRA SUPERIORE -->
     <header class="top-bar no-print">
-      <div class="brand-badge">🏡 Agriturismo</div>
+      <div class="brand-badge">
+        🏡 Agriturismo 
+        <span class="sync-indicator">🟢 Sincronizzato</span>
+      </div>
 
       <div class="bar-controls">
         <div class="date-group">
@@ -468,6 +489,7 @@
 
     <main class="main-content no-print">
       
+      <!-- BOX CHECKOUT DEL GIORNO (CAMERE DA PULIRE) -->
       <div id="checkout-today-box" class="checkout-alert-box">
         <div class="checkout-alert-title">🧹 Check-out Oggi (Camere da pulire e preparare):</div>
         <div id="checkout-today-list" class="checkout-tags">Nessuna camera in check-out oggi.</div>
@@ -479,9 +501,11 @@
         <span class="badge-busy">● Occupata</span>
       </div>
 
+      <!-- GRIGLIA CAMERE 5x2 -->
       <div id="rooms-grid" class="grid-container"></div>
     </main>
 
+    <!-- VISTA REGISTRO ECONOMICO & STAMPA -->
     <div id="master-report-section" class="hidden master-view">
       <div class="report-header no-print">
         <button class="btn-back" onclick="closeMasterReport()">⬅️ Torna al Menu</button>
@@ -534,6 +558,7 @@
     </div>
   </div>
 
+  <!-- MODALE DETTAGLIO CAMERA (CALENDARIO & LISTA PRENOTAZIONI) -->
   <div id="room-detail-modal" class="modal hidden">
     <div class="modal-box">
       <h3 id="detail-room-title" class="modal-title">Dettaglio Camera</h3>
@@ -564,6 +589,7 @@
     </div>
   </div>
 
+  <!-- MODALE NUOVA / MODIFICA PRENOTAZIONE -->
   <div id="booking-modal" class="modal hidden">
     <div class="modal-box">
       <h3 id="modal-room-title" class="modal-title">Gestione Prenotazione</h3>
@@ -620,6 +646,7 @@
         <input type="number" id="book-deposit" value="0" min="0" step="1" oninput="calculateBookingTotal()">
       </div>
 
+      <!-- SEZIONE CONSUMAZIONI RISTORANTE (SCONTRINI) -->
       <div id="meals-section-container" class="meals-section hidden">
         <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">🍽️ Consumazioni Ristorante & Scontrini</h4>
         
@@ -653,6 +680,7 @@
         <div id="meals-list" style="margin-top:6px; max-height:120px; overflow-y:auto;"></div>
       </div>
 
+      <!-- BOX RIEPILOGO FINALE IN TEMPO REALE -->
       <div class="price-summary-box">
         <div class="price-summary-item">
           <span>Soggiorno</span>
@@ -684,6 +712,7 @@
     </div>
   </div>
 
+  <!-- MODALE PIN MASTER -->
   <div id="master-modal" class="modal hidden">
     <div class="modal-box login-box">
       <div class="brand-title">🔒 Autorizzazione Master</div>
@@ -695,6 +724,7 @@
     </div>
   </div>
 
+  <!-- MODALE INGRANDIMENTO FOTO SCONTRINO -->
   <div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()">
     <div style="max-width:90%; max-height:90%;">
       <img id="enlarged-receipt-img" src="" style="width:100%; height:auto; border-radius:8px; border:2px solid #ff9f43;">
@@ -702,6 +732,22 @@
   </div>
 
   <script>
+    // ==========================================
+    // CONFIGURAZIONE CHIAVI FIREBASE INTEGRATE
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyC2VngrhQH-C0A1X4wSddI0f4DF5CW3Pms",
+      authDomain: "agriturismo-booking-app.firebaseapp.com",
+      projectId: "agriturismo-booking-app",
+      storageBucket: "agriturismo-booking-app.firebasestorage.app",
+      messagingSenderId: "972507442001",
+      appId: "1:972507442001:web:e7b77121c645f18f3d1ed0"
+    };
+
+    // Inizializzazione Firebase & Firestore
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const CONFIG = { STAFF_PASS: "max78", MASTER_PIN: "nikita78" };
 
     const ROOMS = [
@@ -717,7 +763,7 @@
       { id: "110", name: "110", type: "Suite SPA", defaultAdultRate: 50, defaultChildRate: 25 }
     ];
 
-    let bookings = JSON.parse(localStorage.getItem("agri_bookings")) || [];
+    let bookings = [];
     let currentTempMeals = [];
 
     let pendingMasterAction = null;
@@ -738,6 +784,24 @@
       
       document.getElementById("report-date-from").value = `${calYear}-01-01`;
       document.getElementById("report-date-to").value = tomorrowStr;
+
+      // SINCRONIZZAZIONE IN TEMPO REALE CON CLOUD FIRESTORE
+      db.collection("prenotazioni").onSnapshot((snapshot) => {
+        bookings = [];
+        snapshot.forEach((doc) => {
+          bookings.push({ id: doc.id, ...doc.data() });
+        });
+        
+        renderRooms();
+        if (currentSelectedRoomId && !document.getElementById("room-detail-modal").classList.contains("hidden")) {
+          openRoomDetailModal(currentSelectedRoomId);
+        }
+        if (!document.getElementById("master-report-section").classList.contains("hidden")) {
+          renderMasterReport();
+        }
+      }, (error) => {
+        console.error("Errore di sincronizzazione Firebase:", error);
+      });
     });
 
     function formatDate(dateStr) {
@@ -760,9 +824,10 @@
       const from = document.getElementById("home-date-from").value;
       const to = document.getElementById("home-date-to").value;
       const grid = document.getElementById("rooms-grid");
+      if (!grid) return;
       grid.innerHTML = "";
 
-      // Controllo Check-out del giorno corrente per pulizia
+      // Check-out del giorno per pulizia
       const todayIso = new Date().toISOString().split('T')[0];
       const todayCheckouts = bookings.filter(b => b.checkOut === todayIso);
       const checkoutBox = document.getElementById("checkout-today-list");
@@ -932,7 +997,6 @@
       document.getElementById("meal-date").value = checkIn || new Date().toISOString().split('T')[0];
 
       if (bookingToEdit) {
-        // MODIFICA PRENOTAZIONE ESISTENTE
         document.getElementById("modal-room-title").innerText = `Modifica Prenotazione Cam. ${room.name}`;
         document.getElementById("book-id").value = bookingToEdit.id;
         document.getElementById("book-guest-name").value = bookingToEdit.guestName || "";
@@ -949,7 +1013,6 @@
         currentTempMeals = bookingToEdit.meals ? JSON.parse(JSON.stringify(bookingToEdit.meals)) : [];
         document.getElementById("meals-section-container").classList.remove("hidden");
       } else {
-        // NUOVA PRENOTAZIONE
         document.getElementById("modal-room-title").innerText = `Prenota Camera ${room.name}`;
         document.getElementById("book-id").value = "";
         document.getElementById("book-guest-name").value = "";
@@ -1051,7 +1114,8 @@
       document.getElementById("booking-modal").classList.add("hidden");
     }
 
-    function saveBooking() {
+    // SALVATAGGIO SU FIREBASE FIRESTORE
+    async function saveBooking() {
       const editId = document.getElementById("book-id").value;
       const roomId = document.getElementById("book-room-id").value;
       const guestName = document.getElementById("book-guest-name").value.trim();
@@ -1091,37 +1155,22 @@
       const grandTotal = stayTotal + mealsTotal;
       const balance = grandTotal - deposit;
 
-      if (editId) {
-        // Aggiorna esistente
-        const idx = bookings.findIndex(b => b.id === editId);
-        if (idx !== -1) {
-          bookings[idx] = {
-            ...bookings[idx],
-            guestName, phone, adults, children, checkIn, checkOut,
-            nights, rateAdult, rateChild, stayTotal, mealsTotal,
-            totalPrice: grandTotal, deposit, balance, notes,
-            meals: currentTempMeals
-          };
+      const bookingData = {
+        roomId, guestName, phone, adults, children, checkIn, checkOut,
+        nights, rateAdult, rateChild, stayTotal, mealsTotal,
+        totalPrice: grandTotal, deposit, balance, notes,
+        meals: currentTempMeals
+      };
+
+      try {
+        if (editId) {
+          await db.collection("prenotazioni").doc(editId).set(bookingData, { merge: true });
+        } else {
+          await db.collection("prenotazioni").add(bookingData);
         }
-      } else {
-        // Nuova prenotazione
-        const newBooking = {
-          id: Date.now().toString(),
-          roomId, guestName, phone, adults, children, checkIn, checkOut,
-          nights, rateAdult, rateChild, stayTotal, mealsTotal,
-          totalPrice: grandTotal, deposit, balance, notes,
-          meals: currentTempMeals
-        };
-        bookings.push(newBooking);
-      }
-
-      localStorage.setItem("agri_bookings", JSON.stringify(bookings));
-
-      closeBookingModal();
-      renderRooms();
-
-      if (!document.getElementById("room-detail-modal").classList.contains("hidden")) {
-        openRoomDetailModal(roomId);
+        closeBookingModal();
+      } catch (err) {
+        alert("Errore nel salvataggio su Firebase: " + err.message);
       }
     }
 
@@ -1257,21 +1306,12 @@
       }
     }
 
-    function deleteBooking(id) {
-      const deletedBooking = bookings.find(b => b.id === id);
-      const roomId = deletedBooking ? deletedBooking.roomId : null;
-
-      bookings = bookings.filter(b => b.id !== id);
-      localStorage.setItem("agri_bookings", JSON.stringify(bookings));
-
-      renderRooms();
-
-      if (!document.getElementById("master-report-section").classList.contains("hidden")) {
-        renderMasterReport();
-      }
-
-      if (!document.getElementById("room-detail-modal").classList.contains("hidden") && roomId) {
-        openRoomDetailModal(roomId);
+    // ELIMINAZIONE DA FIREBASE
+    async function deleteBooking(id) {
+      try {
+        await db.collection("prenotazioni").doc(id).delete();
+      } catch (err) {
+        alert("Errore nell'eliminazione: " + err.message);
       }
     }
 
