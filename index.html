@@ -2,430 +2,145 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Gestionale Agriturismo - Camere e Ristorante</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione Agriturismo</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0e1013; color: #e1e6ed; padding: 15px; }
 
-    html, body {
-      width: 100%;
-      max-width: 100vw;
-      overflow-x: hidden;
-      background-color: #121417;
-      color: #e1e6ed;
-      padding: 8px;
-    }
-
+    /* Utility & Classi Generali */
     .hidden { display: none !important; }
-
-    /* Fix Visibilità Selettori Data in Dark Mode */
-    input[type="date"], input[type="text"], input[type="number"], select, textarea {
-      color-scheme: dark;
-      background-color: #252a33;
-      color: #ffffff;
-      border: 1px solid #3b4250;
-      padding: 7px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      width: 100%;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: #ff9f43;
-      outline: none;
-    }
-
-    /* Navigation Bar */
-    .top-bar {
-      background: #1c2026;
-      border: 1px solid #2d333d;
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-      width: 100%;
-    }
-
-    .brand-badge {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #ff9f43;
-    }
-
-    .bar-controls {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .date-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.8rem;
-    }
-
-    .date-group input {
-      width: 125px;
-    }
-
-    .bar-actions { display: flex; gap: 6px; }
-
-    .btn-bar, .btn-back {
-      background: #252a33;
-      border: 1px solid #ff9f43;
-      color: #ff9f43;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 0.8rem;
-    }
-
-    .btn-bar:hover, .btn-back:hover {
-      background: #ff9f43;
-      color: #121417;
-    }
-
-    /* Banner Check-out di Oggi per Pulizie */
-    .checkout-banner {
-      background: #1c2026;
-      border: 1px solid #e74c3c;
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin-bottom: 10px;
-      font-size: 0.85rem;
-    }
-
-    .checkout-title {
-      color: #e74c3c;
-      font-weight: bold;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .checkout-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .checkout-chip {
-      background: #962d22;
-      color: white;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 0.78rem;
-      font-weight: bold;
-    }
-
-    .legend-bar {
-      margin-bottom: 10px;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      font-size: 0.8rem;
-    }
-
-    .badge-free { color: #2ecc71; font-weight: bold; }
-    .badge-busy { color: #e74c3c; font-weight: bold; }
-
-    /* Griglia Camere Adattata per Mobile (5 per riga senza sbavature) */
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 4px;
-      width: 100%;
-    }
-
-    .room-card {
-      min-height: 105px;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      text-align: center;
-      padding: 6px 2px;
-      cursor: pointer;
-      border: 1px solid transparent;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-      word-break: break-word;
-    }
-
-    .room-card.free {
-      background: #1e824c;
-      color: white;
-      border-color: #2ecc71;
-    }
-
-    .room-card.busy {
-      background: #962d22;
-      color: white;
-      border-color: #e74c3c;
-    }
-
-    .room-number { font-size: 0.9rem; font-weight: bold; }
-    .room-type { font-size: 0.6rem; opacity: 0.9; }
-    .room-guest { 
-      font-size: 0.72rem; 
-      font-weight: bold; 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
-      max-width: 100%;
-    }
-    .room-dates { 
-      font-size: 0.58rem; 
-      font-weight: bold; 
-      color: #ffeaa7; 
-      background: rgba(0,0,0,0.35); 
-      padding: 1px 2px; 
-      border-radius: 3px; 
-      width: 100%;
-    }
+    .card-dark { background: #181b20; border: 1px solid #2d333d; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+    .divider { border: 0; height: 1px; background: #2d333d; margin: 15px 0; }
 
     /* Modali */
-    .modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 8px;
-    }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
+    .modal-box { background: #181b20; border: 1px solid #3a4250; border-radius: 12px; padding: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; color: #e1e6ed; }
+    .login-box { max-width: 350px; text-align: center; }
 
-    .modal-box {
-      background: #1c2026;
-      border: 1px solid #ff9f43;
-      border-radius: 10px;
-      width: 100%;
-      max-width: 520px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 94vh;
-      overflow-y: auto;
-    }
-
-    .login-box { text-align: center; max-width: 320px; }
-    .brand-title { font-size: 1.1rem; font-weight: bold; color: #ff9f43; }
-    .sub-text { color: #a0a8b5; font-size: 0.8rem; }
-
-    .modal-title {
-      color: #ff9f43;
-      border-bottom: 1px solid #2d333d;
-      padding-bottom: 4px;
-      font-size: 1rem;
-    }
-
-    .form-group { display: flex; flex-direction: column; gap: 2px; text-align: left; }
-    .form-group label { font-size: 0.75rem; color: #abb3c0; }
-
-    .form-row { display: flex; gap: 6px; }
+    /* Form & Input */
+    .form-group { display: flex; flex-direction: column; margin-bottom: 12px; }
+    .form-group label { font-size: 0.8rem; color: #a0a8b5; margin-bottom: 4px; }
+    .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
+    .form-inline { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-    .modal-buttons { display: flex; gap: 6px; margin-top: 6px; }
+    input, select, textarea { background: #0e1013; border: 1px solid #2d333d; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 0.9rem; outline: none; width: 100%; }
+    input:focus, select:focus, textarea:focus { border-color: #ff9f43; }
 
-    .btn-gold {
-      background: #ff9f43;
-      color: #121417;
-      border: none;
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      flex: 1;
-      font-size: 0.85rem;
-    }
+    /* Bottoni */
+    button { cursor: pointer; border: none; border-radius: 6px; padding: 8px 14px; font-weight: 600; font-size: 0.85rem; transition: background 0.2s; }
+    .btn-gold { background: #ff9f43; color: #0e1013; }
+    .btn-gold:hover { background: #f39c12; }
+    .btn-cancel { background: #3a4250; color: #fff; }
+    .btn-cancel:hover { background: #4f596b; }
+    .btn-back { background: #2d333d; color: #ff9f43; }
 
-    .btn-cancel {
-      background: #3b4250;
-      color: white;
-      border: none;
-      padding: 8px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
+    /* Header e Navigazione */
+    .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .main-header h1 { font-size: 1.4rem; color: #ff9f43; }
 
-    .error-msg { color: #e74c3c; font-size: 0.75rem; margin-top: 3px; }
+    /* Grid Camere */
+    .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 15px; }
+    .room-card { background: #181b20; border: 1px solid #2d333d; border-radius: 10px; padding: 12px; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; }
+    .room-card:hover { transform: translateY(-2px); }
+    .room-card.busy { border-left: 4px solid #ff9f43; }
+    .room-card.free { border-left: 4px solid #2ecc71; }
 
-    /* Box Calcolo Totale / Saldo dinamico */
-    .price-summary-box {
-      background: #121417;
-      border: 1px solid #ff9f43;
-      border-radius: 6px;
-      padding: 8px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      margin-top: 2px;
-      text-align: center;
-    }
+    .room-number { font-size: 1.1rem; font-weight: bold; color: #fff; }
+    .room-guest { font-size: 0.85rem; color: #ff9f43; font-weight: 600; margin-top: 4px; }
+    .room-dates, .room-type { font-size: 0.75rem; color: #a0a8b5; margin-top: 2px; }
 
-    .price-summary-item { display: flex; flex-direction: column; gap: 1px; }
-    .price-summary-item span { font-size: 0.65rem; color: #abb3c0; }
+    /* Legenda e Checkout */
+    .checkout-box { background: #1c2128; border-color: #30363d; }
+    .checkout-title { font-size: 0.85rem; font-weight: bold; color: #ff9f43; margin-bottom: 6px; }
+    .checkout-list { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.8rem; }
+    .checkout-chip { background: #2d333d; padding: 4px 8px; border-radius: 4px; color: #fff; }
+
+    .legend-bar { display: flex; gap: 15px; font-size: 0.8rem; color: #a0a8b5; align-items: center; margin-top: 10px; }
+    .badge-free { color: #2ecc71; }
+    .badge-busy { color: #ff9f43; }
+
+    /* Calendario Dettaglio Camera */
+    .month-nav { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
+    .btn-nav-cal { background: #2d333d; color: #fff; padding: 3px 8px; font-size: 0.75rem; }
+    .cal-header-grid, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .cal-header-grid div { font-size: 0.65rem; color: #a0a8b5; font-weight: bold; padding: 2px 0; }
+    .cal-day-cell { background: #121417; border: 1px solid #2d333d; border-radius: 4px; padding: 4px 2px; font-size: 0.7rem; min-height: 38px; display: flex; flex-direction: column; justify-content: space-between; }
+    .cal-day-cell.busy { border-color: #ff9f43; background: #2a1f18; }
+    .cal-day-cell.free { border-color: #2ecc71; background: #13231a; }
+    .cal-day-cell.empty { background: transparent; border: none; }
+
+    /* Dettaglio Prenotazioni & Pasti */
+    .detail-booking-card { background: #121417; border: 1px solid #2d333d; padding: 8px; border-radius: 6px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .booking-actions { display: flex; flex-direction: column; gap: 4px; }
+    .btn-sm-meal { background: #27ae60; color: white; padding: 2px 6px; font-size: 0.7rem; }
+    .btn-sm-edit { background: #f39c12; color: white; padding: 2px 6px; font-size: 0.7rem; }
+    .btn-sm-del { background: #e74c3c; color: white; padding: 2px 6px; font-size: 0.7rem; }
+
+    .price-summary-box { background: #121417; border: 1px dashed #3a4250; border-radius: 6px; padding: 8px; margin: 10px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; text-align: center; }
+    .price-summary-item span { display: block; font-size: 0.65rem; color: #a0a8b5; }
     .price-summary-item strong { font-size: 0.85rem; }
 
-    /* Calendario Mensile */
-    .month-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
+    /* Report & Tabella Master */
+    .master-view { background: #0e1013; padding: 10px; }
+    .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left; margin-top: 10px; }
+    .report-table th, .report-table td { border: 1px solid #2d333d; padding: 8px; }
+    .report-table th { background: #181b20; color: #ff9f43; }
+    .report-table tbody tr:nth-child(even) { background: #121417; }
+    .report-table tfoot td { background: #181b20; font-size: 0.85rem; }
 
-    .btn-nav-cal {
-      background: #252a33;
-      border: 1px solid #ff9f43;
-      color: #ff9f43;
-      padding: 3px 6px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      font-weight: bold;
-    }
+    .receipt-preview { width: 24px; height: 24px; object-fit: cover; border-radius: 3px; cursor: pointer; border: 1px solid #ff9f43; }
+    .error-msg { color: #e74c3c; font-size: 0.8rem; margin-top: 6px; }
+    .brand-title { font-size: 1.2rem; font-weight: bold; color: #ff9f43; margin-bottom: 4px; }
+    .sub-text { font-size: 0.8rem; color: #a0a8b5; margin-bottom: 12px; }
 
-    .cal-header-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 0.65rem;
-      color: #ff9f43;
-      margin-bottom: 2px;
-    }
-
-    .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
-      background: #121417;
-      border-radius: 6px;
-      padding: 4px;
-      border: 1px solid #2d333d;
-    }
-
-    .cal-day-cell {
-      min-height: 30px;
-      border-radius: 3px;
-      padding: 1px;
-      text-align: center;
-      font-size: 0.7rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .cal-day-cell.empty { background: transparent; }
-    .cal-day-cell.free { background: #1e824c; color: white; border: 1px solid #2ecc71; }
-    .cal-day-cell.busy { background: #962d22; color: white; border: 1px solid #e74c3c; }
-
-    .detail-booking-card {
-      background: #121417;
-      border: 1px solid #2d333d;
-      border-radius: 6px;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .booking-actions {
-      display: flex;
-      gap: 6px;
-      justify-content: flex-end;
-      margin-top: 4px;
-    }
-
-    .btn-sm-edit { background: #f39c12; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
-    .btn-sm-meal { background: #27ae60; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
-    .btn-sm-del { background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
-
-    /* Registro Economico & Stampa */
-    .master-view { background: #1c2026; padding: 10px; border-radius: 8px; }
-    .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .card-dark { background: #121417; padding: 10px; border-radius: 6px; margin: 10px 0; }
-    .form-inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
-    .divider { border: 0; height: 1px; background: #2d333d; margin: 10px 0; }
-
-    .report-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .report-table th, .report-table td { border: 1px solid #2d333d; padding: 6px; text-align: left; font-size: 0.75rem; }
-    .report-table th { background: #121417; color: #ff9f43; }
-    .report-table tfoot td { background: #121417; font-weight: bold; border-top: 2px solid #ff9f43; }
-
-    .receipt-preview {
-      max-width: 60px;
-      max-height: 60px;
-      border-radius: 4px;
-      cursor: pointer;
-      border: 1px solid #ff9f43;
-    }
-
+    /* Print Setup */
     @media print {
-      .no-print { display: none !important; }
-      body { background: white; color: black; padding: 0; }
-      .master-view { background: white; padding: 0; }
-      .report-table th, .report-table td { border: 1px solid black; color: black; font-size: 0.7rem; }
+      .no-print, .main-header, .search-bar, .modal, .no-print * { display: none !important; }
+      body { background: white !important; color: black !important; padding: 0; }
+      .report-table th, .report-table td { border: 1px solid #000 !important; color: black !important; }
+      .report-table th { background: #eee !important; }
     }
   </style>
 </head>
 <body>
 
+  <!-- MODALE LOGIN STAFF -->
   <div id="login-modal" class="modal">
     <div class="modal-box login-box">
-      <div class="brand-title">🔑 Accesso Agriturismo</div>
-      <p class="sub-text">Inserisci la password dello staff:</p>
-      <input type="password" id="staff-pass-input" placeholder="Password staff">
-      <button class="btn-gold" onclick="loginStaff()">Accedi</button>
+      <div class="brand-title">🌾 Gestione Agriturismo</div>
+      <p class="sub-text">Inserisci la password Staff per accedere:</p>
+      <input type="password" id="staff-pass-input" placeholder="Password Staff">
+      <button class="btn-gold" style="width:100%; margin-top:10px;" onclick="loginStaff()">Accedi</button>
       <p id="login-error" class="error-msg"></p>
     </div>
   </div>
 
+  <!-- APPLICAZIONE PRINCIPALE -->
   <div id="app-container" class="hidden">
     
-    <header class="top-bar no-print">
-      <div class="brand-badge">🏡 Agriturismo & Ristorante</div>
-
-      <div class="bar-controls">
-        <div class="date-group">
-          <label>Dal:</label>
-          <input type="date" id="home-date-from" onchange="renderRooms()">
-        </div>
-        <div class="date-group">
-          <label>Al:</label>
-          <input type="date" id="home-date-to" onchange="renderRooms()">
-        </div>
-      </div>
-
-      <div class="bar-actions">
-        <button class="btn-bar" onclick="openMasterModal('report')">📋 Registro Economico</button>
-      </div>
+    <header class="main-header no-print">
+      <h1>🏡 Agriturismo - Gestionale Camere</h1>
+      <button class="btn-gold" onclick="openMasterModal('report')">📊 Registro Master</button>
     </header>
 
-    <main class="main-content no-print">
-      
-      <div class="checkout-banner">
+    <main class="main-content">
+      <div class="card-dark search-bar">
+        <div class="form-inline">
+          <div class="form-group">
+            <label>Dal (Check-in):</label>
+            <input type="date" id="home-date-from" onchange="renderRooms()">
+          </div>
+          <div class="form-group">
+            <label>Al (Check-out):</label>
+            <input type="date" id="home-date-to" onchange="renderRooms()">
+          </div>
+        </div>
+      </div>
+
+      <div class="card-dark checkout-box">
         <div class="checkout-title">🧹 Check-out di Oggi (Stanze da Pulire e Preparare):</div>
         <div id="checkout-today-list" class="checkout-list">
           <span style="color:#a0a8b5;">Nessuna camera in uscita oggi.</span>
@@ -441,6 +156,7 @@
       <div id="rooms-grid" class="grid-container"></div>
     </main>
 
+    <!-- SEZIONE REGISTRO MASTER -->
     <div id="master-report-section" class="hidden master-view">
       <div class="report-header no-print">
         <button class="btn-back" onclick="closeMasterReport()">⬅️ Torna al Menu</button>
@@ -502,6 +218,7 @@
     </div>
   </div>
 
+  <!-- MODALE DETTAGLIO CAMERA -->
   <div id="room-detail-modal" class="modal hidden">
     <div class="modal-box">
       <h3 id="detail-room-title" class="modal-title">Dettaglio Camera</h3>
@@ -532,6 +249,7 @@
     </div>
   </div>
 
+  <!-- MODALE CREA/MODIFICA PRENOTAZIONE -->
   <div id="booking-modal" class="modal hidden">
     <div class="modal-box">
       <h3 id="modal-room-title" class="modal-title">Prenota Camera</h3>
@@ -612,13 +330,14 @@
         <textarea id="book-notes" rows="2" placeholder="Richieste speciali..."></textarea>
       </div>
 
-      <div class="modal-buttons">
-        <button class="btn-gold" onclick="saveBooking()">Salva Prenotazione</button>
-        <button class="btn-cancel" onclick="closeBookingModal()">Annulla</button>
+      <div class="modal-buttons" style="display:flex; gap:10px;">
+        <button class="btn-gold" style="flex:1;" onclick="saveBooking()">Salva Prenotazione</button>
+        <button class="btn-cancel" style="flex:1;" onclick="closeBookingModal()">Annulla</button>
       </div>
     </div>
   </div>
 
+  <!-- MODALE RISTORANTE -->
   <div id="meal-modal" class="modal hidden">
     <div class="modal-box">
       <h3 class="modal-title" id="meal-modal-title">🍽️ Aggiungi Pasto Ristorante</h3>
@@ -653,37 +372,42 @@
         <input type="text" id="meal-notes" placeholder="Es. Vini extra, dolce...">
       </div>
 
-      <button class="btn-gold" onclick="saveMealEntry()">➕ Registra Pasto</button>
+      <button class="btn-gold" style="width:100%; margin-bottom:10px;" onclick="saveMealEntry()">➕ Registra Pasto</button>
 
       <hr class="divider">
 
       <h4 style="color:#ff9f43; font-size:0.85rem;">Pasti e Scontrini Registrati:</h4>
       <div id="meal-list" style="max-height:150px; overflow-y:auto;"></div>
 
-      <div class="modal-buttons">
+      <div class="modal-buttons" style="margin-top:10px;">
         <button class="btn-cancel" style="width:100%;" onclick="closeMealModal()">Chiudi</button>
       </div>
     </div>
   </div>
 
+  <!-- MODALE PIN MASTER -->
   <div id="master-modal" class="modal hidden">
     <div class="modal-box login-box">
       <div class="brand-title">🔒 Autorizzazione Master</div>
       <p id="master-prompt-text" class="sub-text">Inserisci il PIN Master:</p>
       <input type="password" id="master-pin-input" placeholder="PIN Master">
-      <button class="btn-gold" onclick="submitMasterPin()">Conferma</button>
-      <button class="btn-cancel" onclick="closeMasterModal()">Annulla</button>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn-gold" style="flex:1;" onclick="submitMasterPin()">Conferma</button>
+        <button class="btn-cancel" style="flex:1;" onclick="closeMasterModal()">Annulla</button>
+      </div>
       <p id="master-error" class="error-msg"></p>
     </div>
   </div>
 
+  <!-- MODALE VISUALIZZATORE IMMAGINE SCONTRINO -->
   <div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()">
-    <div class="modal-box" style="align-items:center; background:transparent; border:none;">
+    <div class="modal-box" style="align-items:center; background:transparent; border:none; text-align:center;">
       <img id="enlarged-receipt" src="" style="max-width:100%; max-height:80vh; border-radius:8px; border:2px solid #ff9f43;">
       <p style="color:white; margin-top:8px;">Clicca ovunque per chiudere</p>
     </div>
   </div>
 
+  <!-- LOGICA JAVASCRIPT -->
   <script>
     const CONFIG = { STAFF_PASS: "max78", MASTER_PIN: "nikita78" };
 
