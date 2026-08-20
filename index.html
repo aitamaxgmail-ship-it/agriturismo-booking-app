@@ -2,36 +2,57 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestionale Agriturismo - Camere</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gestionale Agriturismo - Camere e Ristorante</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
-    body {
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
       background-color: #121417;
       color: #e1e6ed;
-      padding: 10px;
+      padding: 8px;
     }
 
     .hidden { display: none !important; }
+
+    /* Fix Visibilità Selettori Data in Dark Mode */
+    input[type="date"], input[type="text"], input[type="number"], select, textarea {
+      color-scheme: dark;
+      background-color: #252a33;
+      color: #ffffff;
+      border: 1px solid #3b4250;
+      padding: 7px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #ff9f43;
+      outline: none;
+    }
 
     /* Navigation Bar */
     .top-bar {
       background: #1c2026;
       border: 1px solid #2d333d;
-      padding: 10px 15px;
+      padding: 10px;
       border-radius: 8px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 8px;
+      margin-bottom: 10px;
+      width: 100%;
     }
 
     .brand-badge {
@@ -42,37 +63,33 @@
 
     .bar-controls {
       display: flex;
-      gap: 10px;
+      gap: 6px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .date-group {
       display: flex;
       align-items: center;
       gap: 4px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
-    .date-group input, .form-group input {
-      background: #252a33;
-      border: 1px solid #3b4250;
-      color: white;
-      padding: 5px 8px;
-      border-radius: 5px;
-      font-size: 0.85rem;
+    .date-group input {
+      width: 125px;
     }
 
-    .bar-actions { display: flex; gap: 8px; }
+    .bar-actions { display: flex; gap: 6px; }
 
     .btn-bar, .btn-back {
       background: #252a33;
       border: 1px solid #ff9f43;
       color: #ff9f43;
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
 
     .btn-bar:hover, .btn-back:hover {
@@ -80,41 +97,73 @@
       color: #121417;
     }
 
-    /* Griglia Camere: Forzata a 5 per riga */
+    /* Banner Check-out di Oggi per Pulizie */
+    .checkout-banner {
+      background: #1c2026;
+      border: 1px solid #e74c3c;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+    }
+
+    .checkout-title {
+      color: #e74c3c;
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .checkout-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .checkout-chip {
+      background: #962d22;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: bold;
+    }
+
     .legend-bar {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       display: flex;
       gap: 12px;
       align-items: center;
-      font-size: 0.85rem;
-      flex-wrap: wrap;
+      font-size: 0.8rem;
     }
 
     .badge-free { color: #2ecc71; font-weight: bold; }
     .badge-busy { color: #e74c3c; font-weight: bold; }
 
+    /* Griglia Camere Adattata per Mobile (5 per riga senza sbavature) */
     .grid-container {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
+      gap: 4px;
+      width: 100%;
     }
 
     .room-card {
-      min-height: 120px;
-      border-radius: 8px;
+      min-height: 105px;
+      border-radius: 6px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
       text-align: center;
-      padding: 8px 4px;
+      padding: 6px 2px;
       cursor: pointer;
-      border: 2px solid transparent;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      transition: transform 0.15s;
+      border: 1px solid transparent;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      word-break: break-word;
     }
-
-    .room-card:hover { transform: scale(1.02); }
 
     .room-card.free {
       background: #1e824c;
@@ -128,10 +177,10 @@
       border-color: #e74c3c;
     }
 
-    .room-number { font-size: 1.1rem; font-weight: bold; }
-    .room-type { font-size: 0.7rem; opacity: 0.9; }
+    .room-number { font-size: 0.9rem; font-weight: bold; }
+    .room-type { font-size: 0.6rem; opacity: 0.9; }
     .room-guest { 
-      font-size: 0.8rem; 
+      font-size: 0.72rem; 
       font-weight: bold; 
       white-space: nowrap; 
       overflow: hidden; 
@@ -139,150 +188,118 @@
       max-width: 100%;
     }
     .room-dates { 
-      font-size: 0.68rem; 
+      font-size: 0.58rem; 
       font-weight: bold; 
       color: #ffeaa7; 
       background: rgba(0,0,0,0.35); 
-      padding: 2px 4px; 
-      border-radius: 4px; 
+      padding: 1px 2px; 
+      border-radius: 3px; 
       width: 100%;
-    }
-
-    /* Ottimizzazione Specifica per Smartphone (Android / iPhone) */
-    @media (max-width: 600px) {
-      body { padding: 5px; }
-      .top-bar { padding: 8px; gap: 8px; }
-      .bar-controls { width: 100%; justify-content: space-between; }
-      .date-group input { width: 110px; font-size: 0.75rem; }
-      
-      .grid-container {
-        grid-template-columns: repeat(5, 1fr);
-        gap: 4px;
-      }
-
-      .room-card {
-        min-height: 105px;
-        padding: 6px 2px;
-      }
-
-      .room-number { font-size: 0.85rem; }
-      .room-type { font-size: 0.6rem; }
-      .room-guest { font-size: 0.72rem; }
-      .room-dates { font-size: 0.58rem; padding: 2px 1px; }
-      .status-text { font-size: 0.6rem !important; }
     }
 
     /* Modali */
     .modal {
       position: fixed;
       top: 0; left: 0;
-      width: 100%; height: 100%;
+      width: 100vw; height: 100vh;
       background: rgba(0,0,0,0.85);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      padding: 8px;
     }
 
     .modal-box {
       background: #1c2026;
       border: 1px solid #ff9f43;
       border-radius: 10px;
-      width: 95%;
-      max-width: 550px;
-      padding: 15px;
+      width: 100%;
+      max-width: 520px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      max-height: 92vh;
+      gap: 8px;
+      max-height: 94vh;
       overflow-y: auto;
     }
 
-    .login-box { text-align: center; max-width: 340px; }
-    .brand-title { font-size: 1.2rem; font-weight: bold; color: #ff9f43; }
-    .sub-text { color: #a0a8b5; font-size: 0.85rem; }
+    .login-box { text-align: center; max-width: 320px; }
+    .brand-title { font-size: 1.1rem; font-weight: bold; color: #ff9f43; }
+    .sub-text { color: #a0a8b5; font-size: 0.8rem; }
 
     .modal-title {
       color: #ff9f43;
       border-bottom: 1px solid #2d333d;
-      padding-bottom: 6px;
-      font-size: 1.1rem;
+      padding-bottom: 4px;
+      font-size: 1rem;
     }
 
-    .form-group { display: flex; flex-direction: column; gap: 3px; text-align: left; }
-    .form-group label { font-size: 0.8rem; color: #abb3c0; }
+    .form-group { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+    .form-group label { font-size: 0.75rem; color: #abb3c0; }
 
-    .form-row { display: flex; gap: 8px; }
+    .form-row { display: flex; gap: 6px; }
     .form-row .form-group { flex: 1; }
 
-    input, select, textarea {
-      background: #121417;
-      border: 1px solid #3b4250;
-      color: white;
-      padding: 7px;
-      border-radius: 6px;
-      font-size: 0.9rem;
-    }
-
-    input:focus, textarea:focus { border-color: #ff9f43; outline: none; }
-
-    .modal-buttons { display: flex; gap: 8px; margin-top: 8px; }
+    .modal-buttons { display: flex; gap: 6px; margin-top: 6px; }
 
     .btn-gold {
       background: #ff9f43;
       color: #121417;
       border: none;
-      padding: 8px 12px;
+      padding: 8px 10px;
       border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
       flex: 1;
+      font-size: 0.85rem;
     }
 
     .btn-cancel {
       background: #3b4250;
       color: white;
       border: none;
-      padding: 8px 12px;
+      padding: 8px 10px;
       border-radius: 6px;
       cursor: pointer;
+      font-size: 0.85rem;
     }
 
-    .error-msg { color: #e74c3c; font-size: 0.8rem; margin-top: 4px; }
+    .error-msg { color: #e74c3c; font-size: 0.75rem; margin-top: 3px; }
 
     /* Box Calcolo Totale / Saldo dinamico */
     .price-summary-box {
       background: #121417;
       border: 1px solid #ff9f43;
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 6px;
+      padding: 8px;
       display: flex;
       justify-content: space-around;
       align-items: center;
-      margin-top: 4px;
+      margin-top: 2px;
       text-align: center;
     }
 
-    .price-summary-item { display: flex; flex-direction: column; gap: 2px; }
-    .price-summary-item span { font-size: 0.7rem; color: #abb3c0; }
-    .price-summary-item strong { font-size: 0.95rem; }
+    .price-summary-item { display: flex; flex-direction: column; gap: 1px; }
+    .price-summary-item span { font-size: 0.65rem; color: #abb3c0; }
+    .price-summary-item strong { font-size: 0.85rem; }
 
     /* Calendario Mensile */
     .month-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .btn-nav-cal {
       background: #252a33;
       border: 1px solid #ff9f43;
       color: #ff9f43;
-      padding: 4px 8px;
+      padding: 3px 6px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: bold;
     }
 
@@ -292,27 +309,27 @@
       gap: 2px;
       text-align: center;
       font-weight: bold;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       color: #ff9f43;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
 
     .cal-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 3px;
+      gap: 2px;
       background: #121417;
-      border-radius: 8px;
-      padding: 5px;
+      border-radius: 6px;
+      padding: 4px;
       border: 1px solid #2d333d;
     }
 
     .cal-day-cell {
-      min-height: 35px;
-      border-radius: 4px;
-      padding: 2px;
+      min-height: 30px;
+      border-radius: 3px;
+      padding: 1px;
       text-align: center;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -326,32 +343,50 @@
     .detail-booking-card {
       background: #121417;
       border: 1px solid #2d333d;
-      border-radius: 8px;
-      padding: 8px 10px;
+      border-radius: 6px;
+      padding: 8px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      gap: 6px;
       margin-top: 6px;
     }
 
-    /* Registro Economico & Stampa */
-    .master-view { background: #1c2026; padding: 15px; border-radius: 8px; }
-    .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .card-dark { background: #121417; padding: 12px; border-radius: 6px; margin: 12px 0; }
-    .form-inline { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
-    .divider { border: 0; height: 1px; background: #2d333d; margin: 12px 0; }
+    .booking-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
 
-    .report-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    .report-table th, .report-table td { border: 1px solid #2d333d; padding: 8px; text-align: left; font-size: 0.85rem; }
+    .btn-sm-edit { background: #f39c12; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+    .btn-sm-meal { background: #27ae60; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+    .btn-sm-del { background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+
+    /* Registro Economico & Stampa */
+    .master-view { background: #1c2026; padding: 10px; border-radius: 8px; }
+    .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .card-dark { background: #121417; padding: 10px; border-radius: 6px; margin: 10px 0; }
+    .form-inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+    .divider { border: 0; height: 1px; background: #2d333d; margin: 10px 0; }
+
+    .report-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .report-table th, .report-table td { border: 1px solid #2d333d; padding: 6px; text-align: left; font-size: 0.75rem; }
     .report-table th { background: #121417; color: #ff9f43; }
     .report-table tfoot td { background: #121417; font-weight: bold; border-top: 2px solid #ff9f43; }
 
+    .receipt-preview {
+      max-width: 60px;
+      max-height: 60px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #ff9f43;
+    }
+
     @media print {
       .no-print { display: none !important; }
-      body { background: white; color: black; }
-      .master-view { background: white; }
-      .report-table th, .report-table td { border: 1px solid black; color: black; }
+      body { background: white; color: black; padding: 0; }
+      .master-view { background: white; padding: 0; }
+      .report-table th, .report-table td { border: 1px solid black; color: black; font-size: 0.7rem; }
     }
   </style>
 </head>
@@ -370,7 +405,7 @@
   <div id="app-container" class="hidden">
     
     <header class="top-bar no-print">
-      <div class="brand-badge">🏡 Agriturismo</div>
+      <div class="brand-badge">🏡 Agriturismo & Ristorante</div>
 
       <div class="bar-controls">
         <div class="date-group">
@@ -389,6 +424,14 @@
     </header>
 
     <main class="main-content no-print">
+      
+      <div class="checkout-banner">
+        <div class="checkout-title">🧹 Check-out di Oggi (Stanze da Pulire e Preparare):</div>
+        <div id="checkout-today-list" class="checkout-list">
+          <span style="color:#a0a8b5;">Nessuna camera in uscita oggi.</span>
+        </div>
+      </div>
+
       <div class="legend-bar">
         <span>Stato periodo:</span>
         <span class="badge-free">● Libera</span>
@@ -406,7 +449,7 @@
         </div>
       </div>
 
-      <h2>Registro Economico & Lista Prenotazioni</h2>
+      <h2>Registro Economico - Soggiorni e Ristorante</h2>
 
       <div class="card-dark no-print">
         <h3>Filtra Registro</h3>
@@ -440,12 +483,14 @@
               <th>Camera</th>
               <th>Referente</th>
               <th>Telefono</th>
-              <th>Adulti / Bimbi</th>
+              <th>Adulti</th>
+              <th>Bambini</th>
               <th>Periodo (Dal / Al)</th>
-              <th>Tariffe A / B</th>
-              <th>Totale</th>
-              <th>Acconto</th>
-              <th>Saldo</th>
+              <th>Soggiorno (€)</th>
+              <th>Ristorante (€)</th>
+              <th>Totale Lordo (€)</th>
+              <th>Acconto (€)</th>
+              <th>Saldo (€)</th>
               <th>Note</th>
               <th class="no-print">Azioni</th>
             </tr>
@@ -461,14 +506,14 @@
     <div class="modal-box">
       <h3 id="detail-room-title" class="modal-title">Dettaglio Camera</h3>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
-        <h4 style="color:#ff9f43; font-size:0.95rem;">📅 Calendario Disponibilità</h4>
-        <button class="btn-gold" style="padding:4px 8px; font-size:0.8rem;" onclick="createBookingFromDetail()">➕ Nuova Prenotazione</button>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h4 style="color:#ff9f43; font-size:0.85rem;">📅 Calendario Disponibilità</h4>
+        <button class="btn-gold" style="padding:4px 8px; font-size:0.75rem;" onclick="createBookingFromDetail()">➕ Nuova Prenotazione</button>
       </div>
 
       <div class="month-nav">
         <button class="btn-nav-cal" onclick="changeMonth(-1)">◀ Mese Prec.</button>
-        <span id="cal-month-title" style="font-weight:bold; color:#ff9f43; font-size:0.9rem;"></span>
+        <span id="cal-month-title" style="font-weight:bold; color:#ff9f43; font-size:0.85rem;"></span>
         <button class="btn-nav-cal" onclick="changeMonth(1)">Mese Succ. ▶</button>
       </div>
 
@@ -478,10 +523,10 @@
 
       <div id="room-calendar-grid" class="cal-grid"></div>
 
-      <h4 style="color:#ff9f43; margin-top:8px; font-size:0.95rem;">📋 Prenotazioni della Camera</h4>
-      <div id="room-bookings-list" style="max-height:160px; overflow-y:auto;"></div>
+      <h4 style="color:#ff9f43; margin-top:6px; font-size:0.85rem;">📋 Prenotazioni della Camera</h4>
+      <div id="room-bookings-list" style="max-height:180px; overflow-y:auto;"></div>
 
-      <div class="modal-buttons" style="margin-top:10px;">
+      <div class="modal-buttons" style="margin-top:6px;">
         <button class="btn-cancel" style="width:100%;" onclick="closeRoomDetailModal()">Chiudi</button>
       </div>
     </div>
@@ -491,6 +536,7 @@
     <div class="modal-box">
       <h3 id="modal-room-title" class="modal-title">Prenota Camera</h3>
       <input type="hidden" id="book-room-id">
+      <input type="hidden" id="book-edit-id">
 
       <div class="form-group">
         <label>Nome referente cliente:</label>
@@ -548,7 +594,7 @@
           <strong id="summary-nights">0</strong>
         </div>
         <div class="price-summary-item">
-          <span>Totale Lordo</span>
+          <span>Soggiorno</span>
           <strong id="summary-total" style="color:#ff9f43;">€ 0.00</strong>
         </div>
         <div class="price-summary-item">
@@ -563,12 +609,59 @@
 
       <div class="form-group">
         <label>Note (Allergie, culla, orari...):</label>
-        <textarea id="book-notes" rows="2" placeholder="Es. Richiesta culla extra, intolleranza lattosio..."></textarea>
+        <textarea id="book-notes" rows="2" placeholder="Richieste speciali..."></textarea>
       </div>
 
       <div class="modal-buttons">
-        <button class="btn-gold" onclick="saveBooking()">Conferma Prenotazione</button>
+        <button class="btn-gold" onclick="saveBooking()">Salva Prenotazione</button>
         <button class="btn-cancel" onclick="closeBookingModal()">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="meal-modal" class="modal hidden">
+    <div class="modal-box">
+      <h3 class="modal-title" id="meal-modal-title">🍽️ Aggiungi Pasto Ristorante</h3>
+      <input type="hidden" id="meal-booking-id">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data Pasto:</label>
+          <input type="date" id="meal-date">
+        </div>
+        <div class="form-group">
+          <label>Pasto:</label>
+          <select id="meal-type">
+            <option value="Pranzo">Pranzo</option>
+            <option value="Cena">Cena</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Importo Scontrino (€):</label>
+        <input type="number" id="meal-amount" step="0.50" min="0" placeholder="Es. 45.50">
+      </div>
+
+      <div class="form-group">
+        <label>Foto Scontrino:</label>
+        <input type="file" id="meal-receipt-file" accept="image/*">
+      </div>
+
+      <div class="form-group">
+        <label>Note Pasto (opzionale):</label>
+        <input type="text" id="meal-notes" placeholder="Es. Vini extra, dolce...">
+      </div>
+
+      <button class="btn-gold" onclick="saveMealEntry()">➕ Registra Pasto</button>
+
+      <hr class="divider">
+
+      <h4 style="color:#ff9f43; font-size:0.85rem;">Pasti e Scontrini Registrati:</h4>
+      <div id="meal-list" style="max-height:150px; overflow-y:auto;"></div>
+
+      <div class="modal-buttons">
+        <button class="btn-cancel" style="width:100%;" onclick="closeMealModal()">Chiudi</button>
       </div>
     </div>
   </div>
@@ -581,6 +674,13 @@
       <button class="btn-gold" onclick="submitMasterPin()">Conferma</button>
       <button class="btn-cancel" onclick="closeMasterModal()">Annulla</button>
       <p id="master-error" class="error-msg"></p>
+    </div>
+  </div>
+
+  <div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()">
+    <div class="modal-box" style="align-items:center; background:transparent; border:none;">
+      <img id="enlarged-receipt" src="" style="max-width:100%; max-height:80vh; border-radius:8px; border:2px solid #ff9f43;">
+      <p style="color:white; margin-top:8px;">Clicca ovunque per chiudere</p>
     </div>
   </div>
 
@@ -645,6 +745,8 @@
       const grid = document.getElementById("rooms-grid");
       grid.innerHTML = "";
 
+      renderTodayCheckouts();
+
       if (!from || !to) return;
 
       ROOMS.forEach(room => {
@@ -660,7 +762,7 @@
           card.innerHTML = `
             <div class="room-number">Cam. ${room.name}</div>
             <div class="room-type">${room.type}</div>
-            <span class="status-text" style="color:#2ecc71; font-weight:bold; font-size:0.7rem;">LIBERA</span>
+            <span class="status-text" style="color:#2ecc71; font-weight:bold; font-size:0.65rem;">LIBERA</span>
           `;
         } else {
           card.innerHTML = `
@@ -668,11 +770,25 @@
             <div class="room-guest">${activeBooking.guestName}</div>
             <div class="room-dates">${formatDate(activeBooking.checkIn)} ➔ ${formatDate(activeBooking.checkOut)}</div>
             <div class="room-type">${activeBooking.nights}n | ${activeBooking.adults}A ${activeBooking.children ? '/ ' + activeBooking.children + 'B' : ''}</div>
-            <span class="status-text" style="color:#ff9f43; font-weight:bold; font-size:0.7rem;">OCCUPATA</span>
+            <span class="status-text" style="color:#ff9f43; font-weight:bold; font-size:0.65rem;">OCCUPATA</span>
           `;
         }
         grid.appendChild(card);
       });
+    }
+
+    function renderTodayCheckouts() {
+      const todayIso = new Date().toISOString().split('T')[0];
+      const todayCheckouts = bookings.filter(b => b.checkOut === todayIso);
+      const container = document.getElementById("checkout-today-list");
+
+      if (todayCheckouts.length === 0) {
+        container.innerHTML = `<span style="color:#a0a8b5;">Nessuna camera in uscita oggi.</span>`;
+      } else {
+        container.innerHTML = todayCheckouts.map(b => `
+          <span class="checkout-chip">Cam. ${getRoomName(b.roomId)} (${b.guestName})</span>
+        `).join('');
+      }
     }
 
     function openRoomDetailModal(roomId) {
@@ -690,20 +806,24 @@
       const roomBookings = bookings.filter(b => b.roomId === roomId).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
 
       if (roomBookings.length === 0) {
-        bookingsList.innerHTML = `<p style="color:#a0a8b5; font-size:0.85rem; padding:8px 0;">Nessuna prenotazione registrata per questa camera.</p>`;
+        bookingsList.innerHTML = `<p style="color:#a0a8b5; font-size:0.8rem; padding:6px 0;">Nessuna prenotazione registrata.</p>`;
       } else {
         roomBookings.forEach(b => {
+          const totalMeals = (b.meals || []).reduce((acc, m) => acc + m.amount, 0);
           const card = document.createElement("div");
           card.className = "detail-booking-card";
           card.innerHTML = `
-            <div style="flex: 1;">
-              <div style="font-weight:bold; color:#ff9f43; font-size:0.9rem;">👤 ${b.guestName} ${b.phone ? '(' + b.phone + ')' : ''}</div>
-              <div style="font-size:0.8rem; margin-top:2px;">📅 ${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights} ${b.nights === 1 ? 'notte' : 'notti'})</div>
-              <div style="font-size:0.78rem; color:#abb3c0; margin-top:2px;">👥 ${b.adults} Ad. ${b.children ? '/ ' + b.children + ' Bimbi' : ''}</div>
-              ${b.notes ? `<div style="font-size:0.78rem; color:#ffeaa7; margin-top:3px; background:rgba(255,255,255,0.05); padding:3px 6px; border-radius:4px; border-left: 3px solid #ff9f43;">📝 <strong>Note:</strong> ${b.notes}</div>` : ''}
-            </div>
             <div>
-              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:5px 8px; border-radius:5px; cursor:pointer; font-weight:bold; font-size:0.8rem;">🗑️ Elimina</button>
+              <div style="font-weight:bold; color:#ff9f43; font-size:0.85rem;">👤 ${b.guestName} ${b.phone ? '(' + b.phone + ')' : ''}</div>
+              <div style="font-size:0.75rem; margin-top:2px;">📅 ${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights}n)</div>
+              <div style="font-size:0.72rem; color:#abb3c0;">👥 ${b.adults} Ad. ${b.children ? '/ ' + b.children + ' Bimbi' : ''}</div>
+              ${totalMeals > 0 ? `<div style="font-size:0.72rem; color:#2ecc71; font-weight:bold; margin-top:2px;">🍽️ Ristorante: € ${totalMeals.toFixed(2)}</div>` : ''}
+              ${b.notes ? `<div style="font-size:0.72rem; color:#ffeaa7; margin-top:2px;">📝 ${b.notes}</div>` : ''}
+            </div>
+            <div class="booking-actions">
+              <button class="btn-sm-meal" onclick="openMealModal('${b.id}')">🍽️ Ristorante</button>
+              <button class="btn-sm-edit" onclick="requestEditRoomDirect('${b.id}')">✏️ Modifica</button>
+              <button class="btn-sm-del" onclick="requestReleaseRoomDirect('${b.id}')">🗑️ Elimina</button>
             </div>
           `;
           bookingsList.appendChild(card);
@@ -743,8 +863,8 @@
         dayCell.className = `cal-day-cell ${activeBooking ? 'busy' : 'free'}`;
         dayCell.title = activeBooking ? `Occupata da: ${activeBooking.guestName}` : `${day}/${calMonth+1}/${calYear}: Libera`;
         dayCell.innerHTML = `
-          <div style="font-size:0.8rem; font-weight:bold;">${day}</div>
-          <div style="font-size:0.55rem; opacity:0.9;">${activeBooking ? '🔴' : '🟢'}</div>
+          <div style="font-weight:bold;">${day}</div>
+          <div style="font-size:0.5rem;">${activeBooking ? '🔴' : '🟢'}</div>
         `;
         calendarGrid.appendChild(dayCell);
       }
@@ -752,13 +872,8 @@
 
     function changeMonth(delta) {
       calMonth += delta;
-      if (calMonth > 11) {
-        calMonth = 0;
-        calYear++;
-      } else if (calMonth < 0) {
-        calMonth = 11;
-        calYear--;
-      }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      else if (calMonth < 0) { calMonth = 11; calYear--; }
       renderCalendarMonth();
     }
 
@@ -789,47 +904,51 @@
         nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
       }
 
-      const totalPrice = ((adults * rateAdult) + (children * rateChild)) * nights;
-      const balance = totalPrice - deposit;
+      const roomTotal = ((adults * rateAdult) + (children * rateChild)) * nights;
+      
+      const editId = document.getElementById("book-edit-id").value;
+      let mealsTotal = 0;
+      if (editId) {
+        const existing = bookings.find(b => b.id === editId);
+        if (existing && existing.meals) {
+          mealsTotal = existing.meals.reduce((acc, m) => acc + m.amount, 0);
+        }
+      }
+
+      const grandTotal = roomTotal + mealsTotal;
+      const balance = grandTotal - deposit;
 
       document.getElementById("summary-nights").innerText = nights;
-      document.getElementById("summary-total").innerText = `€ ${totalPrice.toFixed(2)}`;
+      document.getElementById("summary-total").innerText = `€ ${roomTotal.toFixed(2)}`;
       document.getElementById("summary-deposit").innerText = `€ ${deposit.toFixed(2)}`;
       document.getElementById("summary-balance").innerText = `€ ${balance.toFixed(2)}`;
     }
 
-    function openBookingModal(room, checkIn, checkOut) {
-      document.getElementById("modal-room-title").innerText = `Prenota Camera ${room.name}`;
+    function openBookingModal(room, checkIn, checkOut, editBooking = null) {
+      document.getElementById("book-edit-id").value = editBooking ? editBooking.id : "";
+      document.getElementById("modal-room-title").innerText = editBooking ? `Modifica Prenotazione Cam. ${room.name}` : `Prenota Camera ${room.name}`;
       document.getElementById("book-room-id").value = room.id;
-      document.getElementById("book-guest-name").value = "";
-      document.getElementById("book-phone").value = "";
-      document.getElementById("book-adults").value = 2;
-      document.getElementById("book-children").value = 0;
-      document.getElementById("book-deposit").value = 0;
-      document.getElementById("book-notes").value = "";
-
-      const today = new Date().toISOString().split('T')[0];
       
-      document.getElementById("book-checkin").min = today;
-      document.getElementById("book-checkout").min = today;
+      document.getElementById("book-guest-name").value = editBooking ? editBooking.guestName : "";
+      document.getElementById("book-phone").value = editBooking ? (editBooking.phone || "") : "";
+      document.getElementById("book-adults").value = editBooking ? editBooking.adults : 2;
+      document.getElementById("book-children").value = editBooking ? editBooking.children : 0;
+      document.getElementById("book-deposit").value = editBooking ? editBooking.deposit : 0;
+      document.getElementById("book-notes").value = editBooking ? (editBooking.notes || "") : "";
 
-      const validCheckIn = (checkIn >= today) ? checkIn : today;
-      document.getElementById("book-checkin").value = validCheckIn;
-      
-      if (checkOut <= validCheckIn) {
-        let nextDay = new Date(validCheckIn);
-        nextDay.setDate(nextDay.getDate() + 1);
-        document.getElementById("book-checkout").value = nextDay.toISOString().split('T')[0];
+      document.getElementById("book-checkin").value = editBooking ? editBooking.checkIn : checkIn;
+      document.getElementById("book-checkout").value = editBooking ? editBooking.checkOut : checkOut;
+
+      if (editBooking) {
+        document.getElementById("book-rate-adult").value = editBooking.rateAdult;
+        document.getElementById("book-rate-child").value = editBooking.rateChild;
       } else {
-        document.getElementById("book-checkout").value = checkOut;
+        const rates = getRatesForPeriod(checkIn, room);
+        document.getElementById("book-rate-adult").value = rates.adultRate;
+        document.getElementById("book-rate-child").value = rates.childRate;
       }
 
-      const rates = getRatesForPeriod(validCheckIn, room);
-      document.getElementById("book-rate-adult").value = rates.adultRate;
-      document.getElementById("book-rate-child").value = rates.childRate;
-
       calculateBookingTotal();
-
       document.getElementById("booking-modal").classList.remove("hidden");
     }
 
@@ -838,6 +957,7 @@
     }
 
     function saveBooking() {
+      const editId = document.getElementById("book-edit-id").value;
       const roomId = document.getElementById("book-room-id").value;
       const guestName = document.getElementById("book-guest-name").value.trim();
       const phone = document.getElementById("book-phone").value.trim();
@@ -850,15 +970,8 @@
       const deposit = parseFloat(document.getElementById("book-deposit").value) || 0;
       const notes = document.getElementById("book-notes").value.trim();
 
-      const today = new Date().toISOString().split('T')[0];
-
       if (!guestName || !checkIn || !checkOut) {
-        alert("Compila tutti i campi obbligatori (Nome e Date)!");
-        return;
-      }
-
-      if (checkIn < today) {
-        alert("Errore: Le prenotazioni non possono essere effettuate in date passate!");
+        alert("Compila i campi obbligatori (Nome e Date)!");
         return;
       }
 
@@ -868,7 +981,7 @@
       }
 
       const hasConflict = bookings.some(b => 
-        b.roomId === roomId && (checkIn < b.checkOut && checkOut > b.checkIn)
+        b.id !== editId && b.roomId === roomId && (checkIn < b.checkOut && checkOut > b.checkIn)
       );
 
       if (hasConflict) {
@@ -877,44 +990,184 @@
       }
 
       const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
-      const totalPrice = ((adults * rateAdult) + (children * rateChild)) * nights;
+      const roomTotal = ((adults * rateAdult) + (children * rateChild)) * nights;
+      
+      let existingMeals = [];
+      if (editId) {
+        const oldB = bookings.find(b => b.id === editId);
+        if (oldB && oldB.meals) existingMeals = oldB.meals;
+      }
+
+      const mealsTotal = existingMeals.reduce((acc, m) => acc + m.amount, 0);
+      const totalPrice = roomTotal + mealsTotal;
       const balance = totalPrice - deposit;
 
-      const newBooking = {
-        id: Date.now().toString(),
-        roomId,
-        guestName,
-        phone,
-        adults,
-        children,
-        checkIn,
-        checkOut,
-        nights,
-        rateAdult,
-        rateChild,
-        totalPrice,
-        deposit,
-        balance,
-        notes
-      };
+      if (editId) {
+        const index = bookings.findIndex(b => b.id === editId);
+        if (index !== -1) {
+          bookings[index] = {
+            ...bookings[index],
+            guestName, phone, adults, children, checkIn, checkOut, nights,
+            rateAdult, rateChild, totalPrice, deposit, balance, notes, meals: existingMeals
+          };
+        }
+      } else {
+        const newBooking = {
+          id: Date.now().toString(),
+          roomId, guestName, phone, adults, children, checkIn, checkOut, nights,
+          rateAdult, rateChild, totalPrice, deposit, balance, notes, meals: []
+        };
+        bookings.push(newBooking);
+      }
 
-      bookings.push(newBooking);
       localStorage.setItem("agri_bookings", JSON.stringify(bookings));
-
       closeBookingModal();
       renderRooms();
+      if (currentSelectedRoomId) openRoomDetailModal(currentSelectedRoomId);
     }
 
-    function requestReleaseRoom(booking) {
-      targetBookingId = booking.id;
-      pendingMasterAction = 'release';
-      document.getElementById("master-prompt-text").innerText = `Liberare ${getRoomName(booking.roomId)} (${booking.guestName})? Inserisci PIN Master:`;
-      document.getElementById("master-modal").classList.remove("hidden");
+    /* GESTIONE RISTORANTE E SCONTRINI */
+    function openMealModal(bookingId) {
+      const b = bookings.find(item => item.id === bookingId);
+      if (!b) return;
+
+      document.getElementById("meal-booking-id").value = bookingId;
+      document.getElementById("meal-modal-title").innerText = `🍽️ Pasti Ristorante - ${b.guestName}`;
+      document.getElementById("meal-date").value = new Date().toISOString().split('T')[0];
+      document.getElementById("meal-amount").value = "";
+      document.getElementById("meal-notes").value = "";
+      document.getElementById("meal-receipt-file").value = "";
+
+      renderMealList(b);
+      document.getElementById("meal-modal").classList.remove("hidden");
     }
 
+    function closeMealModal() {
+      document.getElementById("meal-modal").classList.add("hidden");
+    }
+
+    function saveMealEntry() {
+      const bookingId = document.getElementById("meal-booking-id").value;
+      const date = document.getElementById("meal-date").value;
+      const type = document.getElementById("meal-type").value;
+      const amount = parseFloat(document.getElementById("meal-amount").value) || 0;
+      const notes = document.getElementById("meal-notes").value.trim();
+      const fileInput = document.getElementById("meal-receipt-file");
+
+      if (!date || amount <= 0) {
+        alert("Inserisci la data e un importo valido per il pasto!");
+        return;
+      }
+
+      const bIndex = bookings.findIndex(item => item.id === bookingId);
+      if (bIndex === -1) return;
+
+      const saveEntry = (receiptImageData = null) => {
+        const newMeal = {
+          id: Date.now().toString(),
+          date, type, amount, notes, receiptImage: receiptImageData
+        };
+
+        if (!bookings[bIndex].meals) bookings[bIndex].meals = [];
+        bookings[bIndex].meals.push(newMeal);
+
+        // Ricalcola totale
+        const roomTotal = ((bookings[bIndex].adults * bookings[bIndex].rateAdult) + (bookings[bIndex].children * bookings[bIndex].rateChild)) * bookings[bIndex].nights;
+        const mealsTotal = bookings[bIndex].meals.reduce((acc, m) => acc + m.amount, 0);
+        bookings[bIndex].totalPrice = roomTotal + mealsTotal;
+        bookings[bIndex].balance = bookings[bIndex].totalPrice - bookings[bIndex].deposit;
+
+        localStorage.setItem("agri_bookings", JSON.stringify(bookings));
+        renderMealList(bookings[bIndex]);
+        renderRooms();
+        if (currentSelectedRoomId) openRoomDetailModal(currentSelectedRoomId);
+
+        document.getElementById("meal-amount").value = "";
+        document.getElementById("meal-notes").value = "";
+        document.getElementById("meal-receipt-file").value = "";
+      };
+
+      if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) { saveEntry(e.target.result); };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        saveEntry(null);
+      }
+    }
+
+    function renderMealList(booking) {
+      const container = document.getElementById("meal-list");
+      container.innerHTML = "";
+
+      const meals = booking.meals || [];
+      if (meals.length === 0) {
+        container.innerHTML = `<p style="color:#a0a8b5; font-size:0.75rem;">Nessun pasto registrato finora.</p>`;
+        return;
+      }
+
+      meals.forEach(m => {
+        const item = document.createElement("div");
+        item.style = "background:#121417; border:1px solid #2d333d; padding:6px; margin-top:4px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;";
+        item.innerHTML = `
+          <div>
+            <strong style="color:#ff9f43; font-size:0.8rem;">${m.type} (${formatDate(m.date)})</strong>
+            <div style="font-size:0.75rem;">€ ${m.amount.toFixed(2)} ${m.notes ? '- ' + m.notes : ''}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            ${m.receiptImage ? `<img src="${m.receiptImage}" class="receipt-preview" onclick="openImageViewer('${m.receiptImage}')" title="Clicca per ingrandire">` : ''}
+            <button onclick="deleteMealEntry('${booking.id}', '${m.id}')" style="background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-size:0.7rem;">🗑️</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function deleteMealEntry(bookingId, mealId) {
+      const bIndex = bookings.findIndex(item => item.id === bookingId);
+      if (bIndex === -1) return;
+
+      bookings[bIndex].meals = (bookings[bIndex].meals || []).filter(m => m.id !== mealId);
+
+      const roomTotal = ((bookings[bIndex].adults * bookings[bIndex].rateAdult) + (bookings[bIndex].children * bookings[bIndex].rateChild)) * bookings[bIndex].nights;
+      const mealsTotal = bookings[bIndex].meals.reduce((acc, m) => acc + m.amount, 0);
+      bookings[bIndex].totalPrice = roomTotal + mealsTotal;
+      bookings[bIndex].balance = bookings[bIndex].totalPrice - bookings[bIndex].deposit;
+
+      localStorage.setItem("agri_bookings", JSON.stringify(bookings));
+      renderMealList(bookings[bIndex]);
+      renderRooms();
+      if (currentSelectedRoomId) openRoomDetailModal(currentSelectedRoomId);
+    }
+
+    function openImageViewer(imgSrc) {
+      document.getElementById("enlarged-receipt").src = imgSrc;
+      document.getElementById("image-viewer-modal").classList.remove("hidden");
+    }
+
+    function closeImageViewer() {
+      document.getElementById("image-viewer-modal").classList.add("hidden");
+    }
+
+    /* AUTORIZZAZIONI E PIN MASTER */
     function requestReleaseRoomDirect(bookingId) {
       const b = bookings.find(item => item.id === bookingId);
-      if (b) requestReleaseRoom(b);
+      if (b) {
+        targetBookingId = bookingId;
+        pendingMasterAction = 'release';
+        document.getElementById("master-prompt-text").innerText = `Eliminare la prenotazione di ${b.guestName}? Inserisci PIN Master:`;
+        document.getElementById("master-modal").classList.remove("hidden");
+      }
+    }
+
+    function requestEditRoomDirect(bookingId) {
+      const b = bookings.find(item => item.id === bookingId);
+      if (b) {
+        targetBookingId = bookingId;
+        pendingMasterAction = 'edit';
+        document.getElementById("master-prompt-text").innerText = `Modificare la prenotazione di ${b.guestName}? Inserisci PIN Master:`;
+        document.getElementById("master-modal").classList.remove("hidden");
+      }
     }
 
     function openMasterModal(action) {
@@ -938,6 +1191,13 @@
 
         if (action === 'release' && bookingId) {
           deleteBooking(bookingId);
+        } else if (action === 'edit' && bookingId) {
+          const b = bookings.find(item => item.id === bookingId);
+          const room = ROOMS.find(r => r.id === b.roomId);
+          if (b && room) {
+            closeRoomDetailModal();
+            openBookingModal(room, b.checkIn, b.checkOut, b);
+          }
         } else if (action === 'report') {
           renderMasterReport();
         }
@@ -946,6 +1206,7 @@
       }
     }
 
+    /* VISTA REGISTRO & REPORT SEPARATO ADULTI E BAMBINI */
     function renderMasterReport() {
       document.querySelector(".main-content").classList.add("hidden");
       document.getElementById("master-report-section").classList.remove("hidden");
@@ -961,16 +1222,26 @@
         return (from <= b.checkOut && to >= b.checkIn);
       });
 
-      let sumTotal = 0;
+      let sumAdults = 0;
+      let sumChildren = 0;
+      let sumRoomTotal = 0;
+      let sumMealsTotal = 0;
+      let sumGrandTotal = 0;
       let sumDeposit = 0;
       let sumBalance = 0;
 
       filteredBookings.forEach(b => {
-        const total = b.totalPrice || 0;
+        const mealsTotal = (b.meals || []).reduce((acc, m) => acc + m.amount, 0);
+        const roomTotal = ((b.adults * b.rateAdult) + (b.children * b.rateChild)) * b.nights;
+        const grandTotal = roomTotal + mealsTotal;
         const dep = b.deposit || 0;
-        const bal = b.balance || 0;
+        const bal = grandTotal - dep;
 
-        sumTotal += total;
+        sumAdults += b.adults;
+        sumChildren += (b.children || 0);
+        sumRoomTotal += roomTotal;
+        sumMealsTotal += mealsTotal;
+        sumGrandTotal += grandTotal;
         sumDeposit += dep;
         sumBalance += bal;
 
@@ -979,15 +1250,18 @@
             <td><strong>${getRoomName(b.roomId)}</strong></td>
             <td>${b.guestName}</td>
             <td>${b.phone || '-'}</td>
-            <td>${b.adults} Ad. ${b.children ? '/ ' + b.children + ' Bimbi' : ''}</td>
+            <td><strong>${b.adults}</strong></td>
+            <td><strong>${b.children || 0}</strong></td>
             <td>${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights}n)</td>
-            <td>€ ${b.rateAdult} / € ${b.rateChild}</td>
-            <td><strong>€ ${total.toFixed(2)}</strong></td>
+            <td>€ ${roomTotal.toFixed(2)}</td>
+            <td>€ ${mealsTotal.toFixed(2)}</td>
+            <td><strong>€ ${grandTotal.toFixed(2)}</strong></td>
             <td style="color:#2ecc71;">€ ${dep.toFixed(2)}</td>
             <td style="color:#e74c3c;"><strong>€ ${bal.toFixed(2)}</strong></td>
             <td>${b.notes || '-'}</td>
             <td class="no-print">
-              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;">Elimina</button>
+              <button onclick="requestEditRoomDirect('${b.id}')" style="background:#f39c12; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-size:0.7rem;">Modifica</button>
+              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-size:0.7rem;">Elimina</button>
             </td>
           </tr>
         `;
@@ -996,8 +1270,13 @@
       if (tfoot) {
         tfoot.innerHTML = `
           <tr>
-            <td colspan="6" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALE PERIODO:</td>
-            <td><strong style="color:#ff9f43;">€ ${sumTotal.toFixed(2)}</strong></td>
+            <td colspan="3" style="text-align:right; font-weight:bold; color:#ff9f43;">Riepilogo Totali:</td>
+            <td style="color:#ff9f43;"><strong>${sumAdults} Ad.</strong></td>
+            <td style="color:#ff9f43;"><strong>${sumChildren} Bim.</strong></td>
+            <td></td>
+            <td><strong>€ ${sumRoomTotal.toFixed(2)}</strong></td>
+            <td><strong>€ ${sumMealsTotal.toFixed(2)}</strong></td>
+            <td><strong style="color:#ff9f43;">€ ${sumGrandTotal.toFixed(2)}</strong></td>
             <td style="color:#2ecc71;"><strong>€ ${sumDeposit.toFixed(2)}</strong></td>
             <td style="color:#e74c3c;"><strong>€ ${sumBalance.toFixed(2)}</strong></td>
             <td colspan="2"></td>
