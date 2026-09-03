@@ -8,7 +8,6 @@
   <!-- Firebase SDK JS (Compatibility Version per App Web Single-File) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
   <style>
     * {
       box-sizing: border-box;
@@ -16,7 +15,6 @@
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
     html, body {
       width: 100%;
       max-width: 100vw;
@@ -25,9 +23,7 @@
       color: #e1e6ed;
       padding: 8px;
     }
-
     .hidden { display: none !important; }
-
     /* Fix Visibilità Selettori Data (Migliorata Leggibilità e Contrasto) */
     input[type="date"] {
       color-scheme: dark;
@@ -41,14 +37,12 @@
       outline: none;
       box-shadow: 0 0 6px rgba(255, 159, 67, 0.4);
     }
-
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(350deg);
       cursor: pointer;
       transform: scale(1.15);
       margin-left: 5px;
     }
-
     /* Top Navigation Bar */
     .top-bar {
       background: #1c2026;
@@ -62,7 +56,6 @@
       gap: 10px;
       margin-bottom: 12px;
     }
-
     .brand-badge {
       font-size: 1.1rem;
       font-weight: bold;
@@ -71,7 +64,6 @@
       align-items: center;
       gap: 8px;
     }
-
     .sync-indicator {
       font-size: 0.7rem;
       background: #1e824c;
@@ -79,21 +71,24 @@
       padding: 2px 6px;
       border-radius: 10px;
     }
-
     .bar-controls {
       display: flex;
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
     }
-
+    .bar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
     .date-group {
       display: flex;
       align-items: center;
       gap: 5px;
       font-size: 0.85rem;
     }
-
     .btn-bar, .btn-back {
       background: #252a33;
       border: 1px solid #ff9f43;
@@ -104,12 +99,10 @@
       font-weight: bold;
       font-size: 0.85rem;
     }
-
     .btn-bar:hover, .btn-back:hover {
       background: #ff9f43;
       color: #121417;
     }
-
     /* Riquadro Check-out del giorno (Camere da pulire) */
     .checkout-alert-box {
       background: #1f2733;
@@ -120,7 +113,6 @@
       margin-bottom: 12px;
       font-size: 0.85rem;
     }
-
     .checkout-alert-title {
       color: #3498db;
       font-weight: bold;
@@ -129,13 +121,11 @@
       align-items: center;
       gap: 6px;
     }
-
     .checkout-tags {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
     }
-
     .checkout-tag {
       background: #e74c3c;
       color: white;
@@ -144,7 +134,6 @@
       font-weight: bold;
       font-size: 0.78rem;
     }
-
     /* Griglia Camere (5 per riga) */
     .legend-bar {
       margin-bottom: 10px;
@@ -154,17 +143,14 @@
       font-size: 0.85rem;
       flex-wrap: wrap;
     }
-
     .badge-free { color: #2ecc71; font-weight: bold; }
     .badge-busy { color: #e74c3c; font-weight: bold; }
-
     .grid-container {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 6px;
       width: 100%;
     }
-
     .room-card {
       min-height: 110px;
       border-radius: 8px;
@@ -180,21 +166,17 @@
       transition: transform 0.15s;
       word-break: break-word;
     }
-
     .room-card:hover { transform: scale(1.02); }
-
     .room-card.free {
       background: #1e824c;
       color: white;
       border-color: #2ecc71;
     }
-
     .room-card.busy {
       background: #962d22;
       color: white;
       border-color: #e74c3c;
     }
-
     .room-number { font-size: 0.95rem; font-weight: bold; }
     .room-type { font-size: 0.65rem; opacity: 0.9; }
     .room-guest { 
@@ -214,12 +196,12 @@
       border-radius: 4px; 
       width: 100%;
     }
-
     /* Ottimizzazione Mobile Android / iPhone */
     @media (max-width: 600px) {
       body { padding: 4px; }
       .top-bar { padding: 8px; gap: 6px; flex-direction: column; align-items: stretch; }
-      .bar-controls { justify-content: space-between; width: 100%; }
+      .bar-controls, .bar-actions { justify-content: space-between; width: 100%; }
+      .bar-actions .btn-bar { flex: 1; text-align: center; font-size: 0.78rem; padding: 6px 4px; }
       .date-group { flex: 1; font-size: 0.75rem; flex-direction: column; align-items: flex-start; }
       .date-group input { width: 100%; font-size: 0.75rem; padding: 4px; }
       
@@ -227,19 +209,16 @@
         grid-template-columns: repeat(5, 1fr);
         gap: 3px;
       }
-
       .room-card {
         min-height: 95px;
         padding: 4px 2px;
       }
-
       .room-number { font-size: 0.78rem; }
       .room-type { font-size: 0.55rem; }
       .room-guest { font-size: 0.65rem; }
       .room-dates { font-size: 0.52rem; padding: 1px; }
       .status-text { font-size: 0.58rem !important; }
     }
-
     /* Modali */
     .modal {
       position: fixed;
@@ -252,7 +231,6 @@
       z-index: 1000;
       padding: 10px;
     }
-
     .modal-box {
       background: #1c2026;
       border: 1px solid #ff9f43;
@@ -266,24 +244,19 @@
       max-height: 92vh;
       overflow-y: auto;
     }
-
     .login-box { text-align: center; max-width: 340px; }
     .brand-title { font-size: 1.2rem; font-weight: bold; color: #ff9f43; }
     .sub-text { color: #a0a8b5; font-size: 0.85rem; }
-
     .modal-title {
       color: #ff9f43;
       border-bottom: 1px solid #2d333d;
       padding-bottom: 6px;
       font-size: 1.1rem;
     }
-
     .form-group { display: flex; flex-direction: column; gap: 3px; text-align: left; }
     .form-group label { font-size: 0.8rem; color: #abb3c0; }
-
     .form-row { display: flex; gap: 8px; }
     .form-row .form-group { flex: 1; }
-
     input, select, textarea {
       background: #121417;
       border: 1px solid #3b4250;
@@ -292,11 +265,8 @@
       border-radius: 6px;
       font-size: 0.85rem;
     }
-
     input:focus, textarea:focus { border-color: #ff9f43; outline: none; }
-
     .modal-buttons { display: flex; gap: 8px; margin-top: 8px; }
-
     .btn-gold {
       background: #ff9f43;
       color: #121417;
@@ -307,7 +277,6 @@
       cursor: pointer;
       flex: 1;
     }
-
     .btn-cancel {
       background: #3b4250;
       color: white;
@@ -316,9 +285,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
-
     .error-msg { color: #e74c3c; font-size: 0.8rem; margin-top: 4px; }
-
     /* Box Calcolo Totale / Saldo dinamico */
     .price-summary-box {
       background: #121417;
@@ -331,11 +298,9 @@
       margin-top: 4px;
       text-align: center;
     }
-
     .price-summary-item { display: flex; flex-direction: column; gap: 2px; }
     .price-summary-item span { font-size: 0.65rem; color: #abb3c0; }
     .price-summary-item strong { font-size: 0.88rem; }
-
     /* Sezione Consumazioni Ristorante */
     .meals-section {
       background: #121417;
@@ -344,7 +309,6 @@
       padding: 10px;
       margin-top: 6px;
     }
-
     .meal-item {
       display: flex;
       align-items: center;
@@ -356,7 +320,6 @@
       margin-top: 5px;
       font-size: 0.8rem;
     }
-
     .meal-thumb {
       width: 36px;
       height: 36px;
@@ -365,7 +328,6 @@
       cursor: pointer;
       border: 1px solid #ff9f43;
     }
-
     /* Calendario Mensile */
     .month-nav {
       display: flex;
@@ -373,7 +335,6 @@
       align-items: center;
       margin-bottom: 6px;
     }
-
     .btn-nav-cal {
       background: #252a33;
       border: 1px solid #ff9f43;
@@ -384,7 +345,6 @@
       font-size: 0.8rem;
       font-weight: bold;
     }
-
     .cal-header-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -395,7 +355,6 @@
       color: #ff9f43;
       margin-bottom: 3px;
     }
-
     .cal-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -405,7 +364,6 @@
       padding: 5px;
       border: 1px solid #2d333d;
     }
-
     .cal-day-cell {
       min-height: 32px;
       border-radius: 4px;
@@ -417,11 +375,9 @@
       justify-content: center;
       align-items: center;
     }
-
     .cal-day-cell.empty { background: transparent; }
     .cal-day-cell.free { background: #1e824c; color: white; border: 1px solid #2ecc71; }
     .cal-day-cell.busy { background: #962d22; color: white; border: 1px solid #e74c3c; }
-
     .detail-booking-card {
       background: #121417;
       border: 1px solid #2d333d;
@@ -433,28 +389,29 @@
       gap: 8px;
       margin-top: 6px;
     }
-
     /* Registro Economico & Stampa */
     .master-view { background: #1c2026; padding: 12px; border-radius: 8px; }
     .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .card-dark { background: #121417; padding: 12px; border-radius: 6px; margin: 12px 0; }
     .form-inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
-
     .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .report-table th, .report-table td { border: 1px solid #2d333d; padding: 6px 8px; text-align: left; font-size: 0.8rem; }
     .report-table th { background: #121417; color: #ff9f43; }
     .report-table tfoot td { background: #121417; font-weight: bold; border-top: 2px solid #ff9f43; }
 
+    /* Stampa Report Generico e Pranzi/Cene/Ditte */
     @media print {
       .no-print { display: none !important; }
-      body { background: white; color: black; padding: 0; }
-      .master-view { background: white; padding: 0; }
-      .report-table th, .report-table td { border: 1px solid black; color: black; font-size: 0.75rem; padding: 4px; }
+      body { background: white !important; color: black !important; padding: 0 !important; }
+      .master-view, .modal-box { background: white !important; color: black !important; border: none !important; box-shadow: none !important; max-width: 100% !important; padding: 0 !important; }
+      .modal { position: static !important; background: transparent !important; }
+      .report-table th, .report-table td { border: 1px solid black !important; color: black !important; font-size: 0.75rem !important; padding: 4px !important; }
+      .report-table th { background: #f0f0f0 !important; }
+      #pd-report-title { color: black !important; }
     }
   </style>
 </head>
 <body>
-
   <!-- MODALE LOGIN STAFF -->
   <div id="login-modal" class="modal">
     <div class="modal-box login-box">
@@ -465,7 +422,6 @@
       <p id="login-error" class="error-msg"></p>
     </div>
   </div>
-
   <div id="app-container" class="hidden">
     
     <!-- BARRA SUPERIORE -->
@@ -474,7 +430,6 @@
         🏡 Agriturismo 
         <span class="sync-indicator">🟢 Sincronizzato</span>
       </div>
-
       <div class="bar-controls">
         <div class="date-group">
           <label>Dal:</label>
@@ -485,12 +440,11 @@
           <input type="date" id="home-date-to" onchange="renderRooms()">
         </div>
       </div>
-
       <div class="bar-actions">
+        <button class="btn-bar" onclick="openPranziCeneModal()">🍽️ Pranzi Cene Ditte</button>
         <button class="btn-bar" onclick="openMasterModal('report')">📋 Registro Economico</button>
       </div>
     </header>
-
     <main class="main-content no-print">
       
       <!-- BOX CHECKOUT DEL GIORNO (CAMERE DA PULIRE) -->
@@ -498,13 +452,11 @@
         <div class="checkout-alert-title">🧹 Check-out Oggi (Camere da pulire e preparare):</div>
         <div id="checkout-today-list" class="checkout-tags">Nessuna camera in check-out oggi.</div>
       </div>
-
       <div class="legend-bar">
         <span>Stato periodo:</span>
         <span class="badge-free">● Libera</span>
         <span class="badge-busy">● Occupata</span>
       </div>
-
       <!-- GRIGLIA CAMERE 5x2 -->
       <div id="rooms-grid" class="grid-container"></div>
     </main>
@@ -517,9 +469,7 @@
           <button class="btn-gold" onclick="window.print()">🖨️ Stampa Report</button>
         </div>
       </div>
-
       <h2>Registro Economico & Lista Prenotazioni</h2>
-
       <div class="card-dark no-print">
         <h3>Filtra Registro</h3>
         <div class="form-inline">
@@ -533,7 +483,6 @@
           </div>
         </div>
       </div>
-
       <div style="overflow-x:auto;">
         <table class="report-table">
           <thead>
@@ -562,31 +511,163 @@
     </div>
   </div>
 
+  <!-- MODALE PRANZI CENE DITTE & SCONTRINI (NUOVO) -->
+  <div id="pranzi-cene-modal" class="modal hidden">
+    <div class="modal-box" style="max-width: 680px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;">
+        <h3 class="modal-title" style="border:none; padding:0;">🍽️ Pranzi, Cene & Ditte</h3>
+        <button class="btn-cancel" style="padding:4px 8px; font-size:0.8rem;" onclick="closePranziCeneModal()">✕ Chiudi</button>
+      </div>
+      
+      <!-- SCHEDE DI NAVIGAZIONE -->
+      <div style="display:flex; gap:8px; margin-top:6px;" class="no-print">
+        <button id="pd-tab-btn-add" class="btn-gold" style="flex:1; padding:6px; font-size:0.85rem;" onclick="switchPdTab('add')">➕ Carica Scontrino / Pasto</button>
+        <button id="pd-tab-btn-report" class="btn-cancel" style="flex:1; padding:6px; font-size:0.85rem;" onclick="switchPdTab('report')">📋 Report & Stampa</button>
+      </div>
+
+      <!-- SEZIONE 1: CARICO NUOVO SCONTRINO / PASTO -->
+      <div id="pd-section-add" class="no-print" style="margin-top:8px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data Consumazione:</label>
+            <input type="date" id="pd-date">
+          </div>
+          <div class="form-group">
+            <label>Tipo Pasto / Servizio:</label>
+            <select id="pd-meal-type">
+              <option value="Pranzo">Pranzo</option>
+              <option value="Cena">Cena</option>
+              <option value="Consumazione Bar">Consumazione Bar</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:6px;">
+          <label>Destinazione Addebito / Dati:</label>
+          <div style="display:flex; gap:15px; margin:4px 0;">
+            <label style="color:white; cursor:pointer; font-size:0.85rem;">
+              <input type="radio" name="pd-target-type" value="ditta" checked onchange="togglePdTargetType()"> Ditta / Dati Fiscali
+            </label>
+            <label style="color:white; cursor:pointer; font-size:0.85rem;">
+              <input type="radio" name="pd-target-type" value="camera" onchange="togglePdTargetType()"> Numero Camera
+            </label>
+          </div>
+        </div>
+
+        <!-- CAMPO DITTA / DATI FISCALI -->
+        <div id="pd-target-ditta-group" class="form-group">
+          <label>Dati Fiscali / Nome Ditta o Cliente:</label>
+          <input type="text" id="pd-ditta-input" placeholder="Es. Edilizia Rossi Srl - P.IVA 01234567890">
+        </div>
+
+        <!-- CAMPO CAMERA -->
+        <div id="pd-target-camera-group" class="form-group hidden">
+          <label>Seleziona Camera:</label>
+          <select id="pd-camera-select"></select>
+        </div>
+
+        <div class="form-row" style="margin-top:6px;">
+          <div class="form-group">
+            <label>📷 Foto Scontrino (Fotocamera/File):</label>
+            <input type="file" id="pd-photo-input" accept="image/*" capture="environment">
+          </div>
+          <div class="form-group">
+            <label>💶 Importo Scontrino (€):</label>
+            <input type="number" id="pd-amount" step="0.50" min="0" placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:6px;">
+          <label>Note / Dettagli Consumazione:</label>
+          <input type="text" id="pd-notes" placeholder="Es. Menu lavoro x2, bevande incluse">
+        </div>
+
+        <div style="margin-top:10px;">
+          <button class="btn-gold" style="width:100%; padding:10px; font-weight:bold;" onclick="savePranzoCenaEntry()">💾 Salva Scontrino / Pasto</button>
+        </div>
+      </div>
+
+      <!-- SEZIONE 2: REPORT & STAMPA -->
+      <div id="pd-section-report" class="hidden" style="margin-top:8px;">
+        <div class="card-dark no-print" style="padding:8px; margin:0 0 10px 0;">
+          <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">Filtra Report Pranzi/Cene/Ditte</h4>
+          <div class="form-row" style="flex-wrap:wrap;">
+            <div class="form-group" style="flex:1; min-width:130px;">
+              <label>Dal:</label>
+              <input type="date" id="pd-filter-from" onchange="renderPranziCeneReport()">
+            </div>
+            <div class="form-group" style="flex:1; min-width:130px;">
+              <label>Al:</label>
+              <input type="date" id="pd-filter-to" onchange="renderPranziCeneReport()">
+            </div>
+            <div class="form-group" style="flex:1; min-width:150px;">
+              <label>Filtra per Categoria:</label>
+              <select id="pd-filter-category" onchange="onPdCategoryChange()">
+                <option value="ALL">-- Tutti i Record --</option>
+                <option value="DITTA">Solo Ditte / Dati Fiscali</option>
+                <option value="CAMERA">Solo Camere</option>
+              </select>
+            </div>
+            <div id="pd-filter-detail-group" class="form-group hidden" style="flex:1; min-width:150px;">
+              <label id="pd-filter-detail-label">Seleziona Specifica:</label>
+              <select id="pd-filter-detail-select" onchange="renderPranziCeneReport()">
+                <option value="ALL">Tutti</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:8px; text-align:right;">
+            <button class="btn-gold" style="padding:6px 12px; font-size:0.8rem;" onclick="window.print()">🖨️ Stampa Report Selezionato</button>
+          </div>
+        </div>
+
+        <div id="pd-printable-area">
+          <div style="margin-bottom:8px;">
+            <h3 style="color:#ff9f43; font-size:1.0rem;" id="pd-report-title">Report Pranzi, Cene & Ditte</h3>
+            <p style="font-size:0.75rem; color:#abb3c0;" id="pd-report-subtitle"></p>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="report-table" style="width:100%;">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Destinatario / Dati Fiscali</th>
+                  <th>Importo</th>
+                  <th class="no-print">Scontrino</th>
+                  <th>Note</th>
+                  <th class="no-print">Azioni</th>
+                </tr>
+              </thead>
+              <tbody id="pd-table-body"></tbody>
+              <tfoot id="pd-table-foot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- MODALE DETTAGLIO CAMERA (CALENDARIO & LISTA PRENOTAZIONI) -->
   <div id="room-detail-modal" class="modal hidden">
     <div class="modal-box">
       <h3 id="detail-room-title" class="modal-title">Dettaglio Camera</h3>
-
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
         <h4 style="color:#ff9f43; font-size:0.9rem;">📅 Calendario Disponibilità</h4>
         <button class="btn-gold" style="padding:4px 8px; font-size:0.75rem;" onclick="createBookingFromDetail()">➕ Nuova Prenotazione</button>
       </div>
-
       <div class="month-nav">
         <button class="btn-nav-cal" onclick="changeMonth(-1)">◀ Mese Prec.</button>
         <span id="cal-month-title" style="font-weight:bold; color:#ff9f43; font-size:0.85rem;"></span>
         <button class="btn-nav-cal" onclick="changeMonth(1)">Mese Succ. ▶</button>
       </div>
-
       <div class="cal-header-grid">
         <div>LUN</div><div>MAR</div><div>MER</div><div>GIO</div><div>VEN</div><div>SAB</div><div>DOM</div>
       </div>
-
       <div id="room-calendar-grid" class="cal-grid"></div>
-
       <h4 style="color:#ff9f43; margin-top:8px; font-size:0.9rem;">📋 Prenotazioni della Camera</h4>
       <div id="room-bookings-list" style="max-height:160px; overflow-y:auto;"></div>
-
       <div class="modal-buttons" style="margin-top:10px;">
         <button class="btn-cancel" style="width:100%;" onclick="closeRoomDetailModal()">Chiudi</button>
       </div>
@@ -599,19 +680,16 @@
       <h3 id="modal-room-title" class="modal-title">Gestione Prenotazione</h3>
       <input type="hidden" id="book-id">
       <input type="hidden" id="book-room-id">
-
       <div class="form-group">
         <label>Nome referente cliente:</label>
         <input type="text" id="book-guest-name" placeholder="Es. Mario Rossi">
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label>Telefono:</label>
           <input type="text" id="book-phone" placeholder="Es. 3331234567">
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label>Adulti:</label>
@@ -622,7 +700,6 @@
           <input type="number" id="book-children" value="0" min="0" oninput="calculateBookingTotal()">
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label>Prezzo Adulto (€/notte):</label>
@@ -633,7 +710,6 @@
           <input type="number" id="book-rate-child" value="20" min="0" step="0.5" oninput="calculateBookingTotal()">
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label>Check-in (Dal):</label>
@@ -644,12 +720,10 @@
           <input type="date" id="book-checkout" onchange="calculateBookingTotal()">
         </div>
       </div>
-
       <div class="form-group">
         <label>Acconto Versato (€):</label>
         <input type="number" id="book-deposit" value="0" min="0" step="1" oninput="calculateBookingTotal()">
       </div>
-
       <!-- SEZIONE CONSUMAZIONI RISTORANTE (SCONTRINI) -->
       <div id="meals-section-container" class="meals-section hidden">
         <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">🍽️ Consumazioni Ristorante & Scontrini</h4>
@@ -667,7 +741,6 @@
             </select>
           </div>
         </div>
-
         <div class="form-row" style="margin-top:4px;">
           <div class="form-group">
             <label>Importo (€):</label>
@@ -678,12 +751,9 @@
             <input type="file" id="meal-photo-input" accept="image/*">
           </div>
         </div>
-
         <button class="btn-gold" style="margin-top:6px; padding:5px; font-size:0.8rem;" onclick="addMealToBooking()">+ Aggiungi Pasto/Scontrino</button>
-
         <div id="meals-list" style="margin-top:6px; max-height:120px; overflow-y:auto;"></div>
       </div>
-
       <!-- BOX RIEPILOGO FINALE IN TEMPO REALE -->
       <div class="price-summary-box">
         <div class="price-summary-item">
@@ -703,12 +773,10 @@
           <strong id="summary-balance" style="color:#e74c3c;">€ 0.00</strong>
         </div>
       </div>
-
       <div class="form-group">
         <label>Note (Allergie, culla, orari...):</label>
         <textarea id="book-notes" rows="2" placeholder="Note prenotazione..."></textarea>
       </div>
-
       <div class="modal-buttons">
         <button class="btn-gold" onclick="saveBooking()">Salva Prenotazione</button>
         <button class="btn-cancel" onclick="closeBookingModal()">Annulla</button>
@@ -747,13 +815,10 @@
       messagingSenderId: "972507442001",
       appId: "1:972507442001:web:e7b77121c645f18f3d1ed0"
     };
-
     // Inizializzazione Firebase & Firestore
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
     const CONFIG = { STAFF_PASS: "max78", MASTER_PIN: "nikita78" };
-
     const ROOMS = [
       { id: "101", name: "101", type: "Quadrupla", defaultAdultRate: 35, defaultChildRate: 20 },
       { id: "102", name: "102", type: "Tripla", defaultAdultRate: 35, defaultChildRate: 20 },
@@ -766,14 +831,12 @@
       { id: "109", name: "109", type: "Tripla", defaultAdultRate: 35, defaultChildRate: 20 },
       { id: "110", name: "110", type: "Suite SPA", defaultAdultRate: 50, defaultChildRate: 25 }
     ];
-
     let bookings = [];
+    let pranziCeneList = [];
     let currentTempMeals = [];
-
     let pendingMasterAction = null;
     let targetBookingId = null;
     let currentSelectedRoomId = null;
-
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
 
@@ -782,14 +845,18 @@
       let tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
       document.getElementById("home-date-from").value = today;
       document.getElementById("home-date-to").value = tomorrowStr;
       
       document.getElementById("report-date-from").value = `${calYear}-01-01`;
       document.getElementById("report-date-to").value = tomorrowStr;
 
-      // SINCRONIZZAZIONE IN TEMPO REALE CON CLOUD FIRESTORE
+      if (document.getElementById("pd-filter-from")) {
+        document.getElementById("pd-filter-from").value = `${calYear}-01-01`;
+        document.getElementById("pd-filter-to").value = tomorrowStr;
+      }
+      
+      // SINCRONIZZAZIONE IN TEMPO REALE FIRESTORE PRENOTAZIONI
       db.collection("prenotazioni").onSnapshot((snapshot) => {
         bookings = [];
         snapshot.forEach((doc) => {
@@ -804,7 +871,20 @@
           renderMasterReport();
         }
       }, (error) => {
-        console.error("Errore di sincronizzazione Firebase:", error);
+        console.error("Errore di sincronizzazione Firebase Prenotazioni:", error);
+      });
+
+      // SINCRONIZZAZIONE IN TEMPO REALE FIRESTORE PRANZI CENE DITTE
+      db.collection("pranzi_cene_ditte").onSnapshot((snapshot) => {
+        pranziCeneList = [];
+        snapshot.forEach((doc) => {
+          pranziCeneList.push({ id: doc.id, ...doc.data() });
+        });
+        if (!document.getElementById("pranzi-cene-modal").classList.contains("hidden")) {
+          renderPranziCeneReport();
+        }
+      }, (error) => {
+        console.error("Errore di sincronizzazione Firebase Pranzi Cene Ditte:", error);
       });
     });
 
@@ -830,12 +910,10 @@
       const grid = document.getElementById("rooms-grid");
       if (!grid) return;
       grid.innerHTML = "";
-
-      // Check-out del giorno per pulizia
+      
       const todayIso = new Date().toISOString().split('T')[0];
       const todayCheckouts = bookings.filter(b => b.checkOut === todayIso);
       const checkoutBox = document.getElementById("checkout-today-list");
-
       if (todayCheckouts.length === 0) {
         checkoutBox.innerHTML = `<em>Nessun check-out previsto per oggi (${formatDate(todayIso)}).</em>`;
       } else {
@@ -843,18 +921,14 @@
           `<span class="checkout-tag">🧹 Cam. ${getRoomName(b.roomId)} (${b.guestName})</span>`
         ).join(" ");
       }
-
       if (!from || !to) return;
-
       ROOMS.forEach(room => {
         const activeBooking = bookings.find(b => 
           b.roomId === room.id && (from < b.checkOut && to > b.checkIn)
         );
-
         const card = document.createElement("div");
         card.className = `room-card ${activeBooking ? 'busy' : 'free'}`;
         card.onclick = () => openRoomDetailModal(room.id);
-
         if (!activeBooking) {
           card.innerHTML = `
             <div class="room-number">Cam. ${room.name}</div>
@@ -874,20 +948,269 @@
       });
     }
 
+    // ==========================================
+    // LOGICA QUADRO PRANZI CENE DITTE & SCONTRINI
+    // ==========================================
+    function openPranziCeneModal() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById("pd-date").value = today;
+      document.getElementById("pd-amount").value = "";
+      document.getElementById("pd-ditta-input").value = "";
+      document.getElementById("pd-notes").value = "";
+      document.getElementById("pd-photo-input").value = "";
+
+      // Popola selettore camere
+      const camSelect = document.getElementById("pd-camera-select");
+      camSelect.innerHTML = "";
+      ROOMS.forEach(r => {
+        camSelect.innerHTML += `<option value="${r.id}">Camera ${r.name} (${r.type})</option>`;
+      });
+
+      switchPdTab('add');
+      document.getElementById("pranzi-cene-modal").classList.remove("hidden");
+    }
+
+    function closePranziCeneModal() {
+      document.getElementById("pranzi-cene-modal").classList.add("hidden");
+    }
+
+    function switchPdTab(tabName) {
+      const btnAdd = document.getElementById("pd-tab-btn-add");
+      const btnReport = document.getElementById("pd-tab-btn-report");
+      const secAdd = document.getElementById("pd-section-add");
+      const secReport = document.getElementById("pd-section-report");
+
+      if (tabName === 'add') {
+        btnAdd.className = "btn-gold";
+        btnReport.className = "btn-cancel";
+        secAdd.classList.remove("hidden");
+        secReport.classList.add("hidden");
+      } else {
+        btnReport.className = "btn-gold";
+        btnAdd.className = "btn-cancel";
+        secReport.classList.remove("hidden");
+        secAdd.classList.add("hidden");
+        renderPranziCeneReport();
+      }
+    }
+
+    function togglePdTargetType() {
+      const isDitta = document.querySelector('input[name="pd-target-type"]:checked').value === 'ditta';
+      if (isDitta) {
+        document.getElementById("pd-target-ditta-group").classList.remove("hidden");
+        document.getElementById("pd-target-camera-group").classList.add("hidden");
+      } else {
+        document.getElementById("pd-target-ditta-group").classList.add("hidden");
+        document.getElementById("pd-target-camera-group").classList.remove("hidden");
+      }
+    }
+
+    function compressImage(file, maxWidth, maxHeight, quality, callback) {
+      if (!file) {
+        callback(null);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => callback(e.target.result);
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function savePranzoCenaEntry() {
+      const date = document.getElementById("pd-date").value;
+      const mealType = document.getElementById("pd-meal-type").value;
+      const targetType = document.querySelector('input[name="pd-target-type"]:checked').value;
+      const dittaName = document.getElementById("pd-ditta-input").value.trim();
+      const roomId = document.getElementById("pd-camera-select").value;
+      const amount = parseFloat(document.getElementById("pd-amount").value);
+      const notes = document.getElementById("pd-notes").value.trim();
+      const photoInput = document.getElementById("pd-photo-input");
+
+      if (!date || isNaN(amount) || amount <= 0) {
+        alert("Inserisci una data e un importo validi!");
+        return;
+      }
+      if (targetType === 'ditta' && !dittaName) {
+        alert("Inserisci i Dati Fiscali o il Nome della Ditta!");
+        return;
+      }
+
+      const targetName = targetType === 'ditta' ? dittaName : `Camera ${getRoomName(roomId)}`;
+
+      const executeSave = async (photoBase64) => {
+        const entryData = {
+          date,
+          mealType,
+          targetType,
+          targetName,
+          dittaName: targetType === 'ditta' ? dittaName : null,
+          roomId: targetType === 'camera' ? roomId : null,
+          amount,
+          notes,
+          photo: photoBase64 || null,
+          createdAt: new Date().toISOString()
+        };
+
+        try {
+          await db.collection("pranzi_cene_ditte").add(entryData);
+          document.getElementById("pd-amount").value = "";
+          document.getElementById("pd-ditta-input").value = "";
+          document.getElementById("pd-notes").value = "";
+          document.getElementById("pd-photo-input").value = "";
+          alert("Scontrino / Pasto salvato con successo!");
+          switchPdTab('report');
+        } catch (err) {
+          alert("Errore durante il salvataggio: " + err.message);
+        }
+      };
+
+      if (photoInput.files && photoInput.files[0]) {
+        compressImage(photoInput.files[0], 1024, 1024, 0.7, (compressedData) => {
+          executeSave(compressedData);
+        });
+      } else {
+        executeSave(null);
+      }
+    }
+
+    function onPdCategoryChange() {
+      const cat = document.getElementById("pd-filter-category").value;
+      const detailGroup = document.getElementById("pd-filter-detail-group");
+      const detailSelect = document.getElementById("pd-filter-detail-select");
+      const detailLabel = document.getElementById("pd-filter-detail-label");
+
+      detailSelect.innerHTML = `<option value="ALL">Tutti</option>`;
+
+      if (cat === 'ALL') {
+        detailGroup.classList.add("hidden");
+      } else if (cat === 'CAMERA') {
+        detailGroup.classList.remove("hidden");
+        detailLabel.innerText = "Seleziona Camera:";
+        ROOMS.forEach(r => {
+          detailSelect.innerHTML += `<option value="${r.id}">Camera ${r.name}</option>`;
+        });
+      } else if (cat === 'DITTA') {
+        detailGroup.classList.remove("hidden");
+        detailLabel.innerText = "Seleziona Ditta:";
+        const ditteUniche = [...new Set(pranziCeneList.filter(item => item.dittaName).map(item => item.dittaName))];
+        ditteUniche.sort().forEach(d => {
+          detailSelect.innerHTML += `<option value="${d}">${d}</option>`;
+        });
+      }
+      renderPranziCeneReport();
+    }
+
+    function renderPranziCeneReport() {
+      const from = document.getElementById("pd-filter-from").value;
+      const to = document.getElementById("pd-filter-to").value;
+      const category = document.getElementById("pd-filter-category").value;
+      const detailSelect = document.getElementById("pd-filter-detail-select").value;
+
+      const tbody = document.getElementById("pd-table-body");
+      const tfoot = document.getElementById("pd-table-foot");
+      const subtitle = document.getElementById("pd-report-subtitle");
+
+      tbody.innerHTML = "";
+
+      let labelFiltro = "Periodo: " + (from ? formatDate(from) : 'Inizio') + " ➔ " + (to ? formatDate(to) : 'Fine');
+      if (category === 'CAMERA') {
+        labelFiltro += " | Filtro: " + (detailSelect !== 'ALL' ? 'Camera ' + getRoomName(detailSelect) : 'Tutte le Camere');
+      } else if (category === 'DITTA') {
+        labelFiltro += " | Filtro: " + (detailSelect !== 'ALL' ? 'Ditta ' + detailSelect : 'Tutte le Ditte');
+      }
+      subtitle.innerText = labelFiltro;
+
+      const filtered = pranziCeneList.filter(item => {
+        if (from && item.date < from) return false;
+        if (to && item.date > to) return false;
+        if (category === 'CAMERA') {
+          if (item.targetType !== 'camera') return false;
+          if (detailSelect !== 'ALL' && item.roomId !== detailSelect) return false;
+        }
+        if (category === 'DITTA') {
+          if (item.targetType !== 'ditta') return false;
+          if (detailSelect !== 'ALL' && item.dittaName !== detailSelect) return false;
+        }
+        return true;
+      }).sort((a,b) => b.date.localeCompare(a.date));
+
+      let total = 0;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0a8b5;">Nessun record trovato per i filtri selezionati.</td></tr>`;
+      } else {
+        filtered.forEach(item => {
+          total += (item.amount || 0);
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${formatDate(item.date)}</td>
+            <td><span style="color:#ff9f43; font-weight:bold;">${item.mealType || 'Pasto'}</span></td>
+            <td><strong>${item.targetName}</strong></td>
+            <td style="color:#2ecc71; font-weight:bold;">€ ${(item.amount || 0).toFixed(2)}</td>
+            <td class="no-print" style="text-align:center;">
+              ${item.photo ? `<img src="${item.photo}" class="meal-thumb" onclick="openImageViewer('${item.photo}')" title="Clicca per ingrandire">` : '-'}
+            </td>
+            <td>${item.notes || '-'}</td>
+            <td class="no-print" style="text-align:center;">
+              <button onclick="deletePranzoCenaEntry('${item.id}')" style="background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer;">🗑️</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="3" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALE IMPORTI:</td>
+          <td style="color:#2ecc71; font-weight:bold; font-size:0.95rem;">€ ${total.toFixed(2)}</td>
+          <td class="no-print"></td>
+          <td colspan="2"></td>
+        </tr>
+      `;
+    }
+
+    async function deletePranzoCenaEntry(id) {
+      if (confirm("Confermi di voler eliminare questo scontrino/pasto?")) {
+        try {
+          await db.collection("pranzi_cene_ditte").doc(id).delete();
+        } catch (err) {
+          alert("Errore nell'eliminazione: " + err.message);
+        }
+      }
+    }
+
+    // ==========================================
+    // LOGICA CAMERE E PRENOTAZIONI
+    // ==========================================
     function openRoomDetailModal(roomId) {
       const room = ROOMS.find(r => r.id === roomId);
       if (!room) return;
-
       currentSelectedRoomId = roomId;
       document.getElementById("detail-room-title").innerText = `🏡 Camera ${room.name} (${room.type})`;
-
       renderCalendarMonth();
-
       const bookingsList = document.getElementById("room-bookings-list");
       bookingsList.innerHTML = "";
-
       const roomBookings = bookings.filter(b => b.roomId === roomId).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
-
       if (roomBookings.length === 0) {
         bookingsList.innerHTML = `<p style="color:#a0a8b5; font-size:0.85rem; padding:8px 0;">Nessuna prenotazione registrata per questa camera.</p>`;
       } else {
@@ -909,36 +1232,28 @@
           bookingsList.appendChild(card);
         });
       }
-
       document.getElementById("room-detail-modal").classList.remove("hidden");
     }
 
     function renderCalendarMonth() {
       const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
       document.getElementById("cal-month-title").innerText = `${monthNames[calMonth]} ${calYear}`;
-
       const calendarGrid = document.getElementById("room-calendar-grid");
       calendarGrid.innerHTML = "";
-
       const firstDayOfMonth = new Date(calYear, calMonth, 1);
       const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-
       let startDayOfWeek = firstDayOfMonth.getDay() - 1;
       if (startDayOfWeek === -1) startDayOfWeek = 6;
-
       for (let i = 0; i < startDayOfWeek; i++) {
         const emptyCell = document.createElement("div");
         emptyCell.className = "cal-day-cell empty";
         calendarGrid.appendChild(emptyCell);
       }
-
       for (let day = 1; day <= daysInMonth; day++) {
         const mStr = String(calMonth + 1).padStart(2, '0');
         const dStr = String(day).padStart(2, '0');
         const dateIso = `${calYear}-${mStr}-${dStr}`;
-
         const activeBooking = bookings.find(b => b.roomId === currentSelectedRoomId && (dateIso >= b.checkIn && dateIso < b.checkOut));
-
         const dayCell = document.createElement("div");
         dayCell.className = `cal-day-cell ${activeBooking ? 'busy' : 'free'}`;
         dayCell.title = activeBooking ? `Occupata da: ${activeBooking.guestName}` : `${day}/${calMonth+1}/${calYear}: Libera`;
@@ -970,7 +1285,6 @@
       openBookingModal(room, from, to);
     }
 
-    /* GESTIONE CALCOLO PREZZI, SCONTRINI E RISTORANTE */
     function calculateBookingTotal() {
       const adults = parseInt(document.getElementById("book-adults").value) || 0;
       const children = parseInt(document.getElementById("book-children").value) || 0;
@@ -979,17 +1293,14 @@
       const deposit = parseFloat(document.getElementById("book-deposit").value) || 0;
       const checkIn = document.getElementById("book-checkin").value;
       const checkOut = document.getElementById("book-checkout").value;
-
       let nights = 0;
       if (checkIn && checkOut && checkOut > checkIn) {
         nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
       }
-
       const stayTotal = ((adults * rateAdult) + (children * rateChild)) * nights;
       const mealsTotal = currentTempMeals.reduce((sum, m) => sum + m.amount, 0);
       const grandTotal = stayTotal + mealsTotal;
       const balance = grandTotal - deposit;
-
       document.getElementById("summary-stay").innerText = `€ ${stayTotal.toFixed(2)}`;
       document.getElementById("summary-meals").innerText = `€ ${mealsTotal.toFixed(2)}`;
       document.getElementById("summary-deposit").innerText = `€ ${deposit.toFixed(2)}`;
@@ -999,7 +1310,6 @@
     function openBookingModal(room, checkIn, checkOut, bookingToEdit = null) {
       document.getElementById("book-room-id").value = room.id;
       document.getElementById("meal-date").value = checkIn || new Date().toISOString().split('T')[0];
-
       if (bookingToEdit) {
         document.getElementById("modal-room-title").innerText = `Modifica Prenotazione Cam. ${room.name}`;
         document.getElementById("book-id").value = bookingToEdit.id;
@@ -1033,7 +1343,6 @@
         currentTempMeals = [];
         document.getElementById("meals-section-container").classList.add("hidden");
       }
-
       renderMealsList();
       calculateBookingTotal();
       document.getElementById("booking-modal").classList.remove("hidden");
@@ -1042,12 +1351,10 @@
     function renderMealsList() {
       const container = document.getElementById("meals-list");
       container.innerHTML = "";
-
       if (currentTempMeals.length === 0) {
         container.innerHTML = `<em style="font-size:0.75rem; color:#a0a8b5;">Nessuno scontrino/pasto inserito.</em>`;
         return;
       }
-
       currentTempMeals.forEach((m, idx) => {
         const div = document.createElement("div");
         div.className = "meal-item";
@@ -1069,12 +1376,10 @@
       const type = document.getElementById("meal-type").value;
       const amount = parseFloat(document.getElementById("meal-amount").value);
       const photoInput = document.getElementById("meal-photo-input");
-
       if (!date || isNaN(amount) || amount <= 0) {
         alert("Inserisci data e importo pasto validi!");
         return;
       }
-
       const saveMeal = (photoBase64) => {
         currentTempMeals.push({
           id: Date.now().toString(),
@@ -1083,7 +1388,6 @@
           amount,
           photo: photoBase64 || null
         });
-
         document.getElementById("meal-amount").value = "";
         document.getElementById("meal-photo-input").value = "";
         renderMealsList();
@@ -1091,9 +1395,9 @@
       };
 
       if (photoInput.files && photoInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => saveMeal(e.target.result);
-        reader.readAsDataURL(photoInput.files[0]);
+        compressImage(photoInput.files[0], 1024, 1024, 0.7, (compressedData) => {
+          saveMeal(compressedData);
+        });
       } else {
         saveMeal(null);
       }
@@ -1118,7 +1422,6 @@
       document.getElementById("booking-modal").classList.add("hidden");
     }
 
-    // SALVATAGGIO SU FIREBASE FIRESTORE
     async function saveBooking() {
       const editId = document.getElementById("book-id").value;
       const roomId = document.getElementById("book-room-id").value;
@@ -1132,40 +1435,32 @@
       const rateChild = parseFloat(document.getElementById("book-rate-child").value) || 0;
       const deposit = parseFloat(document.getElementById("book-deposit").value) || 0;
       const notes = document.getElementById("book-notes").value.trim();
-
       if (!guestName || !checkIn || !checkOut) {
         alert("Compila i campi obbligatori (Nome Referente e Date)!");
         return;
       }
-
       if (checkOut <= checkIn) {
         alert("La data di check-out deve essere successiva al check-in!");
         return;
       }
-
-      // Controllo sovrapposizioni
       const hasConflict = bookings.some(b => 
         b.id !== editId && b.roomId === roomId && (checkIn < b.checkOut && checkOut > b.checkIn)
       );
-
       if (hasConflict) {
         alert("Errore: La camera risulta occupata in questo intervallo di date!");
         return;
       }
-
       const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
       const stayTotal = ((adults * rateAdult) + (children * rateChild)) * nights;
       const mealsTotal = currentTempMeals.reduce((sum, m) => sum + m.amount, 0);
       const grandTotal = stayTotal + mealsTotal;
       const balance = grandTotal - deposit;
-
       const bookingData = {
         roomId, guestName, phone, adults, children, checkIn, checkOut,
         nights, rateAdult, rateChild, stayTotal, mealsTotal,
         totalPrice: grandTotal, deposit, balance, notes,
         meals: currentTempMeals
       };
-
       try {
         if (editId) {
           await db.collection("prenotazioni").doc(editId).set(bookingData, { merge: true });
@@ -1178,7 +1473,6 @@
       }
     }
 
-    /* AUTORIZZAZIONI MASTER E MODIFICA */
     function requestEditBooking(bookingId) {
       targetBookingId = bookingId;
       pendingMasterAction = 'edit';
@@ -1212,7 +1506,6 @@
         const action = pendingMasterAction;
         const bId = targetBookingId;
         closeMasterModal();
-
         if (action === 'release' && bId) {
           deleteBooking(bId);
         } else if (action === 'edit' && bId) {
@@ -1230,22 +1523,18 @@
       }
     }
 
-    /* REGISTRO ECONOMICO CON DIVISIONE ADULTI E BAMBINI */
     function renderMasterReport() {
       document.querySelector(".main-content").classList.add("hidden");
       document.getElementById("master-report-section").classList.remove("hidden");
-
       const from = document.getElementById("report-date-from").value;
       const to = document.getElementById("report-date-to").value;
       const tbody = document.getElementById("master-table-body");
       const tfoot = document.getElementById("master-table-foot");
       tbody.innerHTML = "";
-
       const filteredBookings = bookings.filter(b => {
         if (!from || !to) return true;
         return (from <= b.checkOut && to >= b.checkIn);
       });
-
       let sumAdults = 0;
       let sumChildren = 0;
       let sumStay = 0;
@@ -1253,14 +1542,12 @@
       let sumTotal = 0;
       let sumDeposit = 0;
       let sumBalance = 0;
-
       filteredBookings.forEach(b => {
         const stay = b.stayTotal || (b.totalPrice || 0);
         const meals = b.mealsTotal || 0;
         const grandTotal = b.totalPrice || (stay + meals);
         const dep = b.deposit || 0;
         const bal = b.balance || 0;
-
         sumAdults += (b.adults || 0);
         sumChildren += (b.children || 0);
         sumStay += stay;
@@ -1268,7 +1555,6 @@
         sumTotal += grandTotal;
         sumDeposit += dep;
         sumBalance += bal;
-
         tbody.innerHTML += `
           <tr>
             <td><strong>Cam. ${getRoomName(b.roomId)}</strong></td>
@@ -1291,7 +1577,6 @@
           </tr>
         `;
       });
-
       if (tfoot) {
         tfoot.innerHTML = `
           <tr>
@@ -1310,7 +1595,6 @@
       }
     }
 
-    // ELIMINAZIONE DA FIREBASE
     async function deleteBooking(id) {
       try {
         await db.collection("prenotazioni").doc(id).delete();
