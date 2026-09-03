@@ -337,6 +337,59 @@
       cursor: pointer;
       border: 1px solid #ff9f43;
     }
+    /* Stili per le Schede Documenti Stampabili */
+    .doc-card-print {
+      background: #121417;
+      border: 1px solid #2d333d;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .doc-card-header {
+      border-bottom: 1px solid #2d333d;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .doc-card-title {
+      color: #ff9f43;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    .doc-card-sub {
+      color: #e1e6ed;
+      font-size: 0.82rem;
+      margin-top: 2px;
+    }
+    .doc-images-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .doc-img-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: #1c2026;
+      border: 1px solid #3b4250;
+      padding: 6px;
+      border-radius: 6px;
+    }
+    .doc-label-tag {
+      font-size: 0.72rem;
+      font-weight: bold;
+      color: #ff9f43;
+    }
+    .doc-preview-img {
+      max-width: 260px;
+      max-height: 160px;
+      width: auto;
+      height: auto;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #ff9f43;
+      object-fit: contain;
+    }
     /* Calendario Mensile */
     .month-nav {
       display: flex;
@@ -408,7 +461,7 @@
     .report-table th { background: #121417; color: #ff9f43; }
     .report-table tfoot td { background: #121417; font-weight: bold; border-top: 2px solid #ff9f43; }
     
-    /* Stampa Report Perfetta senza Refusi e Adattata alla Pagina */
+    /* Stampa Report & Documenti Perfetta senza Refusi */
     @media print {
       .no-print, .hidden, .modal.hidden { display: none !important; }
       @page {
@@ -449,6 +502,43 @@
         overflow: visible !important; 
         height: auto !important; 
       }
+      .doc-card-print {
+        background: white !important;
+        border: 1px solid #000 !important;
+        border-radius: 6px !important;
+        padding: 10px !important;
+        margin-bottom: 12px !important;
+        page-break-inside: avoid !important;
+        color: black !important;
+      }
+      .doc-card-header {
+        border-bottom: 1px solid #ccc !important;
+        padding-bottom: 6px !important;
+        margin-bottom: 8px !important;
+        font-size: 9.5pt !important;
+        color: black !important;
+      }
+      .doc-card-title { color: black !important; font-size: 11pt !important; }
+      .doc-card-sub { color: black !important; font-size: 9pt !important; }
+      .doc-images-row {
+        display: flex !important;
+        gap: 12px !important;
+        flex-wrap: wrap !important;
+      }
+      .doc-img-wrapper {
+        background: white !important;
+        border: 1px solid #666 !important;
+        padding: 4px !important;
+      }
+      .doc-label-tag { color: black !important; }
+      .doc-preview-img {
+        max-width: 280px !important;
+        max-height: 180px !important;
+        width: auto !important;
+        height: auto !important;
+        border: 1px solid #333 !important;
+        object-fit: contain !important;
+      }
       .report-table { 
         width: 100% !important; 
         border-collapse: collapse !important; 
@@ -472,8 +562,8 @@
       }
       .report-table th { background: #f0f0f0 !important; font-weight: bold !important; }
       .report-table tfoot td { background: #f9f9f9 !important; font-weight: bold !important; border-top: 2px solid black !important; }
-      #pd-report-title, #pd-report-subtitle, .modal-title, h2, h3, h4, span, p, div, td, th, strong { color: black !important; }
-      #pd-printable-area, #master-report-section { overflow: visible !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      #pd-report-title, #pd-report-subtitle, #docs-report-title, #docs-report-subtitle, .modal-title, h2, h3, h4, span, p, div, td, th, strong { color: black !important; }
+      #pd-printable-area, #docs-printable-area, #master-report-section { overflow: visible !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
       .meal-thumb { max-width: 35px !important; max-height: 35px !important; border: 1px solid #ccc !important; }
     }
   </style>
@@ -509,6 +599,7 @@
       </div>
       <div class="bar-actions">
         <button class="btn-bar" onclick="openPranziCeneModal()">🍽️ Pranzi Cene Ditte</button>
+        <button class="btn-bar" onclick="openDocsModal()">🪪 Documenti Identità</button>
         <button class="btn-bar" onclick="openMasterModal('report')">📋 Registro Economico</button>
       </div>
     </header>
@@ -577,6 +668,50 @@
       </div>
     </div>
   </div>
+
+  <!-- MODALE SEZIONE DOCUMENTI D'IDENTITA (PER CAMERA & DURATA SOGGIORNO) -->
+  <div id="docs-modal" class="modal hidden">
+    <div class="modal-box" style="max-width: 780px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
+        <h3 class="modal-title" style="border:none; padding:0;">🪪 Documenti d'Identità per Camera</h3>
+        <button class="btn-cancel" style="padding:4px 8px; font-size:0.8rem;" onclick="closeDocsModal()">✕ Chiudi</button>
+      </div>
+
+      <!-- FILTRI DOCUMENTI (NO PRINT) -->
+      <div class="card-dark no-print" style="padding:8px; margin:8px 0 10px 0;">
+        <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">Filtra Registro Documenti</h4>
+        <div class="form-row" style="flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:130px;">
+            <label>Dal:</label>
+            <input type="date" id="docs-filter-from" onchange="renderDocsReport()">
+          </div>
+          <div class="form-group" style="flex:1; min-width:130px;">
+            <label>Al:</label>
+            <input type="date" id="docs-filter-to" onchange="renderDocsReport()">
+          </div>
+          <div class="form-group" style="flex:1; min-width:160px;">
+            <label>Seleziona Camera:</label>
+            <select id="docs-filter-room" onchange="renderDocsReport()">
+              <option value="ALL">-- Tutte le Camere --</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:8px; text-align:right;">
+          <button class="btn-gold" style="padding:6px 12px; font-size:0.8rem;" onclick="window.print()">🖨️ Stampa Documenti</button>
+        </div>
+      </div>
+
+      <!-- AREA STAMPABILE SCHEDE DOCUMENTI -->
+      <div id="docs-printable-area">
+        <div style="margin-bottom:10px;">
+          <h3 style="color:#ff9f43; font-size:1.05rem;" id="docs-report-title">Registro Documenti d'Identità Ospiti</h3>
+          <p style="font-size:0.78rem; color:#abb3c0;" id="docs-report-subtitle"></p>
+        </div>
+        <div id="docs-report-container" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODALE PRANZI CENE DITTE & SCONTRINI -->
   <div id="pranzi-cene-modal" class="modal hidden">
     <div class="modal-box" style="max-width: 680px;">
@@ -787,7 +922,6 @@
         <label>Acconto Versato (€):</label>
         <input type="number" id="book-deposit" value="0" min="0" step="1" oninput="calculateBookingTotal()">
       </div>
-
       <!-- SEZIONE DOCUMENTI D'IDENTITA OSPITI (FRONTE / RETRO) -->
       <div id="docs-section-container" class="meals-section">
         <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">🪪 Documenti d'Identità Ospiti (Fronte / Retro)</h4>
@@ -808,7 +942,6 @@
         <button type="button" class="btn-gold" style="margin-top:6px; padding:5px; font-size:0.8rem;" onclick="addDocToBooking()">+ Aggiungi Documento Ospite</button>
         <div id="docs-list" style="margin-top:6px; max-height:140px; overflow-y:auto;"></div>
       </div>
-
       <!-- SEZIONE CONSUMAZIONI RISTORANTE (SCONTRINI) -->
       <div id="meals-section-container" class="meals-section hidden">
         <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">🍽️ Consumazioni Ristorante & Scontrini</h4>
@@ -951,6 +1084,9 @@
         if (!document.getElementById("master-report-section").classList.contains("hidden")) {
           renderMasterReport();
         }
+        if (!document.getElementById("docs-modal").classList.contains("hidden")) {
+          renderDocsReport();
+        }
       }, (error) => {
         console.error("Errore di sincronizzazione Firebase Prenotazioni:", error);
       });
@@ -1025,6 +1161,107 @@
         grid.appendChild(card);
       });
     }
+
+    // ==========================================
+    // LOGICA SEZIONE / MODALE DOCUMENTI D'IDENTITÀ
+    // ==========================================
+    function openDocsModal() {
+      const today = new Date().toISOString().split('T')[0];
+      const yearStart = `${calYear}-01-01`;
+      document.getElementById("docs-filter-from").value = yearStart;
+      document.getElementById("docs-filter-to").value = today;
+      
+      const roomSelect = document.getElementById("docs-filter-room");
+      roomSelect.innerHTML = `<option value="ALL">-- Tutte le Camere --</option>`;
+      ROOMS.forEach(r => {
+        roomSelect.innerHTML += `<option value="${r.id}">Camera ${r.name} (${r.type})</option>`;
+      });
+      
+      renderDocsReport();
+      document.getElementById("docs-modal").classList.remove("hidden");
+    }
+
+    function closeDocsModal() {
+      document.getElementById("docs-modal").classList.add("hidden");
+    }
+
+    function renderDocsReport() {
+      const from = document.getElementById("docs-filter-from").value;
+      const to = document.getElementById("docs-filter-to").value;
+      const selectedRoom = document.getElementById("docs-filter-room").value;
+      const container = document.getElementById("docs-report-container");
+      const subtitle = document.getElementById("docs-report-subtitle");
+      
+      if (!container) return;
+      container.innerHTML = "";
+      
+      let labelFiltro = "Periodo: " + (from ? formatDate(from) : 'Inizio') + " ➔ " + (to ? formatDate(to) : 'Fine');
+      if (selectedRoom !== 'ALL') {
+        labelFiltro += " | Camera " + getRoomName(selectedRoom);
+      }
+      
+      const filtered = bookings.filter(b => {
+        if (from && b.checkOut < from) return false;
+        if (to && b.checkIn > to) return false;
+        if (selectedRoom !== 'ALL' && b.roomId !== selectedRoom) return false;
+        return (b.guestDocs && b.guestDocs.length > 0);
+      }).sort((a,b) => b.checkIn.localeCompare(a.checkIn));
+      
+      subtitle.innerText = `${labelFiltro} | Prenotazioni trovate con documenti: ${filtered.length}`;
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#a0a8b5;">Nessun documento d'identità trovato per i filtri selezionati.</div>`;
+        return;
+      }
+      
+      filtered.forEach(b => {
+        const card = document.createElement("div");
+        card.className = "doc-card-print";
+        
+        let docsHtml = "";
+        b.guestDocs.forEach((d, idx) => {
+          docsHtml += `
+            <div style="margin-top:8px;">
+              <div style="font-weight:bold; font-size:0.8rem; color:#ff9f43; margin-bottom:4px;" class="doc-label-tag">
+                👤 Ospite / Rif: ${d.label || 'Ospite ' + (idx + 1)}
+              </div>
+              <div class="doc-images-row">
+                ${d.fronte ? `
+                  <div class="doc-img-wrapper">
+                    <span class="doc-label-tag">FRONTE</span>
+                    <img src="${d.fronte}" class="doc-preview-img" onclick="openImageViewer('${d.fronte}')" title="Clicca per ingrandire">
+                  </div>
+                ` : ''}
+                ${d.retro ? `
+                  <div class="doc-img-wrapper">
+                    <span class="doc-label-tag">RETRO</span>
+                    <img src="${d.retro}" class="doc-preview-img" onclick="openImageViewer('${d.retro}')" title="Clicca per ingrandire">
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        });
+        
+        card.innerHTML = `
+          <div class="doc-card-header">
+            <div class="doc-card-title">🏡 Camera ${getRoomName(b.roomId)} — ${b.guestName}</div>
+            <div class="doc-card-sub">
+              📅 <strong>Soggiorno:</strong> ${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights} ${b.nights === 1 ? 'notte' : 'notti'}) | 
+              📞 <strong>Tel:</strong> ${b.phone || '-'} | 
+              👥 <strong>Ospiti:</strong> ${b.adults} Adulti ${b.children ? '/ ' + b.children + ' Bambini' : ''}
+            </div>
+            ${b.notes ? `<div style="font-size:0.75rem; color:#ffeaa7; margin-top:2px;">📝 <strong>Note:</strong> ${b.notes}</div>` : ''}
+          </div>
+          <div class="doc-card-body">
+            ${docsHtml}
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+
     // ==========================================
     // LOGICA QUADRO PRANZI CENE DITTE & CODICE CLIENTE
     // ==========================================
@@ -1478,7 +1715,6 @@
       calculateBookingTotal();
       document.getElementById("booking-modal").classList.remove("hidden");
     }
-
     // ==========================================
     // LOGICA GESTIONE DOCUMENTI D'IDENTITA OSPITI
     // ==========================================
@@ -1506,21 +1742,17 @@
         container.appendChild(div);
       });
     }
-
     function addDocToBooking() {
       const labelInput = document.getElementById("doc-guest-label");
       const fronteInput = document.getElementById("doc-fronte-input");
       const retroInput = document.getElementById("doc-retro-input");
-
       const label = labelInput.value.trim() || `Ospite ${currentTempDocs.length + 1}`;
       const fronteFile = fronteInput.files && fronteInput.files[0];
       const retroFile = retroInput.files && retroInput.files[0];
-
       if (!fronteFile && !retroFile) {
         alert("Seleziona o scatta almeno una foto (Fronte o Retro) del documento!");
         return;
       }
-
       const processRetro = (fronteBase64) => {
         if (retroFile) {
           compressImage(retroFile, 1024, 1024, 0.7, (retroBase64) => {
@@ -1548,7 +1780,6 @@
           renderDocsList();
         }
       };
-
       if (fronteFile) {
         compressImage(fronteFile, 1024, 1024, 0.7, (fronteBase64) => {
           processRetro(fronteBase64);
@@ -1557,12 +1788,10 @@
         processRetro(null);
       }
     }
-
     function removeDoc(index) {
       currentTempDocs.splice(index, 1);
       renderDocsList();
     }
-
     function renderMealsList() {
       const container = document.getElementById("meals-list");
       container.innerHTML = "";
@@ -1758,66 +1987,67 @@
         sumTotal += grandTotal;
         sumDeposit += dep;
         sumBalance += bal;
-
         let docsDisplay = '-';
         if (b.guestDocs && b.guestDocs.length > 0) {
           docsDisplay = b.guestDocs.map(d => `
-            <div style="font-size:0.72rem; margin-bottom:3px;">
+            <div style="font-size:0.72rem; margin-bottom:2px;">
               <strong>${d.label}:</strong>
-              ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" style="width:26px;height:26px;vertical-align:middle;" onclick="openImageViewer('${d.fronte}')" title="${d.label} Fronte">` : ''}
-              ${d.retro ? `<img src="${d.retro}" class="meal-thumb" style="width:26px;height:26px;vertical-align:middle;" onclick="openImageViewer('${d.retro}')" title="${d.label} Retro">` : ''}
+              ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" style="width:24px;height:24px;" onclick="openImageViewer('${d.fronte}')">` : ''}
+              ${d.retro ? `<img src="${d.retro}" class="meal-thumb" style="width:24px;height:24px;" onclick="openImageViewer('${d.retro}')">` : ''}
             </div>
           `).join('');
         }
-
         tbody.innerHTML += `
           <tr>
             <td><strong>Cam. ${getRoomName(b.roomId)}</strong></td>
             <td>${b.guestName}</td>
             <td>${b.phone || '-'}</td>
-            <td style="text-align:center; font-weight:bold;">${b.adults}</td>
-            <td style="text-align:center; font-weight:bold; color:#ff9f43;">${b.children || 0}</td>
+            <td>${b.adults}</td>
+            <td>${b.children || 0}</td>
             <td>${formatDate(b.checkIn)}</td>
             <td>${formatDate(b.checkOut)}</td>
             <td>${b.nights}n</td>
             <td>€ ${stay.toFixed(2)}</td>
-            <td style="color:#3498db;">€ ${meals.toFixed(2)}</td>
+            <td>€ ${meals.toFixed(2)}</td>
             <td><strong>€ ${grandTotal.toFixed(2)}</strong></td>
             <td style="color:#2ecc71;">€ ${dep.toFixed(2)}</td>
             <td style="color:#e74c3c;"><strong>€ ${bal.toFixed(2)}</strong></td>
             <td>${b.notes || '-'}</td>
             <td>${docsDisplay}</td>
             <td class="no-print">
-              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:4px 6px; border-radius:3px; cursor:pointer;">Elimina</button>
+              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer;">Elimina</button>
             </td>
           </tr>
         `;
       });
-      if (tfoot) {
-        tfoot.innerHTML = `
-          <tr>
-            <td colspan="3" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALI PERIODO:</td>
-            <td style="text-align:center; font-weight:bold; color:#ffffff;">${sumAdults} Ad.</td>
-            <td style="text-align:center; font-weight:bold; color:#ff9f43;">${sumChildren} Bim.</td>
-            <td colspan="3"></td>
-            <td><strong>€ ${sumStay.toFixed(2)}</strong></td>
-            <td style="color:#3498db;"><strong>€ ${sumMeals.toFixed(2)}</strong></td>
-            <td><strong style="color:#ff9f43;">€ ${sumTotal.toFixed(2)}</strong></td>
-            <td style="color:#2ecc71;"><strong>€ ${sumDeposit.toFixed(2)}</strong></td>
-            <td style="color:#e74c3c;"><strong>€ ${sumBalance.toFixed(2)}</strong></td>
-            <td></td>
-            <td></td>
-            <td class="no-print"></td>
-          </tr>
-        `;
-      }
+      tfoot.innerHTML = `
+        <tr>
+          <td><strong>TOTALE</strong></td>
+          <td>-</td>
+          <td>-</td>
+          <td><strong>${sumAdults}</strong></td>
+          <td><strong>${sumChildren}</strong></td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td><strong>€ ${sumStay.toFixed(2)}</strong></td>
+          <td><strong>€ ${sumMeals.toFixed(2)}</strong></td>
+          <td><strong>€ ${sumTotal.toFixed(2)}</strong></td>
+          <td style="color:#2ecc71;"><strong>€ ${sumDeposit.toFixed(2)}</strong></td>
+          <td style="color:#e74c3c;"><strong>€ ${sumBalance.toFixed(2)}</strong></td>
+          <td>-</td>
+          <td>-</td>
+          <td class="no-print"></td>
+        </tr>
+      `;
     }
-    async function deleteBooking(id) {
-      try {
-        await db.collection("prenotazioni").doc(id).delete();
-      } catch (err) {
-        alert("Errore nell'eliminazione: " + err.message);
-      }
+    function deleteBooking(id) {
+      db.collection("prenotazioni").doc(id).delete().then(() => {
+        renderRooms();
+        if (!document.getElementById("master-report-section").classList.contains("hidden")) {
+          renderMasterReport();
+        }
+      }).catch(err => alert("Errore durante l'eliminazione: " + err.message));
     }
     function closeMasterReport() {
       document.getElementById("master-report-section").classList.add("hidden");
@@ -1826,7 +2056,7 @@
     }
     function getRoomName(roomId) {
       const room = ROOMS.find(r => r.id === roomId);
-      return room ? room.name : roomId;
+      return room ? room.name : `${roomId}`;
     }
   </script>
 </body>
