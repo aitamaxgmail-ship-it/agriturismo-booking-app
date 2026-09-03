@@ -218,7 +218,6 @@
       .room-guest { font-size: 0.65rem; }
       .room-dates { font-size: 0.52rem; padding: 1px; }
       .status-text { font-size: 0.58rem !important; }
-
       /* Adattamento Modali e Form per Mobile */
       .modal { padding: 4px; }
       .modal-box {
@@ -409,19 +408,73 @@
     .report-table th { background: #121417; color: #ff9f43; }
     .report-table tfoot td { background: #121417; font-weight: bold; border-top: 2px solid #ff9f43; }
     
-    /* Stampa Report Generico e Pranzi/Cene/Ditte - Risoluzione Troncamento */
+    /* Stampa Report Perfetta senza Refusi e Adattata alla Pagina */
     @media print {
-      .no-print { display: none !important; }
-      body, html { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; width: 100% !important; height: auto !important; overflow: visible !important; }
+      .no-print, .hidden, .modal.hidden { display: none !important; }
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+      body, html { 
+        background: white !important; 
+        color: black !important; 
+        padding: 0 !important; 
+        margin: 0 !important; 
+        width: 100% !important; 
+        height: auto !important; 
+        overflow: visible !important; 
+      }
       .master-view { background: white !important; padding: 0 !important; }
-      .modal { position: static !important; background: transparent !important; display: block !important; padding: 0 !important; height: auto !important; overflow: visible !important; z-index: auto !important; }
-      .modal-box { background: white !important; color: black !important; border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; padding: 0 !important; max-height: none !important; overflow: visible !important; height: auto !important; }
-      .report-table { width: 100% !important; border-collapse: collapse !important; page-break-inside: auto; }
-      .report-table tr { page-break-inside: avoid; page-break-after: auto; }
-      .report-table th, .report-table td { border: 1px solid black !important; color: black !important; font-size: 0.75rem !important; padding: 4px !important; word-wrap: break-word; }
-      .report-table th { background: #f0f0f0 !important; }
-      #pd-report-title, #pd-report-subtitle { color: black !important; }
-      #pd-printable-area { overflow: visible !important; width: 100% !important; }
+      .modal:not(.hidden) { 
+        position: static !important; 
+        background: transparent !important; 
+        display: block !important; 
+        padding: 0 !important; 
+        margin: 0 !important;
+        height: auto !important; 
+        overflow: visible !important; 
+        z-index: auto !important; 
+        border: none !important;
+      }
+      .modal-box { 
+        background: white !important; 
+        color: black !important; 
+        border: none !important; 
+        box-shadow: none !important; 
+        max-width: 100% !important; 
+        width: 100% !important; 
+        padding: 0 !important; 
+        margin: 0 !important;
+        max-height: none !important; 
+        overflow: visible !important; 
+        height: auto !important; 
+      }
+      .report-table { 
+        width: 100% !important; 
+        border-collapse: collapse !important; 
+        page-break-inside: auto; 
+        margin-top: 10px !important;
+        table-layout: auto !important;
+      }
+      .report-table tr { 
+        page-break-inside: avoid !important; 
+        page-break-after: auto !important; 
+      }
+      .report-table th, .report-table td { 
+        border: 1px solid black !important; 
+        color: black !important; 
+        font-size: 8.5pt !important; 
+        padding: 4px 6px !important; 
+        word-wrap: break-word !important; 
+        word-break: break-word !important;
+        white-space: normal !important;
+        text-align: left !important;
+      }
+      .report-table th { background: #f0f0f0 !important; font-weight: bold !important; }
+      .report-table tfoot td { background: #f9f9f9 !important; font-weight: bold !important; border-top: 2px solid black !important; }
+      #pd-report-title, #pd-report-subtitle, .modal-title, h2, h3, h4, span, p, div, td, th, strong { color: black !important; }
+      #pd-printable-area, #master-report-section { overflow: visible !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      .meal-thumb { max-width: 35px !important; max-height: 35px !important; border: 1px solid #ccc !important; }
     }
   </style>
 </head>
@@ -526,7 +579,7 @@
   <!-- MODALE PRANZI CENE DITTE & SCONTRINI -->
   <div id="pranzi-cene-modal" class="modal hidden">
     <div class="modal-box" style="max-width: 680px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
         <h3 class="modal-title" style="border:none; padding:0;">🍽️ Pranzi, Cene & Ditte</h3>
         <button class="btn-cancel" style="padding:4px 8px; font-size:0.8rem;" onclick="closePranziCeneModal()">✕ Chiudi</button>
       </div>
@@ -948,7 +1001,6 @@
         grid.appendChild(card);
       });
     }
-
     // ==========================================
     // LOGICA QUADRO PRANZI CENE DITTE & CODICE CLIENTE
     // ==========================================
@@ -966,7 +1018,6 @@
       const nextNum = maxNum + 1;
       return `CLI-${String(nextNum).padStart(3, '0')}`;
     }
-
     function onDittaInputChanged() {
       const nameInput = document.getElementById("pd-ditta-input").value.trim();
       const codeInput = document.getElementById("pd-client-code");
@@ -983,7 +1034,6 @@
         }
       }
     }
-
     function updateDittaDatalist() {
       const datalist = document.getElementById("pd-ditta-list");
       if (!datalist) return;
@@ -1001,7 +1051,6 @@
         datalist.appendChild(opt);
       });
     }
-
     function openPranziCeneModal() {
       const today = new Date().toISOString().split('T')[0];
       document.getElementById("pd-date").value = today;
@@ -1020,11 +1069,9 @@
       switchPdTab('add');
       document.getElementById("pranzi-cene-modal").classList.remove("hidden");
     }
-
     function closePranziCeneModal() {
       document.getElementById("pranzi-cene-modal").classList.add("hidden");
     }
-
     function switchPdTab(tabName) {
       const btnAdd = document.getElementById("pd-tab-btn-add");
       const btnReport = document.getElementById("pd-tab-btn-report");
@@ -1043,7 +1090,6 @@
         renderPranziCeneReport();
       }
     }
-
     function togglePdTargetType() {
       const isDitta = document.querySelector('input[name="pd-target-type"]:checked').value === 'ditta';
       if (isDitta) {
@@ -1054,7 +1100,6 @@
         document.getElementById("pd-target-camera-group").classList.remove("hidden");
       }
     }
-
     function compressImage(file, maxWidth, maxHeight, quality, callback) {
       if (!file) {
         callback(null);
@@ -1086,7 +1131,6 @@
       };
       reader.readAsDataURL(file);
     }
-
     async function savePranzoCenaEntry() {
       const date = document.getElementById("pd-date").value;
       const mealType = document.getElementById("pd-meal-type").value;
@@ -1097,12 +1141,10 @@
       const amount = parseFloat(document.getElementById("pd-amount").value);
       const notes = document.getElementById("pd-notes").value.trim();
       const photoInput = document.getElementById("pd-photo-input");
-
       if (!date || isNaN(amount) || amount <= 0) {
         alert("Inserisci una data e un importo validi!");
         return;
       }
-
       if (targetType === 'ditta') {
         if (!dittaName) {
           alert("Inserisci i Dati Fiscali o il Nome della Ditta!");
@@ -1112,9 +1154,7 @@
           clientCode = getNextClientCode();
         }
       }
-
       const targetName = targetType === 'ditta' ? `${dittaName}` : `Camera ${getRoomName(roomId)}`;
-
       const executeSave = async (photoBase64) => {
         const entryData = {
           date,
@@ -1142,7 +1182,6 @@
           alert("Errore durante il salvataggio: " + err.message);
         }
       };
-
       if (photoInput.files && photoInput.files[0]) {
         compressImage(photoInput.files[0], 1024, 1024, 0.7, (compressedData) => {
           executeSave(compressedData);
@@ -1151,14 +1190,12 @@
         executeSave(null);
       }
     }
-
     function onPdCategoryChange() {
       const cat = document.getElementById("pd-filter-category").value;
       const detailGroup = document.getElementById("pd-filter-detail-group");
       const detailSelect = document.getElementById("pd-filter-detail-select");
       const detailLabel = document.getElementById("pd-filter-detail-label");
       detailSelect.innerHTML = `<option value="ALL">Tutti</option>`;
-
       if (cat === 'ALL') {
         detailGroup.classList.add("hidden");
       } else if (cat === 'CAMERA') {
@@ -1184,7 +1221,6 @@
       }
       renderPranziCeneReport();
     }
-
     function renderPranziCeneReport() {
       const from = document.getElementById("pd-filter-from").value;
       const to = document.getElementById("pd-filter-to").value;
@@ -1194,7 +1230,6 @@
       const tfoot = document.getElementById("pd-table-foot");
       const subtitle = document.getElementById("pd-report-subtitle");
       tbody.innerHTML = "";
-
       let labelFiltro = "Periodo: " + (from ? formatDate(from) : 'Inizio') + " ➔ " + (to ? formatDate(to) : 'Fine');
       if (category === 'CAMERA') {
         labelFiltro += " | Filtro: " + (detailSelect !== 'ALL' ? 'Camera ' + getRoomName(detailSelect) : 'Tutte le Camere');
@@ -1202,7 +1237,6 @@
         labelFiltro += " | Filtro: " + (detailSelect !== 'ALL' ? 'Ditta ' + detailSelect : 'Tutte le Ditte');
       }
       subtitle.innerText = labelFiltro;
-
       const filtered = pranziCeneList.filter(item => {
         if (from && item.date < from) return false;
         if (to && item.date > to) return false;
@@ -1216,7 +1250,6 @@
         }
         return true;
       }).sort((a,b) => b.date.localeCompare(a.date));
-
       let total = 0;
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0a8b5;">Nessun record trovato per i filtri selezionati.</td></tr>`;
@@ -1224,11 +1257,9 @@
         filtered.forEach(item => {
           total += (item.amount || 0);
           const tr = document.createElement("tr");
-
           const destDisplay = item.targetType === 'ditta' 
             ? `<span style="color:#ff9f43; font-weight:bold;">${item.clientCode ? '[' + item.clientCode + '] ' : ''}</span><strong>${item.dittaName || item.targetName}</strong>`
             : `<strong>${item.targetName}</strong>`;
-
           tr.innerHTML = `
             <td>${formatDate(item.date)}</td>
             <td><span style="color:#ff9f43; font-weight:bold;">${item.mealType || 'Pasto'}</span></td>
@@ -1250,11 +1281,11 @@
           <td colspan="3" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALE IMPORTI:</td>
           <td style="color:#2ecc71; font-weight:bold; font-size:0.95rem;">€ ${total.toFixed(2)}</td>
           <td class="no-print"></td>
-          <td colspan="2"></td>
+          <td></td>
+          <td class="no-print"></td>
         </tr>
       `;
     }
-
     async function deletePranzoCenaEntry(id) {
       if (confirm("Confermi di voler eliminare questo scontrino/pasto?")) {
         try {
@@ -1264,7 +1295,6 @@
         }
       }
     }
-
     // ==========================================
     // LOGICA CAMERE E PRENOTAZIONI
     // ==========================================
@@ -1300,7 +1330,6 @@
       }
       document.getElementById("room-detail-modal").classList.remove("hidden");
     }
-
     function renderCalendarMonth() {
       const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
       document.getElementById("cal-month-title").innerText = `${monthNames[calMonth]} ${calYear}`;
@@ -1330,18 +1359,15 @@
         calendarGrid.appendChild(dayCell);
       }
     }
-
     function changeMonth(delta) {
       calMonth += delta;
       if (calMonth > 11) { calMonth = 0; calYear++; } 
       else if (calMonth < 0) { calMonth = 11; calYear--; }
       renderCalendarMonth();
     }
-
     function closeRoomDetailModal() {
       document.getElementById("room-detail-modal").classList.add("hidden");
     }
-
     function createBookingFromDetail() {
       const room = ROOMS.find(r => r.id === currentSelectedRoomId);
       if (!room) return;
@@ -1350,7 +1376,6 @@
       closeRoomDetailModal();
       openBookingModal(room, from, to);
     }
-
     function calculateBookingTotal() {
       const adults = parseInt(document.getElementById("book-adults").value) || 0;
       const children = parseInt(document.getElementById("book-children").value) || 0;
@@ -1372,7 +1397,6 @@
       document.getElementById("summary-deposit").innerText = `€ ${deposit.toFixed(2)}`;
       document.getElementById("summary-balance").innerText = `€ ${balance.toFixed(2)}`;
     }
-
     function openBookingModal(room, checkIn, checkOut, bookingToEdit = null) {
       document.getElementById("book-room-id").value = room.id;
       document.getElementById("meal-date").value = checkIn || new Date().toISOString().split('T')[0];
@@ -1413,7 +1437,6 @@
       calculateBookingTotal();
       document.getElementById("booking-modal").classList.remove("hidden");
     }
-
     function renderMealsList() {
       const container = document.getElementById("meals-list");
       container.innerHTML = "";
@@ -1436,7 +1459,6 @@
         container.appendChild(div);
       });
     }
-
     function addMealToBooking() {
       const date = document.getElementById("meal-date").value;
       const type = document.getElementById("meal-type").value;
@@ -1467,26 +1489,21 @@
         saveMeal(null);
       }
     }
-
     function removeMeal(index) {
       currentTempMeals.splice(index, 1);
       renderMealsList();
       calculateBookingTotal();
     }
-
     function openImageViewer(src) {
       document.getElementById("enlarged-receipt-img").src = src;
       document.getElementById("image-viewer-modal").classList.remove("hidden");
     }
-
     function closeImageViewer() {
       document.getElementById("image-viewer-modal").classList.add("hidden");
     }
-
     function closeBookingModal() {
       document.getElementById("booking-modal").classList.add("hidden");
     }
-
     async function saveBooking() {
       const editId = document.getElementById("book-id").value;
       const roomId = document.getElementById("book-room-id").value;
@@ -1537,14 +1554,12 @@
         alert("Errore nel salvataggio su Firebase: " + err.message);
       }
     }
-
     function requestEditBooking(bookingId) {
       targetBookingId = bookingId;
       pendingMasterAction = 'edit';
       document.getElementById("master-prompt-text").innerText = "Inserisci PIN Master per modificare la prenotazione:";
       document.getElementById("master-modal").classList.remove("hidden");
     }
-
     function requestReleaseRoomDirect(bookingId) {
       const b = bookings.find(item => item.id === bookingId);
       if (!b) return;
@@ -1553,19 +1568,16 @@
       document.getElementById("master-prompt-text").innerText = `Liberare Cam. ${getRoomName(b.roomId)} (${b.guestName})? Inserisci PIN Master:`;
       document.getElementById("master-modal").classList.remove("hidden");
     }
-
     function openMasterModal(action) {
       pendingMasterAction = action;
       document.getElementById("master-prompt-text").innerText = "Inserisci PIN Master per accedere:";
       document.getElementById("master-modal").classList.remove("hidden");
     }
-
     function closeMasterModal() {
       document.getElementById("master-modal").classList.add("hidden");
       document.getElementById("master-pin-input").value = "";
       document.getElementById("master-error").innerText = "";
     }
-
     function submitMasterPin() {
       if (document.getElementById("master-pin-input").value === CONFIG.MASTER_PIN) {
         const action = pendingMasterAction;
@@ -1587,7 +1599,6 @@
         document.getElementById("master-error").innerText = "PIN Master Errato!";
       }
     }
-
     function renderMasterReport() {
       document.querySelector(".main-content").classList.add("hidden");
       document.getElementById("master-report-section").classList.remove("hidden");
@@ -1654,12 +1665,12 @@
             <td><strong style="color:#ff9f43;">€ ${sumTotal.toFixed(2)}</strong></td>
             <td style="color:#2ecc71;"><strong>€ ${sumDeposit.toFixed(2)}</strong></td>
             <td style="color:#e74c3c;"><strong>€ ${sumBalance.toFixed(2)}</strong></td>
-            <td colspan="2"></td>
+            <td></td>
+            <td class="no-print"></td>
           </tr>
         `;
       }
     }
-
     async function deleteBooking(id) {
       try {
         await db.collection("prenotazioni").doc(id).delete();
@@ -1667,13 +1678,11 @@
         alert("Errore nell'eliminazione: " + err.message);
       }
     }
-
     function closeMasterReport() {
       document.getElementById("master-report-section").classList.add("hidden");
       document.querySelector(".main-content").classList.remove("hidden");
       renderRooms();
     }
-
     function getRoomName(roomId) {
       const room = ROOMS.find(r => r.id === roomId);
       return room ? room.name : roomId;
