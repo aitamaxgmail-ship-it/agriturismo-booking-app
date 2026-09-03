@@ -218,6 +218,16 @@
       .room-guest { font-size: 0.65rem; }
       .room-dates { font-size: 0.52rem; padding: 1px; }
       .status-text { font-size: 0.58rem !important; }
+
+      /* Adattamento Modali e Form per Mobile */
+      .modal { padding: 4px; }
+      .modal-box {
+        padding: 10px;
+        max-height: 94vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .form-row { flex-direction: column; gap: 6px; }
     }
     /* Modali */
     .modal {
@@ -398,16 +408,20 @@
     .report-table th, .report-table td { border: 1px solid #2d333d; padding: 6px 8px; text-align: left; font-size: 0.8rem; }
     .report-table th { background: #121417; color: #ff9f43; }
     .report-table tfoot td { background: #121417; font-weight: bold; border-top: 2px solid #ff9f43; }
-
-    /* Stampa Report Generico e Pranzi/Cene/Ditte */
+    
+    /* Stampa Report Generico e Pranzi/Cene/Ditte - Risoluzione Troncamento */
     @media print {
       .no-print { display: none !important; }
-      body { background: white !important; color: black !important; padding: 0 !important; }
-      .master-view, .modal-box { background: white !important; color: black !important; border: none !important; box-shadow: none !important; max-width: 100% !important; padding: 0 !important; }
-      .modal { position: static !important; background: transparent !important; }
-      .report-table th, .report-table td { border: 1px solid black !important; color: black !important; font-size: 0.75rem !important; padding: 4px !important; }
+      body, html { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; width: 100% !important; height: auto !important; overflow: visible !important; }
+      .master-view { background: white !important; padding: 0 !important; }
+      .modal { position: static !important; background: transparent !important; display: block !important; padding: 0 !important; height: auto !important; overflow: visible !important; z-index: auto !important; }
+      .modal-box { background: white !important; color: black !important; border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; padding: 0 !important; max-height: none !important; overflow: visible !important; height: auto !important; }
+      .report-table { width: 100% !important; border-collapse: collapse !important; page-break-inside: auto; }
+      .report-table tr { page-break-inside: avoid; page-break-after: auto; }
+      .report-table th, .report-table td { border: 1px solid black !important; color: black !important; font-size: 0.75rem !important; padding: 4px !important; word-wrap: break-word; }
       .report-table th { background: #f0f0f0 !important; }
-      #pd-report-title { color: black !important; }
+      #pd-report-title, #pd-report-subtitle { color: black !important; }
+      #pd-printable-area { overflow: visible !important; width: 100% !important; }
     }
   </style>
 </head>
@@ -460,7 +474,6 @@
       <!-- GRIGLIA CAMERE 5x2 -->
       <div id="rooms-grid" class="grid-container"></div>
     </main>
-
     <!-- VISTA REGISTRO ECONOMICO & STAMPA -->
     <div id="master-report-section" class="hidden master-view">
       <div class="report-header no-print">
@@ -510,8 +523,7 @@
       </div>
     </div>
   </div>
-
-  <!-- MODALE PRANZI CENE DITTE & SCONTRINI (NUOVO) -->
+  <!-- MODALE PRANZI CENE DITTE & SCONTRINI -->
   <div id="pranzi-cene-modal" class="modal hidden">
     <div class="modal-box" style="max-width: 680px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;">
@@ -524,7 +536,6 @@
         <button id="pd-tab-btn-add" class="btn-gold" style="flex:1; padding:6px; font-size:0.85rem;" onclick="switchPdTab('add')">➕ Carica Scontrino / Pasto</button>
         <button id="pd-tab-btn-report" class="btn-cancel" style="flex:1; padding:6px; font-size:0.85rem;" onclick="switchPdTab('report')">📋 Report & Stampa</button>
       </div>
-
       <!-- SEZIONE 1: CARICO NUOVO SCONTRINO / PASTO -->
       <div id="pd-section-add" class="no-print" style="margin-top:8px;">
         <div class="form-row">
@@ -542,7 +553,6 @@
             </select>
           </div>
         </div>
-
         <div class="form-group" style="margin-top:6px;">
           <label>Destinazione Addebito / Dati:</label>
           <div style="display:flex; gap:15px; margin:4px 0;">
@@ -554,19 +564,25 @@
             </label>
           </div>
         </div>
-
-        <!-- CAMPO DITTA / DATI FISCALI -->
+        <!-- CAMPO DITTA / DATI FISCALI CON CODICE CLIENTE -->
         <div id="pd-target-ditta-group" class="form-group">
-          <label>Dati Fiscali / Nome Ditta o Cliente:</label>
-          <input type="text" id="pd-ditta-input" placeholder="Es. Edilizia Rossi Srl - P.IVA 01234567890">
+          <div class="form-row">
+            <div class="form-group" style="flex:2;">
+              <label>Dati Fiscali / Nome Ditta o Cliente:</label>
+              <input type="text" id="pd-ditta-input" list="pd-ditta-list" placeholder="Es. Edilizia Rossi Srl - P.IVA 01234567890" oninput="onDittaInputChanged()">
+              <datalist id="pd-ditta-list"></datalist>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>Cod. Cliente:</label>
+              <input type="text" id="pd-client-code" placeholder="Es. CLI-001" style="font-weight:bold; color:#ff9f43;">
+            </div>
+          </div>
         </div>
-
         <!-- CAMPO CAMERA -->
         <div id="pd-target-camera-group" class="form-group hidden">
           <label>Seleziona Camera:</label>
           <select id="pd-camera-select"></select>
         </div>
-
         <div class="form-row" style="margin-top:6px;">
           <div class="form-group">
             <label>📷 Foto Scontrino (Fotocamera/File):</label>
@@ -577,17 +593,14 @@
             <input type="number" id="pd-amount" step="0.50" min="0" placeholder="0.00">
           </div>
         </div>
-
         <div class="form-group" style="margin-top:6px;">
           <label>Note / Dettagli Consumazione:</label>
           <input type="text" id="pd-notes" placeholder="Es. Menu lavoro x2, bevande incluse">
         </div>
-
         <div style="margin-top:10px;">
           <button class="btn-gold" style="width:100%; padding:10px; font-weight:bold;" onclick="savePranzoCenaEntry()">💾 Salva Scontrino / Pasto</button>
         </div>
       </div>
-
       <!-- SEZIONE 2: REPORT & STAMPA -->
       <div id="pd-section-report" class="hidden" style="margin-top:8px;">
         <div class="card-dark no-print" style="padding:8px; margin:0 0 10px 0;">
@@ -620,7 +633,6 @@
             <button class="btn-gold" style="padding:6px 12px; font-size:0.8rem;" onclick="window.print()">🖨️ Stampa Report Selezionato</button>
           </div>
         </div>
-
         <div id="pd-printable-area">
           <div style="margin-bottom:8px;">
             <h3 style="color:#ff9f43; font-size:1.0rem;" id="pd-report-title">Report Pranzi, Cene & Ditte</h3>
@@ -632,7 +644,7 @@
                 <tr>
                   <th>Data</th>
                   <th>Tipo</th>
-                  <th>Destinatario / Dati Fiscali</th>
+                  <th>Cod. Cliente / Destinatario</th>
                   <th>Importo</th>
                   <th class="no-print">Scontrino</th>
                   <th>Note</th>
@@ -645,10 +657,8 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
-
   <!-- MODALE DETTAGLIO CAMERA (CALENDARIO & LISTA PRENOTAZIONI) -->
   <div id="room-detail-modal" class="modal hidden">
     <div class="modal-box">
@@ -673,7 +683,6 @@
       </div>
     </div>
   </div>
-
   <!-- MODALE NUOVA / MODIFICA PRENOTAZIONE -->
   <div id="booking-modal" class="modal hidden">
     <div class="modal-box">
@@ -783,7 +792,6 @@
       </div>
     </div>
   </div>
-
   <!-- MODALE PIN MASTER -->
   <div id="master-modal" class="modal hidden">
     <div class="modal-box login-box">
@@ -795,14 +803,12 @@
       <p id="master-error" class="error-msg"></p>
     </div>
   </div>
-
   <!-- MODALE INGRANDIMENTO FOTO SCONTRINO -->
   <div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()">
     <div style="max-width:90%; max-height:90%;">
       <img id="enlarged-receipt-img" src="" style="width:100%; height:auto; border-radius:8px; border:2px solid #ff9f43;">
     </div>
   </div>
-
   <script>
     // ==========================================
     // CONFIGURAZIONE CHIAVI FIREBASE INTEGRATE
@@ -839,7 +845,6 @@
     let currentSelectedRoomId = null;
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
-
     document.addEventListener("DOMContentLoaded", () => {
       const today = new Date().toISOString().split('T')[0];
       let tomorrow = new Date();
@@ -850,7 +855,6 @@
       
       document.getElementById("report-date-from").value = `${calYear}-01-01`;
       document.getElementById("report-date-to").value = tomorrowStr;
-
       if (document.getElementById("pd-filter-from")) {
         document.getElementById("pd-filter-from").value = `${calYear}-01-01`;
         document.getElementById("pd-filter-to").value = tomorrowStr;
@@ -873,13 +877,13 @@
       }, (error) => {
         console.error("Errore di sincronizzazione Firebase Prenotazioni:", error);
       });
-
       // SINCRONIZZAZIONE IN TEMPO REALE FIRESTORE PRANZI CENE DITTE
       db.collection("pranzi_cene_ditte").onSnapshot((snapshot) => {
         pranziCeneList = [];
         snapshot.forEach((doc) => {
           pranziCeneList.push({ id: doc.id, ...doc.data() });
         });
+        updateDittaDatalist();
         if (!document.getElementById("pranzi-cene-modal").classList.contains("hidden")) {
           renderPranziCeneReport();
         }
@@ -887,13 +891,11 @@
         console.error("Errore di sincronizzazione Firebase Pranzi Cene Ditte:", error);
       });
     });
-
     function formatDate(dateStr) {
       if (!dateStr) return '';
       const parts = dateStr.split('-');
       return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
     }
-
     function loginStaff() {
       if (document.getElementById("staff-pass-input").value === CONFIG.STAFF_PASS) {
         document.getElementById("login-modal").classList.add("hidden");
@@ -903,7 +905,6 @@
         document.getElementById("login-error").innerText = "Password errata!";
       }
     }
-
     function renderRooms() {
       const from = document.getElementById("home-date-from").value;
       const to = document.getElementById("home-date-to").value;
@@ -949,23 +950,73 @@
     }
 
     // ==========================================
-    // LOGICA QUADRO PRANZI CENE DITTE & SCONTRINI
+    // LOGICA QUADRO PRANZI CENE DITTE & CODICE CLIENTE
     // ==========================================
+    function getNextClientCode() {
+      let maxNum = 0;
+      pranziCeneList.forEach(item => {
+        if (item.clientCode) {
+          const match = item.clientCode.match(/\d+/);
+          if (match) {
+            const num = parseInt(match[0], 10);
+            if (num > maxNum) maxNum = num;
+          }
+        }
+      });
+      const nextNum = maxNum + 1;
+      return `CLI-${String(nextNum).padStart(3, '0')}`;
+    }
+
+    function onDittaInputChanged() {
+      const nameInput = document.getElementById("pd-ditta-input").value.trim();
+      const codeInput = document.getElementById("pd-client-code");
+      if (!nameInput) {
+        codeInput.value = "";
+        return;
+      }
+      const existing = pranziCeneList.find(item => item.dittaName && item.dittaName.toLowerCase() === nameInput.toLowerCase() && item.clientCode);
+      if (existing) {
+        codeInput.value = existing.clientCode;
+      } else {
+        if (!codeInput.value || codeInput.value.startsWith("CLI-")) {
+          codeInput.value = getNextClientCode();
+        }
+      }
+    }
+
+    function updateDittaDatalist() {
+      const datalist = document.getElementById("pd-ditta-list");
+      if (!datalist) return;
+      datalist.innerHTML = "";
+      const ditteMap = new Map();
+      pranziCeneList.forEach(item => {
+        if (item.dittaName && !ditteMap.has(item.dittaName.toLowerCase())) {
+          ditteMap.set(item.dittaName.toLowerCase(), { name: item.dittaName, code: item.clientCode || '' });
+        }
+      });
+      ditteMap.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.name;
+        opt.label = v.code ? `[${v.code}] ${v.name}` : v.name;
+        datalist.appendChild(opt);
+      });
+    }
+
     function openPranziCeneModal() {
       const today = new Date().toISOString().split('T')[0];
       document.getElementById("pd-date").value = today;
       document.getElementById("pd-amount").value = "";
       document.getElementById("pd-ditta-input").value = "";
+      document.getElementById("pd-client-code").value = "";
       document.getElementById("pd-notes").value = "";
       document.getElementById("pd-photo-input").value = "";
-
+      updateDittaDatalist();
       // Popola selettore camere
       const camSelect = document.getElementById("pd-camera-select");
       camSelect.innerHTML = "";
       ROOMS.forEach(r => {
         camSelect.innerHTML += `<option value="${r.id}">Camera ${r.name} (${r.type})</option>`;
       });
-
       switchPdTab('add');
       document.getElementById("pranzi-cene-modal").classList.remove("hidden");
     }
@@ -979,7 +1030,6 @@
       const btnReport = document.getElementById("pd-tab-btn-report");
       const secAdd = document.getElementById("pd-section-add");
       const secReport = document.getElementById("pd-section-report");
-
       if (tabName === 'add') {
         btnAdd.className = "btn-gold";
         btnReport.className = "btn-cancel";
@@ -1042,6 +1092,7 @@
       const mealType = document.getElementById("pd-meal-type").value;
       const targetType = document.querySelector('input[name="pd-target-type"]:checked').value;
       const dittaName = document.getElementById("pd-ditta-input").value.trim();
+      let clientCode = document.getElementById("pd-client-code").value.trim();
       const roomId = document.getElementById("pd-camera-select").value;
       const amount = parseFloat(document.getElementById("pd-amount").value);
       const notes = document.getElementById("pd-notes").value.trim();
@@ -1051,12 +1102,18 @@
         alert("Inserisci una data e un importo validi!");
         return;
       }
-      if (targetType === 'ditta' && !dittaName) {
-        alert("Inserisci i Dati Fiscali o il Nome della Ditta!");
-        return;
+
+      if (targetType === 'ditta') {
+        if (!dittaName) {
+          alert("Inserisci i Dati Fiscali o il Nome della Ditta!");
+          return;
+        }
+        if (!clientCode) {
+          clientCode = getNextClientCode();
+        }
       }
 
-      const targetName = targetType === 'ditta' ? dittaName : `Camera ${getRoomName(roomId)}`;
+      const targetName = targetType === 'ditta' ? `${dittaName}` : `Camera ${getRoomName(roomId)}`;
 
       const executeSave = async (photoBase64) => {
         const entryData = {
@@ -1064,6 +1121,7 @@
           mealType,
           targetType,
           targetName,
+          clientCode: targetType === 'ditta' ? clientCode : null,
           dittaName: targetType === 'ditta' ? dittaName : null,
           roomId: targetType === 'camera' ? roomId : null,
           amount,
@@ -1071,11 +1129,11 @@
           photo: photoBase64 || null,
           createdAt: new Date().toISOString()
         };
-
         try {
           await db.collection("pranzi_cene_ditte").add(entryData);
           document.getElementById("pd-amount").value = "";
           document.getElementById("pd-ditta-input").value = "";
+          document.getElementById("pd-client-code").value = "";
           document.getElementById("pd-notes").value = "";
           document.getElementById("pd-photo-input").value = "";
           alert("Scontrino / Pasto salvato con successo!");
@@ -1099,7 +1157,6 @@
       const detailGroup = document.getElementById("pd-filter-detail-group");
       const detailSelect = document.getElementById("pd-filter-detail-select");
       const detailLabel = document.getElementById("pd-filter-detail-label");
-
       detailSelect.innerHTML = `<option value="ALL">Tutti</option>`;
 
       if (cat === 'ALL') {
@@ -1112,10 +1169,17 @@
         });
       } else if (cat === 'DITTA') {
         detailGroup.classList.remove("hidden");
-        detailLabel.innerText = "Seleziona Ditta:";
-        const ditteUniche = [...new Set(pranziCeneList.filter(item => item.dittaName).map(item => item.dittaName))];
-        ditteUniche.sort().forEach(d => {
-          detailSelect.innerHTML += `<option value="${d}">${d}</option>`;
+        detailLabel.innerText = "Seleziona Ditta / Cod. Cliente:";
+        const ditteMap = new Map();
+        pranziCeneList.filter(item => item.dittaName).forEach(item => {
+          const key = item.dittaName.toLowerCase();
+          if (!ditteMap.has(key)) {
+            ditteMap.set(key, { name: item.dittaName, code: item.clientCode });
+          }
+        });
+        Array.from(ditteMap.values()).sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
+          const label = d.code ? `[${d.code}] ${d.name}` : d.name;
+          detailSelect.innerHTML += `<option value="${d.name}">${label}</option>`;
         });
       }
       renderPranziCeneReport();
@@ -1126,11 +1190,9 @@
       const to = document.getElementById("pd-filter-to").value;
       const category = document.getElementById("pd-filter-category").value;
       const detailSelect = document.getElementById("pd-filter-detail-select").value;
-
       const tbody = document.getElementById("pd-table-body");
       const tfoot = document.getElementById("pd-table-foot");
       const subtitle = document.getElementById("pd-report-subtitle");
-
       tbody.innerHTML = "";
 
       let labelFiltro = "Periodo: " + (from ? formatDate(from) : 'Inizio') + " ➔ " + (to ? formatDate(to) : 'Fine');
@@ -1162,10 +1224,15 @@
         filtered.forEach(item => {
           total += (item.amount || 0);
           const tr = document.createElement("tr");
+
+          const destDisplay = item.targetType === 'ditta' 
+            ? `<span style="color:#ff9f43; font-weight:bold;">${item.clientCode ? '[' + item.clientCode + '] ' : ''}</span><strong>${item.dittaName || item.targetName}</strong>`
+            : `<strong>${item.targetName}</strong>`;
+
           tr.innerHTML = `
             <td>${formatDate(item.date)}</td>
             <td><span style="color:#ff9f43; font-weight:bold;">${item.mealType || 'Pasto'}</span></td>
-            <td><strong>${item.targetName}</strong></td>
+            <td>${destDisplay}</td>
             <td style="color:#2ecc71; font-weight:bold;">€ ${(item.amount || 0).toFixed(2)}</td>
             <td class="no-print" style="text-align:center;">
               ${item.photo ? `<img src="${item.photo}" class="meal-thumb" onclick="openImageViewer('${item.photo}')" title="Clicca per ingrandire">` : '-'}
@@ -1178,7 +1245,6 @@
           tbody.appendChild(tr);
         });
       }
-
       tfoot.innerHTML = `
         <tr>
           <td colspan="3" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALE IMPORTI:</td>
@@ -1393,7 +1459,6 @@
         renderMealsList();
         calculateBookingTotal();
       };
-
       if (photoInput.files && photoInput.files[0]) {
         compressImage(photoInput.files[0], 1024, 1024, 0.7, (compressedData) => {
           saveMeal(compressedData);
