@@ -310,7 +310,7 @@
     .price-summary-item { display: flex; flex-direction: column; gap: 2px; }
     .price-summary-item span { font-size: 0.65rem; color: #abb3c0; }
     .price-summary-item strong { font-size: 0.88rem; }
-    /* Sezione Consumazioni Ristorante */
+    /* Sezione Consumazioni Ristorante & Documenti */
     .meals-section {
       background: #121417;
       border: 1px solid #2d333d;
@@ -567,6 +567,7 @@
               <th>Acconto</th>
               <th>Saldo</th>
               <th>Note</th>
+              <th>Doc. Identità</th>
               <th class="no-print">Azioni</th>
             </tr>
           </thead>
@@ -786,6 +787,28 @@
         <label>Acconto Versato (€):</label>
         <input type="number" id="book-deposit" value="0" min="0" step="1" oninput="calculateBookingTotal()">
       </div>
+
+      <!-- SEZIONE DOCUMENTI D'IDENTITA OSPITI (FRONTE / RETRO) -->
+      <div id="docs-section-container" class="meals-section">
+        <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">🪪 Documenti d'Identità Ospiti (Fronte / Retro)</h4>
+        <div class="form-group">
+          <label>Nome / Rif. Ospite:</label>
+          <input type="text" id="doc-guest-label" placeholder="Es. Mario Rossi / Ospite 1">
+        </div>
+        <div class="form-row" style="margin-top:4px;">
+          <div class="form-group">
+            <label>📷 Fronte Documento:</label>
+            <input type="file" id="doc-fronte-input" accept="image/*" capture="environment">
+          </div>
+          <div class="form-group">
+            <label>📷 Retro Documento:</label>
+            <input type="file" id="doc-retro-input" accept="image/*" capture="environment">
+          </div>
+        </div>
+        <button type="button" class="btn-gold" style="margin-top:6px; padding:5px; font-size:0.8rem;" onclick="addDocToBooking()">+ Aggiungi Documento Ospite</button>
+        <div id="docs-list" style="margin-top:6px; max-height:140px; overflow-y:auto;"></div>
+      </div>
+
       <!-- SEZIONE CONSUMAZIONI RISTORANTE (SCONTRINI) -->
       <div id="meals-section-container" class="meals-section hidden">
         <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">🍽️ Consumazioni Ristorante & Scontrini</h4>
@@ -813,7 +836,7 @@
             <input type="file" id="meal-photo-input" accept="image/*">
           </div>
         </div>
-        <button class="btn-gold" style="margin-top:6px; padding:5px; font-size:0.8rem;" onclick="addMealToBooking()">+ Aggiungi Pasto/Scontrino</button>
+        <button type="button" class="btn-gold" style="margin-top:6px; padding:5px; font-size:0.8rem;" onclick="addMealToBooking()">+ Aggiungi Pasto/Scontrino</button>
         <div id="meals-list" style="margin-top:6px; max-height:120px; overflow-y:auto;"></div>
       </div>
       <!-- BOX RIEPILOGO FINALE IN TEMPO REALE -->
@@ -856,7 +879,7 @@
       <p id="master-error" class="error-msg"></p>
     </div>
   </div>
-  <!-- MODALE INGRANDIMENTO FOTO SCONTRINO -->
+  <!-- MODALE INGRANDIMENTO FOTO SCONTRINO / DOCUMENTO -->
   <div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()">
     <div style="max-width:90%; max-height:90%;">
       <img id="enlarged-receipt-img" src="" style="width:100%; height:auto; border-radius:8px; border:2px solid #ff9f43;">
@@ -893,6 +916,7 @@
     let bookings = [];
     let pranziCeneList = [];
     let currentTempMeals = [];
+    let currentTempDocs = [];
     let pendingMasterAction = null;
     let targetBookingId = null;
     let currentSelectedRoomId = null;
@@ -1311,6 +1335,19 @@
         bookingsList.innerHTML = `<p style="color:#a0a8b5; font-size:0.85rem; padding:8px 0;">Nessuna prenotazione registrata per questa camera.</p>`;
       } else {
         roomBookings.forEach(b => {
+          let docsPreview = '';
+          if (b.guestDocs && b.guestDocs.length > 0) {
+            docsPreview = `
+              <div style="font-size:0.72rem; margin-top:4px; display:flex; gap:4px; flex-wrap:wrap; align-items:center;">
+                <strong>🪪 Doc:</strong>
+                ${b.guestDocs.map(d => `
+                  <span style="font-size:0.7rem;">${d.label}:</span>
+                  ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" style="width:24px;height:24px;" onclick="openImageViewer('${d.fronte}')" title="Fronte">` : ''}
+                  ${d.retro ? `<img src="${d.retro}" class="meal-thumb" style="width:24px;height:24px;" onclick="openImageViewer('${d.retro}')" title="Retro">` : ''}
+                `).join(' ')}
+              </div>
+            `;
+          }
           const card = document.createElement("div");
           card.className = "detail-booking-card";
           card.innerHTML = `
@@ -1319,6 +1356,7 @@
               <div style="font-size:0.75rem; margin-top:2px;">📅 ${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights} ${b.nights === 1 ? 'notte' : 'notti'})</div>
               <div style="font-size:0.75rem; color:#abb3c0; margin-top:1px;">👥 ${b.adults} Adulti ${b.children ? '/ ' + b.children + ' Bambini' : ''}</div>
               ${b.notes ? `<div style="font-size:0.72rem; color:#ffeaa7; margin-top:2px;">📝 <strong>Note:</strong> ${b.notes}</div>` : ''}
+              ${docsPreview}
             </div>
             <div style="display:flex; flex-direction:column; gap:4px;">
               <button onclick="requestEditBooking('${b.id}')" style="background:#ff9f43; color:#121417; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.75rem;">✏️ Modifica</button>
@@ -1415,6 +1453,7 @@
         document.getElementById("book-notes").value = bookingToEdit.notes || "";
         
         currentTempMeals = bookingToEdit.meals ? JSON.parse(JSON.stringify(bookingToEdit.meals)) : [];
+        currentTempDocs = bookingToEdit.guestDocs ? JSON.parse(JSON.stringify(bookingToEdit.guestDocs)) : [];
         document.getElementById("meals-section-container").classList.remove("hidden");
       } else {
         document.getElementById("modal-room-title").innerText = `Prenota Camera ${room.name}`;
@@ -1431,12 +1470,99 @@
         document.getElementById("book-rate-child").value = room.defaultChildRate;
         
         currentTempMeals = [];
+        currentTempDocs = [];
         document.getElementById("meals-section-container").classList.add("hidden");
       }
       renderMealsList();
+      renderDocsList();
       calculateBookingTotal();
       document.getElementById("booking-modal").classList.remove("hidden");
     }
+
+    // ==========================================
+    // LOGICA GESTIONE DOCUMENTI D'IDENTITA OSPITI
+    // ==========================================
+    function renderDocsList() {
+      const container = document.getElementById("docs-list");
+      if (!container) return;
+      container.innerHTML = "";
+      if (currentTempDocs.length === 0) {
+        container.innerHTML = `<em style="font-size:0.75rem; color:#a0a8b5;">Nessun documento d'identità caricato per questa camera.</em>`;
+        return;
+      }
+      currentTempDocs.forEach((d, idx) => {
+        const div = document.createElement("div");
+        div.className = "meal-item";
+        div.innerHTML = `
+          <div>
+            <strong>🪪 ${d.label || 'Ospite ' + (idx + 1)}</strong>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" onclick="openImageViewer('${d.fronte}')" title="Fronte Documento">` : '<span style="font-size:0.65rem; color:#a0a8b5;">[No Fronte]</span>'}
+            ${d.retro ? `<img src="${d.retro}" class="meal-thumb" onclick="openImageViewer('${d.retro}')" title="Retro Documento">` : '<span style="font-size:0.65rem; color:#a0a8b5;">[No Retro]</span>'}
+            <button type="button" onclick="removeDoc(${idx})" style="background:#e74c3c; color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;">✕</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addDocToBooking() {
+      const labelInput = document.getElementById("doc-guest-label");
+      const fronteInput = document.getElementById("doc-fronte-input");
+      const retroInput = document.getElementById("doc-retro-input");
+
+      const label = labelInput.value.trim() || `Ospite ${currentTempDocs.length + 1}`;
+      const fronteFile = fronteInput.files && fronteInput.files[0];
+      const retroFile = retroInput.files && retroInput.files[0];
+
+      if (!fronteFile && !retroFile) {
+        alert("Seleziona o scatta almeno una foto (Fronte o Retro) del documento!");
+        return;
+      }
+
+      const processRetro = (fronteBase64) => {
+        if (retroFile) {
+          compressImage(retroFile, 1024, 1024, 0.7, (retroBase64) => {
+            currentTempDocs.push({
+              id: Date.now().toString(),
+              label,
+              fronte: fronteBase64 || null,
+              retro: retroBase64 || null
+            });
+            labelInput.value = "";
+            fronteInput.value = "";
+            retroInput.value = "";
+            renderDocsList();
+          });
+        } else {
+          currentTempDocs.push({
+            id: Date.now().toString(),
+            label,
+            fronte: fronteBase64 || null,
+            retro: null
+          });
+          labelInput.value = "";
+          fronteInput.value = "";
+          retroInput.value = "";
+          renderDocsList();
+        }
+      };
+
+      if (fronteFile) {
+        compressImage(fronteFile, 1024, 1024, 0.7, (fronteBase64) => {
+          processRetro(fronteBase64);
+        });
+      } else {
+        processRetro(null);
+      }
+    }
+
+    function removeDoc(index) {
+      currentTempDocs.splice(index, 1);
+      renderDocsList();
+    }
+
     function renderMealsList() {
       const container = document.getElementById("meals-list");
       container.innerHTML = "";
@@ -1541,7 +1667,8 @@
         roomId, guestName, phone, adults, children, checkIn, checkOut,
         nights, rateAdult, rateChild, stayTotal, mealsTotal,
         totalPrice: grandTotal, deposit, balance, notes,
-        meals: currentTempMeals
+        meals: currentTempMeals,
+        guestDocs: currentTempDocs
       };
       try {
         if (editId) {
@@ -1631,6 +1758,18 @@
         sumTotal += grandTotal;
         sumDeposit += dep;
         sumBalance += bal;
+
+        let docsDisplay = '-';
+        if (b.guestDocs && b.guestDocs.length > 0) {
+          docsDisplay = b.guestDocs.map(d => `
+            <div style="font-size:0.72rem; margin-bottom:3px;">
+              <strong>${d.label}:</strong>
+              ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" style="width:26px;height:26px;vertical-align:middle;" onclick="openImageViewer('${d.fronte}')" title="${d.label} Fronte">` : ''}
+              ${d.retro ? `<img src="${d.retro}" class="meal-thumb" style="width:26px;height:26px;vertical-align:middle;" onclick="openImageViewer('${d.retro}')" title="${d.label} Retro">` : ''}
+            </div>
+          `).join('');
+        }
+
         tbody.innerHTML += `
           <tr>
             <td><strong>Cam. ${getRoomName(b.roomId)}</strong></td>
@@ -1647,6 +1786,7 @@
             <td style="color:#2ecc71;">€ ${dep.toFixed(2)}</td>
             <td style="color:#e74c3c;"><strong>€ ${bal.toFixed(2)}</strong></td>
             <td>${b.notes || '-'}</td>
+            <td>${docsDisplay}</td>
             <td class="no-print">
               <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:4px 6px; border-radius:3px; cursor:pointer;">Elimina</button>
             </td>
@@ -1665,6 +1805,7 @@
             <td><strong style="color:#ff9f43;">€ ${sumTotal.toFixed(2)}</strong></td>
             <td style="color:#2ecc71;"><strong>€ ${sumDeposit.toFixed(2)}</strong></td>
             <td style="color:#e74c3c;"><strong>€ ${sumBalance.toFixed(2)}</strong></td>
+            <td></td>
             <td></td>
             <td class="no-print"></td>
           </tr>
