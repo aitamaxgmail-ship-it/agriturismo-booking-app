@@ -337,59 +337,6 @@
       cursor: pointer;
       border: 1px solid #ff9f43;
     }
-    /* Stili per le Schede Documenti Stampabili */
-    .doc-card-print {
-      background: #121417;
-      border: 1px solid #2d333d;
-      border-radius: 8px;
-      padding: 12px;
-    }
-    .doc-card-header {
-      border-bottom: 1px solid #2d333d;
-      padding-bottom: 8px;
-      margin-bottom: 10px;
-    }
-    .doc-card-title {
-      color: #ff9f43;
-      font-size: 1rem;
-      font-weight: bold;
-    }
-    .doc-card-sub {
-      color: #e1e6ed;
-      font-size: 0.82rem;
-      margin-top: 2px;
-    }
-    .doc-images-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-    .doc-img-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      background: #1c2026;
-      border: 1px solid #3b4250;
-      padding: 6px;
-      border-radius: 6px;
-    }
-    .doc-label-tag {
-      font-size: 0.72rem;
-      font-weight: bold;
-      color: #ff9f43;
-    }
-    .doc-preview-img {
-      max-width: 260px;
-      max-height: 160px;
-      width: auto;
-      height: auto;
-      border-radius: 4px;
-      cursor: pointer;
-      border: 1px solid #ff9f43;
-      object-fit: contain;
-    }
     /* Calendario Mensile */
     .month-nav {
       display: flex;
@@ -461,7 +408,7 @@
     .report-table th { background: #121417; color: #ff9f43; }
     .report-table tfoot td { background: #121417; font-weight: bold; border-top: 2px solid #ff9f43; }
     
-    /* Stampa Report & Documenti Perfetta senza Refusi */
+    /* Stampa Report Perfetta senza Refusi e Adattata alla Pagina */
     @media print {
       .no-print, .hidden, .modal.hidden { display: none !important; }
       @page {
@@ -502,43 +449,6 @@
         overflow: visible !important; 
         height: auto !important; 
       }
-      .doc-card-print {
-        background: white !important;
-        border: 1px solid #000 !important;
-        border-radius: 6px !important;
-        padding: 10px !important;
-        margin-bottom: 12px !important;
-        page-break-inside: avoid !important;
-        color: black !important;
-      }
-      .doc-card-header {
-        border-bottom: 1px solid #ccc !important;
-        padding-bottom: 6px !important;
-        margin-bottom: 8px !important;
-        font-size: 9.5pt !important;
-        color: black !important;
-      }
-      .doc-card-title { color: black !important; font-size: 11pt !important; }
-      .doc-card-sub { color: black !important; font-size: 9pt !important; }
-      .doc-images-row {
-        display: flex !important;
-        gap: 12px !important;
-        flex-wrap: wrap !important;
-      }
-      .doc-img-wrapper {
-        background: white !important;
-        border: 1px solid #666 !important;
-        padding: 4px !important;
-      }
-      .doc-label-tag { color: black !important; }
-      .doc-preview-img {
-        max-width: 280px !important;
-        max-height: 180px !important;
-        width: auto !important;
-        height: auto !important;
-        border: 1px solid #333 !important;
-        object-fit: contain !important;
-      }
       .report-table { 
         width: 100% !important; 
         border-collapse: collapse !important; 
@@ -562,8 +472,8 @@
       }
       .report-table th { background: #f0f0f0 !important; font-weight: bold !important; }
       .report-table tfoot td { background: #f9f9f9 !important; font-weight: bold !important; border-top: 2px solid black !important; }
-      #pd-report-title, #pd-report-subtitle, #docs-report-title, #docs-report-subtitle, .modal-title, h2, h3, h4, span, p, div, td, th, strong { color: black !important; }
-      #pd-printable-area, #docs-printable-area, #master-report-section { overflow: visible !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      #pd-report-title, #pd-report-subtitle, #ep-report-title, #ep-report-subtitle, .modal-title, h2, h3, h4, span, p, div, td, th, strong { color: black !important; }
+      #pd-printable-area, #ep-printable-area, #doc-printable-area, #master-report-section { overflow: visible !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
       .meal-thumb { max-width: 35px !important; max-height: 35px !important; border: 1px solid #ccc !important; }
     }
   </style>
@@ -581,7 +491,7 @@
   </div>
   <div id="app-container" class="hidden">
     
-    <!-- BARRA SUPERIORE -->
+    <!-- BARRA SUPERIORE (4 PULSANTI TOTALI) -->
     <header class="top-bar no-print">
       <div class="brand-badge">
         🏡 Agriturismo 
@@ -599,8 +509,9 @@
       </div>
       <div class="bar-actions">
         <button class="btn-bar" onclick="openPranziCeneModal()">🍽️ Pranzi Cene Ditte</button>
-        <button class="btn-bar" onclick="openDocsModal()">🪪 Documenti Identità</button>
+        <button class="btn-bar" onclick="openDocumentiIdentitaModal()">🪪 Documenti Identità</button>
         <button class="btn-bar" onclick="openMasterModal('report')">📋 Registro Economico</button>
+        <button class="btn-bar" onclick="openEstrattoPagamentiModal()">📄 Estratto e Pagamenti</button>
       </div>
     </header>
     <main class="main-content no-print">
@@ -618,6 +529,7 @@
       <!-- GRIGLIA CAMERE 5x2 -->
       <div id="rooms-grid" class="grid-container"></div>
     </main>
+
     <!-- VISTA REGISTRO ECONOMICO & STAMPA -->
     <div id="master-report-section" class="hidden master-view">
       <div class="report-header no-print">
@@ -665,49 +577,6 @@
           <tbody id="master-table-body"></tbody>
           <tfoot id="master-table-foot"></tfoot>
         </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODALE SEZIONE DOCUMENTI D'IDENTITA (PER CAMERA & DURATA SOGGIORNO) -->
-  <div id="docs-modal" class="modal hidden">
-    <div class="modal-box" style="max-width: 780px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
-        <h3 class="modal-title" style="border:none; padding:0;">🪪 Documenti d'Identità per Camera</h3>
-        <button class="btn-cancel" style="padding:4px 8px; font-size:0.8rem;" onclick="closeDocsModal()">✕ Chiudi</button>
-      </div>
-
-      <!-- FILTRI DOCUMENTI (NO PRINT) -->
-      <div class="card-dark no-print" style="padding:8px; margin:8px 0 10px 0;">
-        <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">Filtra Registro Documenti</h4>
-        <div class="form-row" style="flex-wrap:wrap;">
-          <div class="form-group" style="flex:1; min-width:130px;">
-            <label>Dal:</label>
-            <input type="date" id="docs-filter-from" onchange="renderDocsReport()">
-          </div>
-          <div class="form-group" style="flex:1; min-width:130px;">
-            <label>Al:</label>
-            <input type="date" id="docs-filter-to" onchange="renderDocsReport()">
-          </div>
-          <div class="form-group" style="flex:1; min-width:160px;">
-            <label>Seleziona Camera:</label>
-            <select id="docs-filter-room" onchange="renderDocsReport()">
-              <option value="ALL">-- Tutte le Camere --</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-top:8px; text-align:right;">
-          <button class="btn-gold" style="padding:6px 12px; font-size:0.8rem;" onclick="window.print()">🖨️ Stampa Documenti</button>
-        </div>
-      </div>
-
-      <!-- AREA STAMPABILE SCHEDE DOCUMENTI -->
-      <div id="docs-printable-area">
-        <div style="margin-bottom:10px;">
-          <h3 style="color:#ff9f43; font-size:1.05rem;" id="docs-report-title">Registro Documenti d'Identità Ospiti</h3>
-          <p style="font-size:0.78rem; color:#abb3c0;" id="docs-report-subtitle"></p>
-        </div>
-        <div id="docs-report-container" style="display:flex; flex-direction:column; gap:12px;"></div>
       </div>
     </div>
   </div>
@@ -848,6 +717,152 @@
       </div>
     </div>
   </div>
+
+  <!-- MODALE DOCUMENTI IDENTITA GLOBALI -->
+  <div id="documenti-identita-modal" class="modal hidden">
+    <div class="modal-box" style="max-width: 750px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
+        <h3 class="modal-title" style="border:none; padding:0;">🪪 Documenti d'Identità Ospiti</h3>
+        <button class="btn-cancel" style="padding:4px 8px; font-size:0.8rem;" onclick="closeDocumentiIdentitaModal()">✕ Chiudi</button>
+      </div>
+      <div class="card-dark no-print" style="padding:8px; margin:8px 0;">
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label>Cerca Ospite / Camera:</label>
+            <input type="text" id="doc-search-input" placeholder="Es. Mario Rossi o Camera 101" oninput="renderDocumentiIdentitaList()">
+          </div>
+          <div class="form-group" style="flex:1; align-self:flex-end;">
+            <button class="btn-gold" style="padding:7px; font-size:0.8rem; width:100%;" onclick="window.print()">🖨️ Stampa Elenco</button>
+          </div>
+        </div>
+      </div>
+      <div id="doc-printable-area" style="overflow-x:auto;">
+        <table class="report-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th>Camera</th>
+              <th>Referente / Ospite</th>
+              <th>Rif. Documento</th>
+              <th>Check-in / Check-out</th>
+              <th class="no-print">Fronte / Retro</th>
+            </tr>
+          </thead>
+          <tbody id="docs-global-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE ESTRATTO E PAGAMENTI -->
+  <div id="estratto-pagamenti-modal" class="modal hidden">
+    <div class="modal-box" style="max-width: 800px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
+        <h3 class="modal-title" style="border:none; padding:0;">📄 Estratto e Pagamenti</h3>
+        <button class="btn-cancel" style="padding:4px 8px; font-size:0.8rem;" onclick="closeEstrattoPagamentiModal()">✕ Chiudi</button>
+      </div>
+
+      <!-- SCHEDE ESTRATTO E PAGAMENTI -->
+      <div style="display:flex; gap:8px; margin-top:6px;" class="no-print">
+        <button id="ep-tab-btn-pdf" class="btn-gold" style="flex:1; padding:6px; font-size:0.85rem;" onclick="switchEpTab('pdf')">📎 Allegato Estratto Conto (PDF)</button>
+        <button id="ep-tab-btn-fatture" class="btn-cancel" style="flex:1; padding:6px; font-size:0.85rem;" onclick="switchEpTab('fatture')">🧾 Incrocio Fatture & Non Saldate</button>
+      </div>
+
+      <!-- SEZIONE 1: ALLEGATO PDF ESTRATTO CONTO -->
+      <div id="ep-section-pdf" class="no-print" style="margin-top:8px;">
+        <div class="card-dark" style="padding:10px;">
+          <h4 style="color:#ff9f43; font-size:0.9rem; margin-bottom:6px;">📎 Allegare PDF Estratto Conto Bancario</h4>
+          <div class="form-group">
+            <label>Seleziona file PDF Estratto Conto:</label>
+            <input type="file" id="ep-pdf-file-input" accept="application/pdf" onchange="handleEstrattoPdfUpload(event)">
+          </div>
+          <div id="ep-pdf-info" style="margin-top:10px; font-size:0.85rem; color:#2ecc71;"></div>
+        </div>
+      </div>
+
+      <!-- SEZIONE 2: INCROCIO FATTURE DA PAGARE & STAMPA NON SALDATE -->
+      <div id="ep-section-fatture" class="hidden" style="margin-top:8px;">
+        <!-- FORM NUOVA FATTURA DA PAGARE -->
+        <div class="card-dark no-print" style="padding:10px; margin-bottom:10px;">
+          <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">➕ Inserisci Fattura da Pagare</h4>
+          <div class="form-row">
+            <div class="form-group" style="flex:2;">
+              <label>Fornitore / Ditta:</label>
+              <input type="text" id="ep-fornitore-input" placeholder="Es. Fornitore Bevande Srl">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>N. Fattura:</label>
+              <input type="text" id="ep-num-fattura" placeholder="Es. FAT-2026/01">
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:4px;">
+            <div class="form-group">
+              <label>Data Fattura:</label>
+              <input type="date" id="ep-data-fattura">
+            </div>
+            <div class="form-group">
+              <label>Importo (€):</label>
+              <input type="number" id="ep-importo-fattura" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Stato Pagamento:</label>
+              <select id="ep-stato-fattura">
+                <option value="NON_SALDATA">❌ Non Saldata</option>
+                <option value="SALDATA">✅ Saldata (Incrociata EC)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:4px;">
+            <label>Note / Riferimento Estratto Conto:</label>
+            <input type="text" id="ep-note-fattura" placeholder="Es. Riscontrato in data XX/XX su EC">
+          </div>
+          <button class="btn-gold" style="margin-top:8px; width:100%; padding:8px;" onclick="saveFatturaEntry()">💾 Salva Fattura</button>
+        </div>
+
+        <!-- FILTRO E STAMPA FATTURE NON SALDATE -->
+        <div class="card-dark no-print" style="padding:8px; margin-bottom:10px;">
+          <div class="form-row" style="align-items:center;">
+            <div class="form-group" style="flex:2;">
+              <label>Filtra Stato Fatture:</label>
+              <select id="ep-filter-stato" onchange="renderFattureReport()">
+                <option value="NON_SALDATA">❌ Solo Fatture ANCORA NON SALDATE</option>
+                <option value="SALDATA">✅ Solo Fatture Saldate</option>
+                <option value="ALL">-- Tutte le Fatture --</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1; align-self:flex-end;">
+              <button class="btn-gold" style="padding:7px; font-size:0.8rem; width:100%;" onclick="window.print()">🖨️ Stampa Fatture Non Saldate</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABELLA FATTURE DA PAGARE / NON SALDATE (AREA STAMPABILE) -->
+        <div id="ep-printable-area">
+          <div style="margin-bottom:8px;">
+            <h3 style="color:#ff9f43; font-size:1.0rem;" id="ep-report-title">Report Fatture da Pagare / Non Saldate</h3>
+            <p style="font-size:0.75rem; color:#abb3c0;" id="ep-report-subtitle"></p>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="report-table" style="width:100%;">
+              <thead>
+                <tr>
+                  <th>Fornitore</th>
+                  <th>N° Fattura</th>
+                  <th>Data Fattura</th>
+                  <th>Importo</th>
+                  <th>Stato Pagamento</th>
+                  <th>Note / Incrocio EC</th>
+                  <th class="no-print">Azioni / Cambio Stato</th>
+                </tr>
+              </thead>
+              <tbody id="ep-table-body"></tbody>
+              <tfoot id="ep-table-foot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODALE DETTAGLIO CAMERA (CALENDARIO & LISTA PRENOTAZIONI) -->
   <div id="room-detail-modal" class="modal hidden">
     <div class="modal-box">
@@ -872,6 +887,7 @@
       </div>
     </div>
   </div>
+
   <!-- MODALE NUOVA / MODIFICA PRENOTAZIONE -->
   <div id="booking-modal" class="modal hidden">
     <div class="modal-box">
@@ -1001,6 +1017,7 @@
       </div>
     </div>
   </div>
+
   <!-- MODALE PIN MASTER -->
   <div id="master-modal" class="modal hidden">
     <div class="modal-box login-box">
@@ -1012,12 +1029,14 @@
       <p id="master-error" class="error-msg"></p>
     </div>
   </div>
+
   <!-- MODALE INGRANDIMENTO FOTO SCONTRINO / DOCUMENTO -->
   <div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()">
     <div style="max-width:90%; max-height:90%;">
       <img id="enlarged-receipt-img" src="" style="width:100%; height:auto; border-radius:8px; border:2px solid #ff9f43;">
     </div>
   </div>
+
   <script>
     // ==========================================
     // CONFIGURAZIONE CHIAVI FIREBASE INTEGRATE
@@ -1048,6 +1067,8 @@
     ];
     let bookings = [];
     let pranziCeneList = [];
+    let fattureList = [];
+    let pdfEstrattoData = localStorage.getItem("agri_pdf_estratto") || null;
     let currentTempMeals = [];
     let currentTempDocs = [];
     let pendingMasterAction = null;
@@ -1055,6 +1076,7 @@
     let currentSelectedRoomId = null;
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
+
     document.addEventListener("DOMContentLoaded", () => {
       const today = new Date().toISOString().split('T')[0];
       let tomorrow = new Date();
@@ -1084,12 +1106,13 @@
         if (!document.getElementById("master-report-section").classList.contains("hidden")) {
           renderMasterReport();
         }
-        if (!document.getElementById("docs-modal").classList.contains("hidden")) {
-          renderDocsReport();
+        if (!document.getElementById("documenti-identita-modal").classList.contains("hidden")) {
+          renderDocumentiIdentitaList();
         }
       }, (error) => {
         console.error("Errore di sincronizzazione Firebase Prenotazioni:", error);
       });
+
       // SINCRONIZZAZIONE IN TEMPO REALE FIRESTORE PRANZI CENE DITTE
       db.collection("pranzi_cene_ditte").onSnapshot((snapshot) => {
         pranziCeneList = [];
@@ -1103,12 +1126,27 @@
       }, (error) => {
         console.error("Errore di sincronizzazione Firebase Pranzi Cene Ditte:", error);
       });
+
+      // SINCRONIZZAZIONE IN TEMPO REALE FIRESTORE FATTURE E PAGAMENTI
+      db.collection("fatture_pagamenti").onSnapshot((snapshot) => {
+        fattureList = [];
+        snapshot.forEach((doc) => {
+          fattureList.push({ id: doc.id, ...doc.data() });
+        });
+        if (!document.getElementById("estratto-pagamenti-modal").classList.contains("hidden")) {
+          renderFattureReport();
+        }
+      }, (error) => {
+        console.error("Errore di sincronizzazione Firebase Fatture:", error);
+      });
     });
+
     function formatDate(dateStr) {
       if (!dateStr) return '';
       const parts = dateStr.split('-');
       return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
     }
+
     function loginStaff() {
       if (document.getElementById("staff-pass-input").value === CONFIG.STAFF_PASS) {
         document.getElementById("login-modal").classList.add("hidden");
@@ -1118,6 +1156,7 @@
         document.getElementById("login-error").innerText = "Password errata!";
       }
     }
+
     function renderRooms() {
       const from = document.getElementById("home-date-from").value;
       const to = document.getElementById("home-date-to").value;
@@ -1163,103 +1202,251 @@
     }
 
     // ==========================================
-    // LOGICA SEZIONE / MODALE DOCUMENTI D'IDENTITÀ
+    // LOGICA QUADRO DOCUMENTI IDENTITA GLOBALI
     // ==========================================
-    function openDocsModal() {
-      const today = new Date().toISOString().split('T')[0];
-      const yearStart = `${calYear}-01-01`;
-      document.getElementById("docs-filter-from").value = yearStart;
-      document.getElementById("docs-filter-to").value = today;
-      
-      const roomSelect = document.getElementById("docs-filter-room");
-      roomSelect.innerHTML = `<option value="ALL">-- Tutte le Camere --</option>`;
-      ROOMS.forEach(r => {
-        roomSelect.innerHTML += `<option value="${r.id}">Camera ${r.name} (${r.type})</option>`;
+    function openDocumentiIdentitaModal() {
+      renderDocumentiIdentitaList();
+      document.getElementById("documenti-identita-modal").classList.remove("hidden");
+    }
+    function closeDocumentiIdentitaModal() {
+      document.getElementById("documenti-identita-modal").classList.add("hidden");
+    }
+    function renderDocumentiIdentitaList() {
+      const tbody = document.getElementById("docs-global-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      const search = (document.getElementById("doc-search-input") ? document.getElementById("doc-search-input").value.toLowerCase() : "");
+      let count = 0;
+      bookings.forEach(b => {
+        if (b.guestDocs && b.guestDocs.length > 0) {
+          b.guestDocs.forEach(d => {
+            const roomName = getRoomName(b.roomId);
+            const matchText = `${roomName} ${b.guestName} ${d.label}`.toLowerCase();
+            if (!search || matchText.includes(search)) {
+              count++;
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td><strong>Cam. ${roomName}</strong></td>
+                <td>${b.guestName}</td>
+                <td>${d.label || 'Documento Ospite'}</td>
+                <td>${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)}</td>
+                <td class="no-print">
+                  <div style="display:flex; gap:6px; align-items:center;">
+                    ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" onclick="openImageViewer('${d.fronte}')" title="Fronte Documento">` : '-'}
+                    ${d.retro ? `<img src="${d.retro}" class="meal-thumb" onclick="openImageViewer('${d.retro}')" title="Retro Documento">` : '-'}
+                  </div>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            }
+          });
+        }
       });
-      
-      renderDocsReport();
-      document.getElementById("docs-modal").classList.remove("hidden");
-    }
-
-    function closeDocsModal() {
-      document.getElementById("docs-modal").classList.add("hidden");
-    }
-
-    function renderDocsReport() {
-      const from = document.getElementById("docs-filter-from").value;
-      const to = document.getElementById("docs-filter-to").value;
-      const selectedRoom = document.getElementById("docs-filter-room").value;
-      const container = document.getElementById("docs-report-container");
-      const subtitle = document.getElementById("docs-report-subtitle");
-      
-      if (!container) return;
-      container.innerHTML = "";
-      
-      let labelFiltro = "Periodo: " + (from ? formatDate(from) : 'Inizio') + " ➔ " + (to ? formatDate(to) : 'Fine');
-      if (selectedRoom !== 'ALL') {
-        labelFiltro += " | Camera " + getRoomName(selectedRoom);
+      if (count === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#a0a8b5;">Nessun documento d'identità registrato.</td></tr>`;
       }
-      
-      const filtered = bookings.filter(b => {
-        if (from && b.checkOut < from) return false;
-        if (to && b.checkIn > to) return false;
-        if (selectedRoom !== 'ALL' && b.roomId !== selectedRoom) return false;
-        return (b.guestDocs && b.guestDocs.length > 0);
-      }).sort((a,b) => b.checkIn.localeCompare(a.checkIn));
-      
-      subtitle.innerText = `${labelFiltro} | Prenotazioni trovate con documenti: ${filtered.length}`;
-      
-      if (filtered.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:#a0a8b5;">Nessun documento d'identità trovato per i filtri selezionati.</div>`;
+    }
+
+    // ==========================================
+    // LOGICA QUADRO ESTRATTO E PAGAMENTI
+    // ==========================================
+    function openEstrattoPagamentiModal() {
+      const today = new Date().toISOString().split('T')[0];
+      if (document.getElementById("ep-data-fattura")) {
+        document.getElementById("ep-data-fattura").value = today;
+      }
+      displayEstrattoPdfInfo();
+      switchEpTab('pdf');
+      document.getElementById("estratto-pagamenti-modal").classList.remove("hidden");
+    }
+    function closeEstrattoPagamentiModal() {
+      document.getElementById("estratto-pagamenti-modal").classList.add("hidden");
+    }
+    function switchEpTab(tabName) {
+      const btnPdf = document.getElementById("ep-tab-btn-pdf");
+      const btnFatture = document.getElementById("ep-tab-btn-fatture");
+      const secPdf = document.getElementById("ep-section-pdf");
+      const secFatture = document.getElementById("ep-section-fatture");
+      if (tabName === 'pdf') {
+        btnPdf.className = "btn-gold";
+        btnFatture.className = "btn-cancel";
+        secPdf.classList.remove("hidden");
+        secFatture.classList.add("hidden");
+      } else {
+        btnFatture.className = "btn-gold";
+        btnPdf.className = "btn-cancel";
+        secFatture.classList.remove("hidden");
+        secPdf.classList.add("hidden");
+        renderFattureReport();
+      }
+    }
+
+    function handleEstrattoPdfUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.type !== "application/pdf") {
+        alert("Carica un file PDF valido!");
         return;
       }
-      
-      filtered.forEach(b => {
-        const card = document.createElement("div");
-        card.className = "doc-card-print";
-        
-        let docsHtml = "";
-        b.guestDocs.forEach((d, idx) => {
-          docsHtml += `
-            <div style="margin-top:8px;">
-              <div style="font-weight:bold; font-size:0.8rem; color:#ff9f43; margin-bottom:4px;" class="doc-label-tag">
-                👤 Ospite / Rif: ${d.label || 'Ospite ' + (idx + 1)}
-              </div>
-              <div class="doc-images-row">
-                ${d.fronte ? `
-                  <div class="doc-img-wrapper">
-                    <span class="doc-label-tag">FRONTE</span>
-                    <img src="${d.fronte}" class="doc-preview-img" onclick="openImageViewer('${d.fronte}')" title="Clicca per ingrandire">
-                  </div>
-                ` : ''}
-                ${d.retro ? `
-                  <div class="doc-img-wrapper">
-                    <span class="doc-label-tag">RETRO</span>
-                    <img src="${d.retro}" class="doc-preview-img" onclick="openImageViewer('${d.retro}')" title="Clicca per ingrandire">
-                  </div>
-                ` : ''}
-              </div>
-            </div>
-          `;
-        });
-        
-        card.innerHTML = `
-          <div class="doc-card-header">
-            <div class="doc-card-title">🏡 Camera ${getRoomName(b.roomId)} — ${b.guestName}</div>
-            <div class="doc-card-sub">
-              📅 <strong>Soggiorno:</strong> ${formatDate(b.checkIn)} ➔ ${formatDate(b.checkOut)} (${b.nights} ${b.nights === 1 ? 'notte' : 'notti'}) | 
-              📞 <strong>Tel:</strong> ${b.phone || '-'} | 
-              👥 <strong>Ospiti:</strong> ${b.adults} Adulti ${b.children ? '/ ' + b.children + ' Bambini' : ''}
-            </div>
-            ${b.notes ? `<div style="font-size:0.75rem; color:#ffeaa7; margin-top:2px;">📝 <strong>Note:</strong> ${b.notes}</div>` : ''}
-          </div>
-          <div class="doc-card-body">
-            ${docsHtml}
-          </div>
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        pdfEstrattoData = {
+          name: file.name,
+          size: (file.size / 1024).toFixed(1) + " KB",
+          date: new Date().toLocaleDateString('it-IT'),
+          dataUrl: e.target.result
+        };
+        localStorage.setItem("agri_pdf_estratto", JSON.stringify(pdfEstrattoData));
+        displayEstrattoPdfInfo();
+        alert("PDF Estratto Conto allegato con successo!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function displayEstrattoPdfInfo() {
+      const infoDiv = document.getElementById("ep-pdf-info");
+      if (!infoDiv) return;
+      let stored = localStorage.getItem("agri_pdf_estratto");
+      if (stored) {
+        try { pdfEstrattoData = JSON.parse(stored); } catch(e){}
+      }
+      if (pdfEstrattoData && pdfEstrattoData.name) {
+        infoDiv.innerHTML = `
+          ✅ <strong>PDF Estratto Conto Attualmente Allegato:</strong><br>
+          📄 <strong>Nome File:</strong> ${pdfEstrattoData.name} (${pdfEstrattoData.size})<br>
+          📅 <strong>Data Caricamento:</strong> ${pdfEstrattoData.date}<br>
+          <a href="${pdfEstrattoData.dataUrl}" target="_blank" style="color:#3498db; text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;">🔍 Apri / Visualizza PDF Estratto Conto</a>
+          <button onclick="deleteEstrattoPdf()" style="background:#e74c3c; color:white; border:none; padding:3px 8px; border-radius:4px; margin-left:10px; cursor:pointer;">🗑️ Rimuovi PDF</button>
         `;
-        
-        container.appendChild(card);
-      });
+      } else {
+        infoDiv.innerHTML = `<em>Nessun PDF di Estratto Conto allegato attualmente.</em>`;
+      }
+    }
+
+    function deleteEstrattoPdf() {
+      if (confirm("Rimuovere il PDF dell'estratto conto allegato?")) {
+        localStorage.removeItem("agri_pdf_estratto");
+        pdfEstrattoData = null;
+        displayEstrattoPdfInfo();
+      }
+    }
+
+    async function saveFatturaEntry() {
+      const fornitore = document.getElementById("ep-fornitore-input").value.trim();
+      const numFattura = document.getElementById("ep-num-fattura").value.trim();
+      const dataFattura = document.getElementById("ep-data-fattura").value;
+      const importo = parseFloat(document.getElementById("ep-importo-fattura").value);
+      const stato = document.getElementById("ep-stato-fattura").value;
+      const note = document.getElementById("ep-note-fattura").value.trim();
+
+      if (!fornitore || !dataFattura || isNaN(importo) || importo <= 0) {
+        alert("Compila tutti i campi obbligatori (Fornitore, Data, Importo validi)!");
+        return;
+      }
+
+      const fatturaData = {
+        fornitore,
+        numFattura: numFattura || "-",
+        dataFattura,
+        importo,
+        stato,
+        note: note || "-",
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        await db.collection("fatture_pagamenti").add(fatturaData);
+        document.getElementById("ep-fornitore-input").value = "";
+        document.getElementById("ep-num-fattura").value = "";
+        document.getElementById("ep-importo-fattura").value = "";
+        document.getElementById("ep-note-fattura").value = "";
+        alert("Fattura inserita con successo!");
+        renderFattureReport();
+      } catch (err) {
+        alert("Errore nel salvataggio della fattura: " + err.message);
+      }
+    }
+
+    function renderFattureReport() {
+      const statoFiltro = document.getElementById("ep-filter-stato") ? document.getElementById("ep-filter-stato").value : "NON_SALDATA";
+      const tbody = document.getElementById("ep-table-body");
+      const tfoot = document.getElementById("ep-table-foot");
+      const title = document.getElementById("ep-report-title");
+      const subtitle = document.getElementById("ep-report-subtitle");
+
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      let filtered = fattureList.filter(f => {
+        if (statoFiltro === "NON_SALDATA") return f.stato === "NON_SALDATA";
+        if (statoFiltro === "SALDATA") return f.stato === "SALDATA";
+        return true;
+      }).sort((a,b) => b.dataFattura.localeCompare(a.dataFattura));
+
+      if (statoFiltro === "NON_SALDATA") {
+        title.innerText = "📋 Stampa Fatture ANCORA NON SALDATE";
+        subtitle.innerText = "Elenco fatture da saldare incrociate con l'Estratto Conto bancario";
+      } else if (statoFiltro === "SALDATA") {
+        title.innerText = "📋 Elenco Fatture SALDATE";
+        subtitle.innerText = "Fatture verificate e saldate da Estratto Conto";
+      } else {
+        title.innerText = "📋 Registro Generale Fatture";
+        subtitle.innerText = "Tutte le fatture registrate (Saldate e Non Saldate)";
+      }
+
+      let totale = 0;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0a8b5;">Nessuna fattura trovata per il filtro selezionato.</td></tr>`;
+      } else {
+        filtered.forEach(f => {
+          totale += (f.importo || 0);
+          const tr = document.createElement("tr");
+          const isSaldata = f.stato === "SALDATA";
+          tr.innerHTML = `
+            <td><strong>${f.fornitore}</strong></td>
+            <td>${f.numFattura}</td>
+            <td>${formatDate(f.dataFattura)}</td>
+            <td style="color:${isSaldata ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">€ ${(f.importo || 0).toFixed(2)}</td>
+            <td><span style="color:${isSaldata ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">${isSaldata ? '✅ SALDATA' : '❌ NON SALDATA'}</span></td>
+            <td>${f.note || '-'}</td>
+            <td class="no-print" style="text-align:center;">
+              <button onclick="toggleStatoFattura('${f.id}', '${f.stato}')" style="background:${isSaldata ? '#ff9f43' : '#2ecc71'}; color:#121417; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:0.75rem; margin-right:4px;" title="Incrocia / Cambia Stato">
+                ${isSaldata ? '❌ Segna Non Saldata' : '✅ Segna Saldata (Incrocia)'}
+              </button>
+              <button onclick="deleteFatturaEntry('${f.id}')" style="background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer;" title="Elimina">🗑️</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="3" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALE FATTURE:</td>
+          <td style="color:#e74c3c; font-weight:bold; font-size:0.95rem;">€ ${totale.toFixed(2)}</td>
+          <td colspan="2"></td>
+          <td class="no-print"></td>
+        </tr>
+      `;
+    }
+
+    async function toggleStatoFattura(id, currentStato) {
+      const nextStato = currentStato === "SALDATA" ? "NON_SALDATA" : "SALDATA";
+      try {
+        await db.collection("fatture_pagamenti").doc(id).update({ stato: nextStato });
+      } catch (err) {
+        alert("Errore aggiornamento stato fattura: " + err.message);
+      }
+    }
+
+    async function deleteFatturaEntry(id) {
+      if (confirm("Confermi di voler eliminare questa fattura?")) {
+        try {
+          await db.collection("fatture_pagamenti").doc(id).delete();
+        } catch (err) {
+          alert("Errore eliminazione fattura: " + err.message);
+        }
+      }
     }
 
     // ==========================================
@@ -1556,6 +1743,7 @@
         }
       }
     }
+
     // ==========================================
     // LOGICA CAMERE E PRENOTAZIONI
     // ==========================================
@@ -1715,6 +1903,7 @@
       calculateBookingTotal();
       document.getElementById("booking-modal").classList.remove("hidden");
     }
+
     // ==========================================
     // LOGICA GESTIONE DOCUMENTI D'IDENTITA OSPITI
     // ==========================================
@@ -1918,41 +2107,44 @@
     }
     function requestReleaseRoomDirect(bookingId) {
       const b = bookings.find(item => item.id === bookingId);
-      if (!b) return;
-      targetBookingId = b.id;
+      if (b) requestReleaseRoom(b);
+    }
+    function requestReleaseRoom(booking) {
+      targetBookingId = booking.id;
       pendingMasterAction = 'release';
-      document.getElementById("master-prompt-text").innerText = `Liberare Cam. ${getRoomName(b.roomId)} (${b.guestName})? Inserisci PIN Master:`;
+      document.getElementById("master-prompt-text").innerText = `Liberare Camera ${getRoomName(booking.roomId)} (${booking.guestName})? Inserisci PIN Master:`;
       document.getElementById("master-modal").classList.remove("hidden");
     }
     function openMasterModal(action) {
       pendingMasterAction = action;
-      document.getElementById("master-prompt-text").innerText = "Inserisci PIN Master per accedere:";
+      document.getElementById("master-prompt-text").innerText = "Inserisci il PIN Master per accedere al Registro:";
       document.getElementById("master-modal").classList.remove("hidden");
     }
     function closeMasterModal() {
       document.getElementById("master-modal").classList.add("hidden");
       document.getElementById("master-pin-input").value = "";
       document.getElementById("master-error").innerText = "";
+      targetBookingId = null;
     }
     function submitMasterPin() {
       if (document.getElementById("master-pin-input").value === CONFIG.MASTER_PIN) {
         const action = pendingMasterAction;
-        const bId = targetBookingId;
+        const bookingId = targetBookingId;
         closeMasterModal();
-        if (action === 'release' && bId) {
-          deleteBooking(bId);
-        } else if (action === 'edit' && bId) {
-          const b = bookings.find(item => item.id === bId);
-          const room = ROOMS.find(r => r.id === b.roomId);
-          if (b && room) {
+        if (action === 'release' && bookingId) {
+          deleteBooking(bookingId);
+        } else if (action === 'edit' && bookingId) {
+          const bookingToEdit = bookings.find(b => b.id === bookingId);
+          if (bookingToEdit) {
+            const room = ROOMS.find(r => r.id === bookingToEdit.roomId);
             closeRoomDetailModal();
-            openBookingModal(room, b.checkIn, b.checkOut, b);
+            openBookingModal(room, bookingToEdit.checkIn, bookingToEdit.checkOut, bookingToEdit);
           }
         } else if (action === 'report') {
           renderMasterReport();
         }
       } else {
-        document.getElementById("master-error").innerText = "PIN Master Errato!";
+        document.getElementById("master-error").innerText = "PIN Master errato!";
       }
     }
     function renderMasterReport() {
@@ -1963,40 +2155,32 @@
       const tbody = document.getElementById("master-table-body");
       const tfoot = document.getElementById("master-table-foot");
       tbody.innerHTML = "";
+      let totStay = 0, totMeals = 0, totGross = 0, totDeposit = 0, totBalance = 0;
       const filteredBookings = bookings.filter(b => {
         if (!from || !to) return true;
         return (from <= b.checkOut && to >= b.checkIn);
-      });
-      let sumAdults = 0;
-      let sumChildren = 0;
-      let sumStay = 0;
-      let sumMeals = 0;
-      let sumTotal = 0;
-      let sumDeposit = 0;
-      let sumBalance = 0;
+      }).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
+
       filteredBookings.forEach(b => {
-        const stay = b.stayTotal || (b.totalPrice || 0);
+        const stay = b.stayTotal || b.totalPrice || 0;
         const meals = b.mealsTotal || 0;
-        const grandTotal = b.totalPrice || (stay + meals);
-        const dep = b.deposit || 0;
-        const bal = b.balance || 0;
-        sumAdults += (b.adults || 0);
-        sumChildren += (b.children || 0);
-        sumStay += stay;
-        sumMeals += meals;
-        sumTotal += grandTotal;
-        sumDeposit += dep;
-        sumBalance += bal;
+        const gross = b.totalPrice || (stay + meals);
+        const deposit = b.deposit || 0;
+        const balance = b.balance !== undefined ? b.balance : (gross - deposit);
+
+        totStay += stay;
+        totMeals += meals;
+        totGross += gross;
+        totDeposit += deposit;
+        totBalance += balance;
+
         let docsDisplay = '-';
         if (b.guestDocs && b.guestDocs.length > 0) {
           docsDisplay = b.guestDocs.map(d => `
-            <div style="font-size:0.72rem; margin-bottom:2px;">
-              <strong>${d.label}:</strong>
-              ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" style="width:24px;height:24px;" onclick="openImageViewer('${d.fronte}')">` : ''}
-              ${d.retro ? `<img src="${d.retro}" class="meal-thumb" style="width:24px;height:24px;" onclick="openImageViewer('${d.retro}')">` : ''}
-            </div>
-          `).join('');
+            <span style="font-size:0.7rem; color:#ff9f43;">🪪 ${d.label}</span>
+          `).join('<br>');
         }
+
         tbody.innerHTML += `
           <tr>
             <td><strong>Cam. ${getRoomName(b.roomId)}</strong></td>
@@ -2008,46 +2192,37 @@
             <td>${formatDate(b.checkOut)}</td>
             <td>${b.nights}n</td>
             <td>€ ${stay.toFixed(2)}</td>
-            <td>€ ${meals.toFixed(2)}</td>
-            <td><strong>€ ${grandTotal.toFixed(2)}</strong></td>
-            <td style="color:#2ecc71;">€ ${dep.toFixed(2)}</td>
-            <td style="color:#e74c3c;"><strong>€ ${bal.toFixed(2)}</strong></td>
+            <td style="color:#3498db;">€ ${meals.toFixed(2)}</td>
+            <td><strong>€ ${gross.toFixed(2)}</strong></td>
+            <td style="color:#2ecc71;">€ ${deposit.toFixed(2)}</td>
+            <td style="color:#e74c3c;"><strong>€ ${balance.toFixed(2)}</strong></td>
             <td>${b.notes || '-'}</td>
             <td>${docsDisplay}</td>
             <td class="no-print">
-              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer;">Elimina</button>
+              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:4px 6px; border-radius:4px; cursor:pointer;">Elimina</button>
             </td>
           </tr>
         `;
       });
+
       tfoot.innerHTML = `
         <tr>
-          <td><strong>TOTALE</strong></td>
-          <td>-</td>
-          <td>-</td>
-          <td><strong>${sumAdults}</strong></td>
-          <td><strong>${sumChildren}</strong></td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-          <td><strong>€ ${sumStay.toFixed(2)}</strong></td>
-          <td><strong>€ ${sumMeals.toFixed(2)}</strong></td>
-          <td><strong>€ ${sumTotal.toFixed(2)}</strong></td>
-          <td style="color:#2ecc71;"><strong>€ ${sumDeposit.toFixed(2)}</strong></td>
-          <td style="color:#e74c3c;"><strong>€ ${sumBalance.toFixed(2)}</strong></td>
-          <td>-</td>
-          <td>-</td>
-          <td class="no-print"></td>
+          <td colspan="8" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALI PERIODO:</td>
+          <td>€ ${totStay.toFixed(2)}</td>
+          <td style="color:#3498db;">€ ${totMeals.toFixed(2)}</td>
+          <td>€ ${totGross.toFixed(2)}</td>
+          <td style="color:#2ecc71;">€ ${totDeposit.toFixed(2)}</td>
+          <td style="color:#e74c3c;">€ ${totBalance.toFixed(2)}</td>
+          <td colspan="3" class="no-print"></td>
         </tr>
       `;
     }
-    function deleteBooking(id) {
-      db.collection("prenotazioni").doc(id).delete().then(() => {
-        renderRooms();
-        if (!document.getElementById("master-report-section").classList.contains("hidden")) {
-          renderMasterReport();
-        }
-      }).catch(err => alert("Errore durante l'eliminazione: " + err.message));
+    async function deleteBooking(id) {
+      try {
+        await db.collection("prenotazioni").doc(id).delete();
+      } catch (err) {
+        alert("Errore nell'eliminazione della prenotazione: " + err.message);
+      }
     }
     function closeMasterReport() {
       document.getElementById("master-report-section").classList.add("hidden");
