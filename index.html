@@ -8,6 +8,13 @@
   <!-- Firebase SDK JS (Compatibility Version per App Web Single-File) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- PDF.js per lettura ed estrazione automatica testo dai PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window['pdfjs-dist/build/pdf']) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
   <style>
     * {
       box-sizing: border-box;
@@ -196,6 +203,46 @@
       border-radius: 4px; 
       width: 100%;
     }
+    /* Stili per Drag & Drop e Incrocio Estratto Conto */
+    .dropzone-box {
+      border: 2px dashed #ff9f43;
+      background: #181d24;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 12px;
+      color: #e1e6ed;
+    }
+    .dropzone-box:hover, .dropzone-box.dragover {
+      background: #232b36;
+      border-color: #2ecc71;
+      box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+    }
+    .row-matched {
+      background: rgba(46, 204, 113, 0.12) !important;
+      border-left: 4px solid #2ecc71 !important;
+    }
+    .badge-matched {
+      background: #1e824c;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+    .badge-unmatched {
+      background: #962d22;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+
     /* Ottimizzazione Mobile Android / iPhone */
     @media (max-width: 600px) {
       body { padding: 4px; }
@@ -753,9 +800,9 @@
     </div>
   </div>
 
-  <!-- MODALE ESTRATTO E PAGAMENTI -->
+  <!-- MODALE ESTRATTO E PAGAMENTI CON INCROCIO AUTOMATICO E DRAG & DROP FATTURE -->
   <div id="estratto-pagamenti-modal" class="modal hidden">
-    <div class="modal-box" style="max-width: 800px;">
+    <div class="modal-box" style="max-width: 880px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
         <h3 class="modal-title" style="border:none; padding:0;">📄 Estratto e Pagamenti</h3>
         <button class="btn-cancel" style="padding:4px 8px; font-size:0.8rem;" onclick="closeEstrattoPagamentiModal()">✕ Chiudi</button>
@@ -767,12 +814,18 @@
         <button id="ep-tab-btn-fatture" class="btn-cancel" style="flex:1; padding:6px; font-size:0.85rem;" onclick="switchEpTab('fatture')">🧾 Incrocio Fatture & Non Saldate</button>
       </div>
 
-      <!-- SEZIONE 1: ALLEGATO PDF ESTRATTO CONTO -->
+      <!-- SEZIONE 1: ALLEGATO PDF ESTRATTO CONTO CON ZONA DRAG & DROP -->
       <div id="ep-section-pdf" class="no-print" style="margin-top:8px;">
         <div class="card-dark" style="padding:10px;">
-          <h4 style="color:#ff9f43; font-size:0.9rem; margin-bottom:6px;">📎 Allegare PDF Estratto Conto Bancario</h4>
+          <h4 style="color:#ff9f43; font-size:0.9rem; margin-bottom:8px;">📎 Allegare PDF Estratto Conto Bancario</h4>
+          
+          <div class="dropzone-box" id="ep-ec-dropzone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleEcDrop(event)">
+            📄 <strong>Trascina qui il PDF dell'Estratto Conto Bancario</strong><br>
+            <span style="font-size:0.75rem; color:#a0a8b5;">oppure seleziona il file manualmente qui sotto</span>
+          </div>
+
           <div class="form-group">
-            <label>Seleziona file PDF Estratto Conto:</label>
+            <label>O Seleziona file PDF Estratto Conto:</label>
             <input type="file" id="ep-pdf-file-input" accept="application/pdf" onchange="handleEstrattoPdfUpload(event)">
           </div>
           <div id="ep-pdf-info" style="margin-top:10px; font-size:0.85rem; color:#2ecc71;"></div>
@@ -781,9 +834,25 @@
 
       <!-- SEZIONE 2: INCROCIO FATTURE DA PAGARE & STAMPA NON SALDATE -->
       <div id="ep-section-fatture" class="hidden" style="margin-top:8px;">
-        <!-- FORM NUOVA FATTURA DA PAGARE -->
+        
+        <!-- BARRA INCROCIO RAPIDO ESTRATTO CONTO -->
+        <div id="ep-ec-quick-bar" style="background:#121417; border:1px solid #ff9f43; padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+          <span>📄 <strong>Estratto Conto Bancario:</strong> <span id="ep-ec-quick-name" style="color:#2ecc71;">Nessun PDF caricato</span></span>
+          <div style="display:flex; gap:6px;">
+            <button id="ep-auto-incrocio-btn" class="btn-gold" style="padding:4px 10px; font-size:0.75rem;" onclick="runAutoIncrocioEC()">⚡ Esegui Incrocio Automatico con EC</button>
+            <button id="ep-ec-quick-btn" class="btn-cancel" style="padding:4px 8px; font-size:0.75rem; display:none;" onclick="openEstrattoPdfQuick()">🔍 Visiona Estratto Conto PDF</button>
+          </div>
+        </div>
+
+        <!-- ZONA TRASCINAMENTO (DRAG & DROP) FATTURE MULTIPLE -->
+        <div id="ep-invoices-dropzone" class="dropzone-box" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleInvoiceDrop(event)">
+          📥 <strong>Trascina qui i PDF o Immagini delle Fatture da pagare</strong><br>
+          <span style="font-size:0.75rem; color:#a0a8b5;">Puoi trascinare più file contemporaneamente. Il sistema estrarrà i dati ed effettuerà l'incrocio.</span>
+        </div>
+
+        <!-- FORM NUOVA FATTURA MANUALE DA PAGARE -->
         <div class="card-dark no-print" style="padding:10px; margin-bottom:10px;">
-          <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">➕ Inserisci Fattura da Pagare</h4>
+          <h4 style="color:#ff9f43; font-size:0.85rem; margin-bottom:6px;">➕ Oppure Inserisci Fattura Manualmente</h4>
           <div class="form-row">
             <div class="form-group" style="flex:2;">
               <label>Fornitore / Ditta:</label>
@@ -811,9 +880,15 @@
               </select>
             </div>
           </div>
-          <div class="form-group" style="margin-top:4px;">
-            <label>Note / Riferimento Estratto Conto:</label>
-            <input type="text" id="ep-note-fattura" placeholder="Es. Riscontrato in data XX/XX su EC">
+          <div class="form-row" style="margin-top:4px;">
+            <div class="form-group" style="flex:1;">
+              <label>📎 File PDF Fattura / Ricevuta (Allegato):</label>
+              <input type="file" id="ep-pdf-fattura-input" accept="application/pdf,image/*">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>Note / Riferimento Estratto Conto:</label>
+              <input type="text" id="ep-note-fattura" placeholder="Es. Riscontrato su EC in data XX/XX">
+            </div>
           </div>
           <button class="btn-gold" style="margin-top:8px; width:100%; padding:8px;" onclick="saveFatturaEntry()">💾 Salva Fattura</button>
         </div>
@@ -850,8 +925,10 @@
                   <th>Data Fattura</th>
                   <th>Importo</th>
                   <th>Stato Pagamento</th>
-                  <th>Note / Incrocio EC</th>
-                  <th class="no-print">Azioni / Cambio Stato</th>
+                  <th>Esito Incrocio EC</th>
+                  <th>PDF Fattura</th>
+                  <th>Note</th>
+                  <th class="no-print">Azioni / Spunta Saldata</th>
                 </tr>
               </thead>
               <tbody id="ep-table-body"></tbody>
@@ -1068,7 +1145,7 @@
     let bookings = [];
     let pranziCeneList = [];
     let fattureList = [];
-    let pdfEstrattoData = localStorage.getItem("agri_pdf_estratto") || null;
+    let pdfEstrattoData = localStorage.getItem("agri_pdf_estratto") ? JSON.parse(localStorage.getItem("agri_pdf_estratto")) : null;
     let currentTempMeals = [];
     let currentTempDocs = [];
     let pendingMasterAction = null;
@@ -1147,6 +1224,11 @@
       return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
     }
 
+    function getRoomName(id) {
+      const room = ROOMS.find(r => r.id === id);
+      return room ? room.name : id;
+    }
+
     function loginStaff() {
       if (document.getElementById("staff-pass-input").value === CONFIG.STAFF_PASS) {
         document.getElementById("login-modal").classList.add("hidden");
@@ -1198,6 +1280,146 @@
           `;
         }
         grid.appendChild(card);
+      });
+    }
+
+    // ==========================================
+    // ESTRATTORE E MOTORE DI INCROCIO TESTO PDF
+    // ==========================================
+    async function extractTextFromPdfDataUrl(dataUrl) {
+      if (!window.pdfjsLib) return "";
+      try {
+        const loadingTask = pdfjsLib.getDocument(dataUrl);
+        const pdf = await loadingTask.promise;
+        let fullText = "";
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const tokenized = await page.getTextContent();
+          const pageText = tokenized.items.map(item => item.str).join(" ");
+          fullText += " " + pageText;
+        }
+        return fullText;
+      } catch (e) {
+        console.error("Errore estrazione testo PDF:", e);
+        return "";
+      }
+    }
+
+    function checkMatchWithEC(fornitore, numFattura, importo, extraText = "") {
+      if (!pdfEstrattoData || !pdfEstrattoData.extractedText) return false;
+      const ecText = pdfEstrattoData.extractedText.toLowerCase();
+
+      if (fornitore && fornitore.length >= 3 && fornitore !== "-" && ecText.includes(fornitore.toLowerCase())) {
+        return true;
+      }
+      if (numFattura && numFattura.length >= 3 && numFattura !== "-" && ecText.includes(numFattura.toLowerCase())) {
+        return true;
+      }
+      if (importo && importo > 0) {
+        const impStr1 = importo.toFixed(2).replace('.', ',');
+        const impStr2 = importo.toFixed(2);
+        if (ecText.includes(impStr1) || ecText.includes(impStr2)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.add("dragover");
+    }
+    function handleDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove("dragover");
+    }
+
+    async function handleEcDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove("dragover");
+      const files = e.dataTransfer ? e.dataTransfer.files : null;
+      if (files && files[0]) {
+        processEstrattoFile(files[0]);
+      }
+    }
+
+    async function handleInvoiceDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove("dragover");
+
+      const files = e.dataTransfer ? e.dataTransfer.files : null;
+      if (!files || files.length === 0) return;
+
+      let addedCount = 0;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type === "application/pdf" || file.type.startsWith("image/")) {
+          await processDroppedInvoiceFile(file);
+          addedCount++;
+        }
+      }
+      if (addedCount > 0) {
+        alert(`Inserite e analizzate con successo ${addedCount} fatture!`);
+        renderFattureReport();
+      }
+    }
+
+    async function processDroppedInvoiceFile(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const dataUrl = e.target.result;
+          let extractedText = "";
+          if (file.type === "application/pdf") {
+            try { extractedText = await extractTextFromPdfDataUrl(dataUrl); } catch(err){}
+          }
+
+          let detectedFornitore = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+          let detectedNum = "-";
+          let detectedImporto = 0;
+
+          if (extractedText) {
+            const amountMatch = extractedText.match(/(?:totale|importo|saldo|tot\.?)\s*:?\s*€?\s*([0-9]+[.,][0-9]{2})/i) ||
+                                 extractedText.match(/€\s*([0-9]+[.,][0-9]{2})/);
+            if (amountMatch) {
+              detectedImporto = parseFloat(amountMatch[1].replace(',', '.'));
+            }
+            const numMatch = extractedText.match(/(?:fattura|ft|doc|n\.?)\s*(?:n°|num\.?|numero)?\s*:?\s*([a-zA-Z0-9\/\-_]+)/i);
+            if (numMatch && numMatch[1].length < 20) {
+              detectedNum = numMatch[1];
+            }
+            const fornMatch = extractedText.match(/(?:fornitore|spett\.le|ditta|società|srl|snc|spa)\s*:?\s*([a-zA-Z0-9\s\.]{3,30})/i);
+            if (fornMatch) {
+              detectedFornitore = fornMatch[1].trim();
+            }
+          }
+
+          let isMatched = checkMatchWithEC(detectedFornitore, detectedNum, detectedImporto, extractedText);
+
+          const fatturaData = {
+            fornitore: detectedFornitore,
+            numFattura: detectedNum,
+            dataFattura: new Date().toISOString().split('T')[0],
+            importo: detectedImporto,
+            stato: isMatched ? "SALDATA" : "NON_SALDATA",
+            note: isMatched ? "Incrociato in automatico da Bonifico su Estratto Conto PDF" : "Caricato tramite Drag & Drop",
+            pdfFattura: dataUrl,
+            extractedText: extractedText,
+            createdAt: new Date().toISOString()
+          };
+
+          try {
+            await db.collection("fatture_pagamenti").add(fatturaData);
+          } catch(err) {
+            console.error("Errore salvataggio fattura trascinata:", err);
+          }
+          resolve();
+        };
+        reader.readAsDataURL(file);
       });
     }
 
@@ -1281,26 +1503,39 @@
       }
     }
 
-    function handleEstrattoPdfUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (file.type !== "application/pdf") {
+    function processEstrattoFile(file) {
+      if (!file || file.type !== "application/pdf") {
         alert("Carica un file PDF valido!");
         return;
       }
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
+        const dataUrl = e.target.result;
+        let extractedText = "";
+        try {
+          extractedText = await extractTextFromPdfDataUrl(dataUrl);
+        } catch(err) { console.warn("Estrazione testo PDF fallita:", err); }
+
         pdfEstrattoData = {
           name: file.name,
           size: (file.size / 1024).toFixed(1) + " KB",
           date: new Date().toLocaleDateString('it-IT'),
-          dataUrl: e.target.result
+          dataUrl: dataUrl,
+          extractedText: extractedText || ""
         };
         localStorage.setItem("agri_pdf_estratto", JSON.stringify(pdfEstrattoData));
         displayEstrattoPdfInfo();
-        alert("PDF Estratto Conto allegato con successo!");
+        alert("PDF Estratto Conto allegato e analizzato con successo!");
+        if (!document.getElementById("ep-section-fatture").classList.contains("hidden")) {
+          renderFattureReport();
+        }
       };
       reader.readAsDataURL(file);
+    }
+
+    function handleEstrattoPdfUpload(event) {
+      const file = event.target.files[0];
+      if (file) processEstrattoFile(file);
     }
 
     function displayEstrattoPdfInfo() {
@@ -1311,11 +1546,13 @@
         try { pdfEstrattoData = JSON.parse(stored); } catch(e){}
       }
       if (pdfEstrattoData && pdfEstrattoData.name) {
+        const textLen = pdfEstrattoData.extractedText ? pdfEstrattoData.extractedText.length : 0;
         infoDiv.innerHTML = `
-          ✅ <strong>PDF Estratto Conto Attualmente Allegato:</strong><br>
+          ✅ <strong>PDF Estratto Conto Attualmente Allegato e Analizzato:</strong><br>
           📄 <strong>Nome File:</strong> ${pdfEstrattoData.name} (${pdfEstrattoData.size})<br>
           📅 <strong>Data Caricamento:</strong> ${pdfEstrattoData.date}<br>
-          <a href="${pdfEstrattoData.dataUrl}" target="_blank" style="color:#3498db; text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;">🔍 Apri / Visualizza PDF Estratto Conto</a>
+          🟢 <strong>Testo Estratto:</strong> ${textLen > 0 ? textLen + ' caratteri analizzati per incrocio' : 'Standard PDF'}<br>
+          <a href="#" onclick="openEstrattoPdfQuick(); return false;" style="color:#3498db; text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;">🔍 Apri / Visualizza PDF Estratto Conto</a>
           <button onclick="deleteEstrattoPdf()" style="background:#e74c3c; color:white; border:none; padding:3px 8px; border-radius:4px; margin-left:10px; cursor:pointer;">🗑️ Rimuovi PDF</button>
         `;
       } else {
@@ -1328,6 +1565,42 @@
         localStorage.removeItem("agri_pdf_estratto");
         pdfEstrattoData = null;
         displayEstrattoPdfInfo();
+        updateEcQuickBar();
+      }
+    }
+
+    function updateEcQuickBar() {
+      const nameSpan = document.getElementById("ep-ec-quick-name");
+      const btn = document.getElementById("ep-ec-quick-btn");
+      if (!nameSpan || !btn) return;
+      let stored = localStorage.getItem("agri_pdf_estratto");
+      if (stored) {
+        try { pdfEstrattoData = JSON.parse(stored); } catch(e){}
+      }
+      if (pdfEstrattoData && pdfEstrattoData.dataUrl) {
+        nameSpan.innerText = `${pdfEstrattoData.name || 'Estratto Conto.pdf'} (${pdfEstrattoData.size || ''})`;
+        btn.style.display = "inline-block";
+      } else {
+        nameSpan.innerText = "Nessun PDF Estratto Conto caricato";
+        btn.style.display = "none";
+      }
+    }
+
+    function openEstrattoPdfQuick() {
+      if (pdfEstrattoData && pdfEstrattoData.dataUrl) {
+        openPdfBase64(pdfEstrattoData.dataUrl, pdfEstrattoData.name || 'Estratto_Conto.pdf');
+      } else {
+        alert("Nessun PDF Estratto Conto presente. Caricalo prima nella scheda 'Allegato Estratto Conto (PDF)'.");
+      }
+    }
+
+    function openPdfBase64(dataUrl, filename) {
+      if (!dataUrl) return;
+      const win = window.open();
+      if (win) {
+        win.document.write(`<html style="margin:0;padding:0;height:100%;"><head><title>${filename || 'Documento PDF'}</title></head><body style="margin:0;padding:0;height:100%;overflow:hidden;"><iframe src="${dataUrl}" width="100%" height="100%" style="border:none;"></iframe></body></html>`);
+      } else {
+        alert("Sblocca i pop-up nel browser per visualizzare il PDF.");
       }
     }
 
@@ -1338,36 +1611,88 @@
       const importo = parseFloat(document.getElementById("ep-importo-fattura").value);
       const stato = document.getElementById("ep-stato-fattura").value;
       const note = document.getElementById("ep-note-fattura").value.trim();
+      const pdfFileInput = document.getElementById("ep-pdf-fattura-input");
 
       if (!fornitore || !dataFattura || isNaN(importo) || importo <= 0) {
         alert("Compila tutti i campi obbligatori (Fornitore, Data, Importo validi)!");
         return;
       }
 
-      const fatturaData = {
-        fornitore,
-        numFattura: numFattura || "-",
-        dataFattura,
-        importo,
-        stato,
-        note: note || "-",
-        createdAt: new Date().toISOString()
+      const executeSave = async (pdfBase64, extractedText = "") => {
+        const fatturaData = {
+          fornitore,
+          numFattura: numFattura || "-",
+          dataFattura,
+          importo,
+          stato,
+          note: note || "-",
+          pdfFattura: pdfBase64 || null,
+          extractedText: extractedText || "",
+          createdAt: new Date().toISOString()
+        };
+
+        try {
+          await db.collection("fatture_pagamenti").add(fatturaData);
+          document.getElementById("ep-fornitore-input").value = "";
+          document.getElementById("ep-num-fattura").value = "";
+          document.getElementById("ep-importo-fattura").value = "";
+          document.getElementById("ep-note-fattura").value = "";
+          if (pdfFileInput) pdfFileInput.value = "";
+          alert("Fattura inserita con successo!");
+          renderFattureReport();
+        } catch (err) {
+          alert("Errore nel salvataggio della fattura: " + err.message);
+        }
       };
 
-      try {
-        await db.collection("fatture_pagamenti").add(fatturaData);
-        document.getElementById("ep-fornitore-input").value = "";
-        document.getElementById("ep-num-fattura").value = "";
-        document.getElementById("ep-importo-fattura").value = "";
-        document.getElementById("ep-note-fattura").value = "";
-        alert("Fattura inserita con successo!");
-        renderFattureReport();
-      } catch (err) {
-        alert("Errore nel salvataggio della fattura: " + err.message);
+      if (pdfFileInput && pdfFileInput.files && pdfFileInput.files[0]) {
+        const file = pdfFileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          let extText = "";
+          if (file.type === "application/pdf") {
+            try { extText = await extractTextFromPdfDataUrl(e.target.result); } catch(err){}
+          }
+          executeSave(e.target.result, extText);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        executeSave(null, "");
       }
     }
 
+    async function runAutoIncrocioEC() {
+      if (!pdfEstrattoData || !pdfEstrattoData.extractedText) {
+        alert("Per favore, allegare prima il PDF dell'Estratto Conto nella prima scheda!");
+        return;
+      }
+
+      let matchedCount = 0;
+      for (const f of fattureList) {
+        if (f.stato !== "SALDATA") {
+          const matched = checkMatchWithEC(f.fornitore, f.numFattura, f.importo, f.extractedText || "");
+          if (matched) {
+            matchedCount++;
+            try {
+              await db.collection("fatture_pagamenti").doc(f.id).update({
+                stato: "SALDATA",
+                note: (f.note && f.note !== '-' ? f.note + " | " : "") + "✅ Incrociata e Riscontrata da Bonifico EC"
+              });
+            } catch(e) { console.error(e); }
+          }
+        }
+      }
+
+      if (matchedCount > 0) {
+        alert(`🎉 Incrocio completato! Trovate e spuntate ${matchedCount} fatture saldate dall'Estratto Conto!`);
+      } else {
+        alert("Nessuna nuova corrispondenza trovata tra le fatture non saldate e l'Estratto Conto.");
+      }
+      renderFattureReport();
+    }
+
     function renderFattureReport() {
+      updateEcQuickBar();
       const statoFiltro = document.getElementById("ep-filter-stato") ? document.getElementById("ep-filter-stato").value : "NON_SALDATA";
       const tbody = document.getElementById("ep-table-body");
       const tfoot = document.getElementById("ep-table-foot");
@@ -1396,24 +1721,40 @@
 
       let totale = 0;
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0a8b5;">Nessuna fattura trovata per il filtro selezionato.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#a0a8b5;">Nessuna fattura trovata per il filtro selezionato.</td></tr>`;
       } else {
         filtered.forEach(f => {
           totale += (f.importo || 0);
           const tr = document.createElement("tr");
           const isSaldata = f.stato === "SALDATA";
+          const isMatchedWithEc = checkMatchWithEC(f.fornitore, f.numFattura, f.importo, f.extractedText || "");
+
+          if (isMatchedWithEc && !isSaldata) {
+            tr.className = "row-matched";
+          }
+
+          const matchBadge = isMatchedWithEc 
+            ? `<span class="badge-matched">🟢 BONIFICO TROVATO IN EC</span>` 
+            : `<span class="badge-unmatched">⚠️ NON RILEVATO SU EC</span>`;
+
+          const pdfCell = f.pdfFattura 
+            ? `<button onclick="openPdfBase64('${f.pdfFattura}', 'Fattura_${f.numFattura}.pdf')" style="background:#3498db; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:0.75rem;">📄 Vedi PDF</button>` 
+            : '-';
+
           tr.innerHTML = `
             <td><strong>${f.fornitore}</strong></td>
             <td>${f.numFattura}</td>
             <td>${formatDate(f.dataFattura)}</td>
             <td style="color:${isSaldata ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">€ ${(f.importo || 0).toFixed(2)}</td>
             <td><span style="color:${isSaldata ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">${isSaldata ? '✅ SALDATA' : '❌ NON SALDATA'}</span></td>
+            <td>${matchBadge}</td>
+            <td>${pdfCell}</td>
             <td>${f.note || '-'}</td>
             <td class="no-print" style="text-align:center;">
-              <button onclick="toggleStatoFattura('${f.id}', '${f.stato}')" style="background:${isSaldata ? '#ff9f43' : '#2ecc71'}; color:#121417; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:0.75rem; margin-right:4px;" title="Incrocia / Cambia Stato">
-                ${isSaldata ? '❌ Segna Non Saldata' : '✅ Segna Saldata (Incrocia)'}
+              <button onclick="toggleStatoFattura('${f.id}', '${f.stato}')" style="background:${isSaldata ? '#ff9f43' : '#2ecc71'}; color:#121417; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.75rem; margin-right:4px;" title="Incrocia / Spunta Saldata">
+                ${isSaldata ? '❌ Segna Non Saldata' : '✅ Spunta Saldata'}
               </button>
-              <button onclick="deleteFatturaEntry('${f.id}')" style="background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer;" title="Elimina">🗑️</button>
+              <button onclick="deleteFatturaEntry('${f.id}')" style="background:#e74c3c; color:white; border:none; padding:4px 6px; border-radius:4px; cursor:pointer;" title="Elimina">🗑️</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -1424,7 +1765,7 @@
         <tr>
           <td colspan="3" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALE FATTURE:</td>
           <td style="color:#e74c3c; font-weight:bold; font-size:0.95rem;">€ ${totale.toFixed(2)}</td>
-          <td colspan="2"></td>
+          <td colspan="4"></td>
           <td class="no-print"></td>
         </tr>
       `;
@@ -1508,7 +1849,6 @@
       document.getElementById("pd-notes").value = "";
       document.getElementById("pd-photo-input").value = "";
       updateDittaDatalist();
-      // Popola selettore camere
       const camSelect = document.getElementById("pd-camera-select");
       camSelect.innerHTML = "";
       ROOMS.forEach(r => {
@@ -1549,10 +1889,7 @@
       }
     }
     function compressImage(file, maxWidth, maxHeight, quality, callback) {
-      if (!file) {
-        callback(null);
-        return;
-      }
+      if (!file) { callback(null); return; }
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -1793,6 +2130,7 @@
       }
       document.getElementById("room-detail-modal").classList.remove("hidden");
     }
+
     function renderCalendarMonth() {
       const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
       document.getElementById("cal-month-title").innerText = `${monthNames[calMonth]} ${calYear}`;
@@ -1822,196 +2160,371 @@
         calendarGrid.appendChild(dayCell);
       }
     }
+
     function changeMonth(delta) {
       calMonth += delta;
       if (calMonth > 11) { calMonth = 0; calYear++; } 
       else if (calMonth < 0) { calMonth = 11; calYear--; }
       renderCalendarMonth();
     }
+
     function closeRoomDetailModal() {
       document.getElementById("room-detail-modal").classList.add("hidden");
     }
+
     function createBookingFromDetail() {
-      const room = ROOMS.find(r => r.id === currentSelectedRoomId);
-      if (!room) return;
-      const from = document.getElementById("home-date-from").value;
-      const to = document.getElementById("home-date-to").value;
+      if (!currentSelectedRoomId) return;
       closeRoomDetailModal();
-      openBookingModal(room, from, to);
+      openBookingModal(null, currentSelectedRoomId);
     }
+
+    // ==========================================
+    // LOGICA MODALE PIN MASTER & REGISTRO ECONOMICO
+    // ==========================================
+    function openMasterModal(action, bookingId = null) {
+      pendingMasterAction = action;
+      targetBookingId = bookingId;
+      document.getElementById("master-pin-input").value = "";
+      document.getElementById("master-error").innerText = "";
+      
+      const promptText = document.getElementById("master-prompt-text");
+      if (action === 'report') {
+        promptText.innerText = "Inserisci il PIN Master per accedere al Registro Economico:";
+      } else if (action === 'edit') {
+        promptText.innerText = "Inserisci il PIN Master per modificare la prenotazione:";
+      } else if (action === 'delete') {
+        promptText.innerText = "Inserisci il PIN Master per eliminare la prenotazione:";
+      } else {
+        promptText.innerText = "Inserisci il PIN Master:";
+      }
+      
+      document.getElementById("master-modal").classList.remove("hidden");
+    }
+
+    function closeMasterModal() {
+      document.getElementById("master-modal").classList.add("hidden");
+      pendingMasterAction = null;
+      targetBookingId = null;
+    }
+
+    function submitMasterPin() {
+      const pin = document.getElementById("master-pin-input").value;
+      if (pin === CONFIG.MASTER_PIN) {
+        document.getElementById("master-modal").classList.add("hidden");
+        const action = pendingMasterAction;
+        const bId = targetBookingId;
+        pendingMasterAction = null;
+        targetBookingId = null;
+
+        if (action === 'report') {
+          showMasterReport();
+        } else if (action === 'edit' && bId) {
+          openBookingModal(bId);
+        } else if (action === 'delete' && bId) {
+          deleteBookingDirect(bId);
+        }
+      } else {
+        document.getElementById("master-error").innerText = "PIN Master errato!";
+      }
+    }
+
+    function showMasterReport() {
+      document.querySelector(".main-content").classList.add("hidden");
+      document.getElementById("master-report-section").classList.remove("hidden");
+      renderMasterReport();
+    }
+
+    function closeMasterReport() {
+      document.getElementById("master-report-section").classList.add("hidden");
+      document.querySelector(".main-content").classList.remove("hidden");
+    }
+
+    function renderMasterReport() {
+      const from = document.getElementById("report-date-from").value;
+      const to = document.getElementById("report-date-to").value;
+      const tbody = document.getElementById("master-table-body");
+      const tfoot = document.getElementById("master-table-foot");
+
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const filtered = bookings.filter(b => {
+        if (from && b.checkOut < from) return false;
+        if (to && b.checkIn > to) return false;
+        return true;
+      }).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
+
+      let totalStay = 0;
+      let totalMeals = 0;
+      let totalGross = 0;
+      let totalDeposit = 0;
+      let totalBalance = 0;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="16" style="text-align:center; color:#a0a8b5;">Nessuna prenotazione trovata per il periodo selezionato.</td></tr>`;
+      } else {
+        filtered.forEach(b => {
+          const roomName = getRoomName(b.roomId);
+          const stayPrice = b.stayTotal || 0;
+          const mealsPrice = b.mealsTotal || 0;
+          const grossPrice = stayPrice + mealsPrice;
+          const deposit = b.deposit || 0;
+          const balance = grossPrice - deposit;
+
+          totalStay += stayPrice;
+          totalMeals += mealsPrice;
+          totalGross += grossPrice;
+          totalDeposit += deposit;
+          totalBalance += balance;
+
+          let docsInfo = '-';
+          if (b.guestDocs && b.guestDocs.length > 0) {
+            docsInfo = b.guestDocs.map(d => `
+              <div style="display:inline-flex; gap:4px; align-items:center; margin-right:4px;">
+                <span>${d.label}:</span>
+                ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" onclick="openImageViewer('${d.fronte}')" style="width:20px;height:20px;" title="Fronte">` : ''}
+                ${d.retro ? `<img src="${d.retro}" class="meal-thumb" onclick="openImageViewer('${d.retro}')" style="width:20px;height:20px;" title="Retro">` : ''}
+              </div>
+            `).join('');
+          }
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><strong>Cam. ${roomName}</strong></td>
+            <td>${b.guestName}</td>
+            <td>${b.phone || '-'}</td>
+            <td>${b.adults}</td>
+            <td>${b.children || 0}</td>
+            <td>${formatDate(b.checkIn)}</td>
+            <td>${formatDate(b.checkOut)}</td>
+            <td>${b.nights}</td>
+            <td>€ ${stayPrice.toFixed(2)}</td>
+            <td>€ ${mealsPrice.toFixed(2)}</td>
+            <td><strong>€ ${grossPrice.toFixed(2)}</strong></td>
+            <td style="color:#2ecc71;">€ ${deposit.toFixed(2)}</td>
+            <td style="color:${balance > 0 ? '#e74c3c' : '#2ecc71'}; font-weight:bold;">€ ${balance.toFixed(2)}</td>
+            <td>${b.notes || '-'}</td>
+            <td>${docsInfo}</td>
+            <td class="no-print">
+              <button onclick="requestEditBooking('${b.id}')" style="background:#ff9f43; color:#121417; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:0.75rem; margin-right:2px;">✏️</button>
+              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-weight:bold; font-size:0.75rem;">🗑️</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="8" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALI GENERALI:</td>
+          <td><strong>€ ${totalStay.toFixed(2)}</strong></td>
+          <td><strong>€ ${totalMeals.toFixed(2)}</strong></td>
+          <td><strong style="color:#ff9f43;">€ ${totalGross.toFixed(2)}</strong></td>
+          <td style="color:#2ecc71;"><strong>€ ${totalDeposit.toFixed(2)}</strong></td>
+          <td style="color:#e74c3c;"><strong>€ ${totalBalance.toFixed(2)}</strong></td>
+          <td colspan="2"></td>
+          <td class="no-print"></td>
+        </tr>
+      `;
+    }
+
+    // ==========================================
+    // AZIONI SULLE PRENOTAZIONI (MODIFICA, ELIMINAZIONE, SALVATAGGIO)
+    // ==========================================
+    function requestEditBooking(id) {
+      openMasterModal('edit', id);
+    }
+
+    function requestReleaseRoomDirect(id) {
+      openMasterModal('delete', id);
+    }
+
+    async function deleteBookingDirect(id) {
+      if (confirm("Sei sicuro di voler eliminare definitivamente questa prenotazione?")) {
+        try {
+          await db.collection("prenotazioni").doc(id).delete();
+          alert("Prenotazione eliminata con successo!");
+        } catch (err) {
+          alert("Errore durante l'eliminazione: " + err.message);
+        }
+      }
+    }
+
+    function openBookingModal(bookingId = null, roomId = null) {
+      currentTempMeals = [];
+      currentTempDocs = [];
+      document.getElementById("book-id").value = bookingId || "";
+      
+      const titleElem = document.getElementById("modal-room-title");
+      
+      if (bookingId) {
+        const b = bookings.find(item => item.id === bookingId);
+        if (!b) return;
+        document.getElementById("book-room-id").value = b.roomId;
+        titleElem.innerText = `Modifica Prenotazione - Camera ${getRoomName(b.roomId)}`;
+        document.getElementById("book-guest-name").value = b.guestName || "";
+        document.getElementById("book-phone").value = b.phone || "";
+        document.getElementById("book-adults").value = b.adults || 2;
+        document.getElementById("book-children").value = b.children || 0;
+        document.getElementById("book-rate-adult").value = b.rateAdult !== undefined ? b.rateAdult : 35;
+        document.getElementById("book-rate-child").value = b.rateChild !== undefined ? b.rateChild : 20;
+        document.getElementById("book-checkin").value = b.checkIn || "";
+        document.getElementById("book-checkout").value = b.checkOut || "";
+        document.getElementById("book-deposit").value = b.deposit || 0;
+        document.getElementById("book-notes").value = b.notes || "";
+        
+        if (b.meals) currentTempMeals = [...b.meals];
+        if (b.guestDocs) currentTempDocs = [...b.guestDocs];
+      } else {
+        const selectedRoom = ROOMS.find(r => r.id === (roomId || currentSelectedRoomId || "101"));
+        document.getElementById("book-room-id").value = selectedRoom ? selectedRoom.id : "101";
+        titleElem.innerText = `Nuova Prenotazione - Camera ${selectedRoom ? selectedRoom.name : '101'}`;
+        
+        document.getElementById("book-guest-name").value = "";
+        document.getElementById("book-phone").value = "";
+        document.getElementById("book-adults").value = 2;
+        document.getElementById("book-children").value = 0;
+        document.getElementById("book-rate-adult").value = selectedRoom ? selectedRoom.defaultAdultRate : 35;
+        document.getElementById("book-rate-child").value = selectedRoom ? selectedRoom.defaultChildRate : 20;
+        
+        const today = document.getElementById("home-date-from").value || new Date().toISOString().split('T')[0];
+        const tomorrow = document.getElementById("home-date-to").value || new Date(Date.now() + 86400000).toISOString().split('T')[0];
+        document.getElementById("book-checkin").value = today;
+        document.getElementById("book-checkout").value = tomorrow;
+        document.getElementById("book-deposit").value = 0;
+        document.getElementById("book-notes").value = "";
+      }
+
+      document.getElementById("meals-section-container").classList.remove("hidden");
+      const todayIso = new Date().toISOString().split('T')[0];
+      if (document.getElementById("meal-date")) document.getElementById("meal-date").value = todayIso;
+      
+      renderTempMealsList();
+      renderTempDocsList();
+      calculateBookingTotal();
+      
+      document.getElementById("booking-modal").classList.remove("hidden");
+    }
+
+    function closeBookingModal() {
+      document.getElementById("booking-modal").classList.add("hidden");
+    }
+
     function calculateBookingTotal() {
+      const checkInStr = document.getElementById("book-checkin").value;
+      const checkOutStr = document.getElementById("book-checkout").value;
       const adults = parseInt(document.getElementById("book-adults").value) || 0;
       const children = parseInt(document.getElementById("book-children").value) || 0;
       const rateAdult = parseFloat(document.getElementById("book-rate-adult").value) || 0;
       const rateChild = parseFloat(document.getElementById("book-rate-child").value) || 0;
       const deposit = parseFloat(document.getElementById("book-deposit").value) || 0;
-      const checkIn = document.getElementById("book-checkin").value;
-      const checkOut = document.getElementById("book-checkout").value;
+
       let nights = 0;
-      if (checkIn && checkOut && checkOut > checkIn) {
-        nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
+      if (checkInStr && checkOutStr) {
+        const dIn = new Date(checkInStr);
+        const dOut = new Date(checkOutStr);
+        const diffTime = dOut - dIn;
+        if (diffTime > 0) {
+          nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
       }
-      const stayTotal = ((adults * rateAdult) + (children * rateChild)) * nights;
-      const mealsTotal = currentTempMeals.reduce((sum, m) => sum + m.amount, 0);
-      const grandTotal = stayTotal + mealsTotal;
-      const balance = grandTotal - deposit;
+
+      const stayTotal = nights * ((adults * rateAdult) + (children * rateChild));
+      const mealsTotal = currentTempMeals.reduce((acc, m) => acc + (parseFloat(m.amount) || 0), 0);
+      const grossTotal = stayTotal + mealsTotal;
+      const balance = grossTotal - deposit;
+
       document.getElementById("summary-stay").innerText = `€ ${stayTotal.toFixed(2)}`;
       document.getElementById("summary-meals").innerText = `€ ${mealsTotal.toFixed(2)}`;
       document.getElementById("summary-deposit").innerText = `€ ${deposit.toFixed(2)}`;
       document.getElementById("summary-balance").innerText = `€ ${balance.toFixed(2)}`;
-    }
-    function openBookingModal(room, checkIn, checkOut, bookingToEdit = null) {
-      document.getElementById("book-room-id").value = room.id;
-      document.getElementById("meal-date").value = checkIn || new Date().toISOString().split('T')[0];
-      if (bookingToEdit) {
-        document.getElementById("modal-room-title").innerText = `Modifica Prenotazione Cam. ${room.name}`;
-        document.getElementById("book-id").value = bookingToEdit.id;
-        document.getElementById("book-guest-name").value = bookingToEdit.guestName || "";
-        document.getElementById("book-phone").value = bookingToEdit.phone || "";
-        document.getElementById("book-adults").value = bookingToEdit.adults || 2;
-        document.getElementById("book-children").value = bookingToEdit.children || 0;
-        document.getElementById("book-checkin").value = bookingToEdit.checkIn;
-        document.getElementById("book-checkout").value = bookingToEdit.checkOut;
-        document.getElementById("book-rate-adult").value = bookingToEdit.rateAdult;
-        document.getElementById("book-rate-child").value = bookingToEdit.rateChild;
-        document.getElementById("book-deposit").value = bookingToEdit.deposit || 0;
-        document.getElementById("book-notes").value = bookingToEdit.notes || "";
-        
-        currentTempMeals = bookingToEdit.meals ? JSON.parse(JSON.stringify(bookingToEdit.meals)) : [];
-        currentTempDocs = bookingToEdit.guestDocs ? JSON.parse(JSON.stringify(bookingToEdit.guestDocs)) : [];
-        document.getElementById("meals-section-container").classList.remove("hidden");
-      } else {
-        document.getElementById("modal-room-title").innerText = `Prenota Camera ${room.name}`;
-        document.getElementById("book-id").value = "";
-        document.getElementById("book-guest-name").value = "";
-        document.getElementById("book-phone").value = "";
-        document.getElementById("book-adults").value = 2;
-        document.getElementById("book-children").value = 0;
-        document.getElementById("book-deposit").value = 0;
-        document.getElementById("book-notes").value = "";
-        document.getElementById("book-checkin").value = checkIn;
-        document.getElementById("book-checkout").value = checkOut;
-        document.getElementById("book-rate-adult").value = room.defaultAdultRate;
-        document.getElementById("book-rate-child").value = room.defaultChildRate;
-        
-        currentTempMeals = [];
-        currentTempDocs = [];
-        document.getElementById("meals-section-container").classList.add("hidden");
-      }
-      renderMealsList();
-      renderDocsList();
-      calculateBookingTotal();
-      document.getElementById("booking-modal").classList.remove("hidden");
+
+      return { nights, stayTotal, mealsTotal, grossTotal, balance };
     }
 
-    // ==========================================
-    // LOGICA GESTIONE DOCUMENTI D'IDENTITA OSPITI
-    // ==========================================
-    function renderDocsList() {
-      const container = document.getElementById("docs-list");
-      if (!container) return;
-      container.innerHTML = "";
-      if (currentTempDocs.length === 0) {
-        container.innerHTML = `<em style="font-size:0.75rem; color:#a0a8b5;">Nessun documento d'identità caricato per questa camera.</em>`;
-        return;
-      }
-      currentTempDocs.forEach((d, idx) => {
-        const div = document.createElement("div");
-        div.className = "meal-item";
-        div.innerHTML = `
-          <div>
-            <strong>🪪 ${d.label || 'Ospite ' + (idx + 1)}</strong>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            ${d.fronte ? `<img src="${d.fronte}" class="meal-thumb" onclick="openImageViewer('${d.fronte}')" title="Fronte Documento">` : '<span style="font-size:0.65rem; color:#a0a8b5;">[No Fronte]</span>'}
-            ${d.retro ? `<img src="${d.retro}" class="meal-thumb" onclick="openImageViewer('${d.retro}')" title="Retro Documento">` : '<span style="font-size:0.65rem; color:#a0a8b5;">[No Retro]</span>'}
-            <button type="button" onclick="removeDoc(${idx})" style="background:#e74c3c; color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;">✕</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
     function addDocToBooking() {
-      const labelInput = document.getElementById("doc-guest-label");
+      const label = document.getElementById("doc-guest-label").value.trim() || "Ospite";
       const fronteInput = document.getElementById("doc-fronte-input");
       const retroInput = document.getElementById("doc-retro-input");
-      const label = labelInput.value.trim() || `Ospite ${currentTempDocs.length + 1}`;
-      const fronteFile = fronteInput.files && fronteInput.files[0];
-      const retroFile = retroInput.files && retroInput.files[0];
-      if (!fronteFile && !retroFile) {
-        alert("Seleziona o scatta almeno una foto (Fronte o Retro) del documento!");
-        return;
-      }
-      const processRetro = (fronteBase64) => {
-        if (retroFile) {
-          compressImage(retroFile, 1024, 1024, 0.7, (retroBase64) => {
-            currentTempDocs.push({
-              id: Date.now().toString(),
-              label,
-              fronte: fronteBase64 || null,
-              retro: retroBase64 || null
-            });
-            labelInput.value = "";
-            fronteInput.value = "";
-            retroInput.value = "";
-            renderDocsList();
+
+      let fronteData = null;
+      let retroData = null;
+
+      const processFronte = (next) => {
+        if (fronteInput.files && fronteInput.files[0]) {
+          compressImage(fronteInput.files[0], 1024, 1024, 0.7, (res) => {
+            fronteData = res;
+            next();
           });
-        } else {
+        } else next();
+      };
+
+      const processRetro = (next) => {
+        if (retroInput.files && retroInput.files[0]) {
+          compressImage(retroInput.files[0], 1024, 1024, 0.7, (res) => {
+            retroData = res;
+            next();
+          });
+        } else next();
+      };
+
+      processFronte(() => {
+        processRetro(() => {
+          if (!fronteData && !retroData) {
+            alert("Seleziona almeno un'immagine per il fronte o il retro del documento!");
+            return;
+          }
           currentTempDocs.push({
             id: Date.now().toString(),
             label,
-            fronte: fronteBase64 || null,
-            retro: null
+            fronte: fronteData,
+            retro: retroData
           });
-          labelInput.value = "";
+          document.getElementById("doc-guest-label").value = "";
           fronteInput.value = "";
           retroInput.value = "";
-          renderDocsList();
-        }
-      };
-      if (fronteFile) {
-        compressImage(fronteFile, 1024, 1024, 0.7, (fronteBase64) => {
-          processRetro(fronteBase64);
+          renderTempDocsList();
         });
-      } else {
-        processRetro(null);
-      }
+      });
     }
-    function removeDoc(index) {
-      currentTempDocs.splice(index, 1);
-      renderDocsList();
-    }
-    function renderMealsList() {
-      const container = document.getElementById("meals-list");
-      container.innerHTML = "";
-      if (currentTempMeals.length === 0) {
-        container.innerHTML = `<em style="font-size:0.75rem; color:#a0a8b5;">Nessuno scontrino/pasto inserito.</em>`;
-        return;
-      }
-      currentTempMeals.forEach((m, idx) => {
+
+    function renderTempDocsList() {
+      const listDiv = document.getElementById("docs-list");
+      if (!listDiv) return;
+      listDiv.innerHTML = "";
+      currentTempDocs.forEach((doc, idx) => {
         const div = document.createElement("div");
         div.className = "meal-item";
         div.innerHTML = `
           <div>
-            <strong>${formatDate(m.date)} (${m.type})</strong> - <span style="color:#ff9f43; font-weight:bold;">€ ${m.amount.toFixed(2)}</span>
+            <strong>${doc.label}</strong>
+            <div style="display:inline-flex; gap:4px; margin-left:6px;">
+              ${doc.fronte ? `<img src="${doc.fronte}" class="meal-thumb" onclick="openImageViewer('${doc.fronte}')" title="Fronte">` : ''}
+              ${doc.retro ? `<img src="${doc.retro}" class="meal-thumb" onclick="openImageViewer('${doc.retro}')" title="Retro">` : ''}
+            </div>
           </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            ${m.photo ? `<img src="${m.photo}" class="meal-thumb" onclick="openImageViewer('${m.photo}')" title="Clicca per ingrandire scontrino">` : ''}
-            <button onclick="removeMeal(${idx})" style="background:#e74c3c; color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;">✕</button>
-          </div>
+          <button type="button" onclick="removeTempDoc(${idx})" style="background:#e74c3c; color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;">✕</button>
         `;
-        container.appendChild(div);
+        listDiv.appendChild(div);
       });
     }
+
+    function removeTempDoc(idx) {
+      currentTempDocs.splice(idx, 1);
+      renderTempDocsList();
+    }
+
     function addMealToBooking() {
       const date = document.getElementById("meal-date").value;
       const type = document.getElementById("meal-type").value;
       const amount = parseFloat(document.getElementById("meal-amount").value);
       const photoInput = document.getElementById("meal-photo-input");
+
       if (!date || isNaN(amount) || amount <= 0) {
-        alert("Inserisci data e importo pasto validi!");
+        alert("Inserisci data e importo validi per la consumazione!");
         return;
       }
+
       const saveMeal = (photoBase64) => {
         currentTempMeals.push({
           id: Date.now().toString(),
@@ -2021,217 +2534,119 @@
           photo: photoBase64 || null
         });
         document.getElementById("meal-amount").value = "";
-        document.getElementById("meal-photo-input").value = "";
-        renderMealsList();
+        photoInput.value = "";
+        renderTempMealsList();
         calculateBookingTotal();
       };
+
       if (photoInput.files && photoInput.files[0]) {
-        compressImage(photoInput.files[0], 1024, 1024, 0.7, (compressedData) => {
-          saveMeal(compressedData);
-        });
+        compressImage(photoInput.files[0], 1024, 1024, 0.7, (res) => saveMeal(res));
       } else {
         saveMeal(null);
       }
     }
-    function removeMeal(index) {
-      currentTempMeals.splice(index, 1);
-      renderMealsList();
+
+    function renderTempMealsList() {
+      const listDiv = document.getElementById("meals-list");
+      if (!listDiv) return;
+      listDiv.innerHTML = "";
+      currentTempMeals.forEach((meal, idx) => {
+        const div = document.createElement("div");
+        div.className = "meal-item";
+        div.innerHTML = `
+          <div>
+            <strong>${meal.type}</strong> (${formatDate(meal.date)}): <span style="color:#2ecc71; font-weight:bold;">€ ${meal.amount.toFixed(2)}</span>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            ${meal.photo ? `<img src="${meal.photo}" class="meal-thumb" onclick="openImageViewer('${meal.photo}')">` : ''}
+            <button type="button" onclick="removeTempMeal(${idx})" style="background:#e74c3c; color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;">✕</button>
+          </div>
+        `;
+        listDiv.appendChild(div);
+      });
+    }
+
+    function removeTempMeal(idx) {
+      currentTempMeals.splice(idx, 1);
+      renderTempMealsList();
       calculateBookingTotal();
     }
-    function openImageViewer(src) {
-      document.getElementById("enlarged-receipt-img").src = src;
-      document.getElementById("image-viewer-modal").classList.remove("hidden");
-    }
-    function closeImageViewer() {
-      document.getElementById("image-viewer-modal").classList.add("hidden");
-    }
-    function closeBookingModal() {
-      document.getElementById("booking-modal").classList.add("hidden");
-    }
+
     async function saveBooking() {
-      const editId = document.getElementById("book-id").value;
+      const id = document.getElementById("book-id").value;
       const roomId = document.getElementById("book-room-id").value;
       const guestName = document.getElementById("book-guest-name").value.trim();
       const phone = document.getElementById("book-phone").value.trim();
-      const adults = parseInt(document.getElementById("book-adults").value) || 1;
+      const adults = parseInt(document.getElementById("book-adults").value) || 0;
       const children = parseInt(document.getElementById("book-children").value) || 0;
-      const checkIn = document.getElementById("book-checkin").value;
-      const checkOut = document.getElementById("book-checkout").value;
       const rateAdult = parseFloat(document.getElementById("book-rate-adult").value) || 0;
       const rateChild = parseFloat(document.getElementById("book-rate-child").value) || 0;
+      const checkIn = document.getElementById("book-checkin").value;
+      const checkOut = document.getElementById("book-checkout").value;
       const deposit = parseFloat(document.getElementById("book-deposit").value) || 0;
       const notes = document.getElementById("book-notes").value.trim();
-      if (!guestName || !checkIn || !checkOut) {
-        alert("Compila i campi obbligatori (Nome Referente e Date)!");
+
+      if (!guestName || !checkIn || !checkOut || checkOut <= checkIn) {
+        alert("Compila tutti i campi obbligatori! Verifica che la data di check-out sia successiva al check-in.");
         return;
       }
-      if (checkOut <= checkIn) {
-        alert("La data di check-out deve essere successiva al check-in!");
-        return;
-      }
-      const hasConflict = bookings.some(b => 
-        b.id !== editId && b.roomId === roomId && (checkIn < b.checkOut && checkOut > b.checkIn)
+
+      const overlap = bookings.find(b => 
+        b.id !== id && 
+        b.roomId === roomId && 
+        (checkIn < b.checkOut && checkOut > b.checkIn)
       );
-      if (hasConflict) {
-        alert("Errore: La camera risulta occupata in questo intervallo di date!");
+
+      if (overlap) {
+        alert(`Attenzione! La camera è già occupata nel periodo selezionato da ${overlap.guestName} (${formatDate(overlap.checkIn)} - ${formatDate(overlap.checkOut)}).`);
         return;
       }
-      const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
-      const stayTotal = ((adults * rateAdult) + (children * rateChild)) * nights;
-      const mealsTotal = currentTempMeals.reduce((sum, m) => sum + m.amount, 0);
-      const grandTotal = stayTotal + mealsTotal;
-      const balance = grandTotal - deposit;
+
+      const totals = calculateBookingTotal();
+
       const bookingData = {
-        roomId, guestName, phone, adults, children, checkIn, checkOut,
-        nights, rateAdult, rateChild, stayTotal, mealsTotal,
-        totalPrice: grandTotal, deposit, balance, notes,
+        roomId,
+        guestName,
+        phone,
+        adults,
+        children,
+        rateAdult,
+        rateChild,
+        checkIn,
+        checkOut,
+        nights: totals.nights,
+        stayTotal: totals.stayTotal,
+        mealsTotal: totals.mealsTotal,
+        deposit,
+        notes,
         meals: currentTempMeals,
-        guestDocs: currentTempDocs
+        guestDocs: currentTempDocs,
+        updatedAt: new Date().toISOString()
       };
+
       try {
-        if (editId) {
-          await db.collection("prenotazioni").doc(editId).set(bookingData, { merge: true });
+        if (id) {
+          await db.collection("prenotazioni").doc(id).update(bookingData);
         } else {
+          bookingData.createdAt = new Date().toISOString();
           await db.collection("prenotazioni").add(bookingData);
         }
         closeBookingModal();
+        alert("Prenotazione salvata con successo!");
       } catch (err) {
-        alert("Errore nel salvataggio su Firebase: " + err.message);
+        alert("Errore durante il salvataggio della prenotazione: " + err.message);
       }
     }
-    function requestEditBooking(bookingId) {
-      targetBookingId = bookingId;
-      pendingMasterAction = 'edit';
-      document.getElementById("master-prompt-text").innerText = "Inserisci PIN Master per modificare la prenotazione:";
-      document.getElementById("master-modal").classList.remove("hidden");
-    }
-    function requestReleaseRoomDirect(bookingId) {
-      const b = bookings.find(item => item.id === bookingId);
-      if (b) requestReleaseRoom(b);
-    }
-    function requestReleaseRoom(booking) {
-      targetBookingId = booking.id;
-      pendingMasterAction = 'release';
-      document.getElementById("master-prompt-text").innerText = `Liberare Camera ${getRoomName(booking.roomId)} (${booking.guestName})? Inserisci PIN Master:`;
-      document.getElementById("master-modal").classList.remove("hidden");
-    }
-    function openMasterModal(action) {
-      pendingMasterAction = action;
-      document.getElementById("master-prompt-text").innerText = "Inserisci il PIN Master per accedere al Registro:";
-      document.getElementById("master-modal").classList.remove("hidden");
-    }
-    function closeMasterModal() {
-      document.getElementById("master-modal").classList.add("hidden");
-      document.getElementById("master-pin-input").value = "";
-      document.getElementById("master-error").innerText = "";
-      targetBookingId = null;
-    }
-    function submitMasterPin() {
-      if (document.getElementById("master-pin-input").value === CONFIG.MASTER_PIN) {
-        const action = pendingMasterAction;
-        const bookingId = targetBookingId;
-        closeMasterModal();
-        if (action === 'release' && bookingId) {
-          deleteBooking(bookingId);
-        } else if (action === 'edit' && bookingId) {
-          const bookingToEdit = bookings.find(b => b.id === bookingId);
-          if (bookingToEdit) {
-            const room = ROOMS.find(r => r.id === bookingToEdit.roomId);
-            closeRoomDetailModal();
-            openBookingModal(room, bookingToEdit.checkIn, bookingToEdit.checkOut, bookingToEdit);
-          }
-        } else if (action === 'report') {
-          renderMasterReport();
-        }
-      } else {
-        document.getElementById("master-error").innerText = "PIN Master errato!";
-      }
-    }
-    function renderMasterReport() {
-      document.querySelector(".main-content").classList.add("hidden");
-      document.getElementById("master-report-section").classList.remove("hidden");
-      const from = document.getElementById("report-date-from").value;
-      const to = document.getElementById("report-date-to").value;
-      const tbody = document.getElementById("master-table-body");
-      const tfoot = document.getElementById("master-table-foot");
-      tbody.innerHTML = "";
-      let totStay = 0, totMeals = 0, totGross = 0, totDeposit = 0, totBalance = 0;
-      const filteredBookings = bookings.filter(b => {
-        if (!from || !to) return true;
-        return (from <= b.checkOut && to >= b.checkIn);
-      }).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
 
-      filteredBookings.forEach(b => {
-        const stay = b.stayTotal || b.totalPrice || 0;
-        const meals = b.mealsTotal || 0;
-        const gross = b.totalPrice || (stay + meals);
-        const deposit = b.deposit || 0;
-        const balance = b.balance !== undefined ? b.balance : (gross - deposit);
-
-        totStay += stay;
-        totMeals += meals;
-        totGross += gross;
-        totDeposit += deposit;
-        totBalance += balance;
-
-        let docsDisplay = '-';
-        if (b.guestDocs && b.guestDocs.length > 0) {
-          docsDisplay = b.guestDocs.map(d => `
-            <span style="font-size:0.7rem; color:#ff9f43;">🪪 ${d.label}</span>
-          `).join('<br>');
-        }
-
-        tbody.innerHTML += `
-          <tr>
-            <td><strong>Cam. ${getRoomName(b.roomId)}</strong></td>
-            <td>${b.guestName}</td>
-            <td>${b.phone || '-'}</td>
-            <td>${b.adults}</td>
-            <td>${b.children || 0}</td>
-            <td>${formatDate(b.checkIn)}</td>
-            <td>${formatDate(b.checkOut)}</td>
-            <td>${b.nights}n</td>
-            <td>€ ${stay.toFixed(2)}</td>
-            <td style="color:#3498db;">€ ${meals.toFixed(2)}</td>
-            <td><strong>€ ${gross.toFixed(2)}</strong></td>
-            <td style="color:#2ecc71;">€ ${deposit.toFixed(2)}</td>
-            <td style="color:#e74c3c;"><strong>€ ${balance.toFixed(2)}</strong></td>
-            <td>${b.notes || '-'}</td>
-            <td>${docsDisplay}</td>
-            <td class="no-print">
-              <button onclick="requestReleaseRoomDirect('${b.id}')" style="background:#e74c3c; color:white; border:none; padding:4px 6px; border-radius:4px; cursor:pointer;">Elimina</button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tfoot.innerHTML = `
-        <tr>
-          <td colspan="8" style="text-align:right; font-weight:bold; color:#ff9f43;">TOTALI PERIODO:</td>
-          <td>€ ${totStay.toFixed(2)}</td>
-          <td style="color:#3498db;">€ ${totMeals.toFixed(2)}</td>
-          <td>€ ${totGross.toFixed(2)}</td>
-          <td style="color:#2ecc71;">€ ${totDeposit.toFixed(2)}</td>
-          <td style="color:#e74c3c;">€ ${totBalance.toFixed(2)}</td>
-          <td colspan="3" class="no-print"></td>
-        </tr>
-      `;
+    function openImageViewer(src) {
+      if (!src) return;
+      document.getElementById("enlarged-receipt-img").src = src;
+      document.getElementById("image-viewer-modal").classList.remove("hidden");
     }
-    async function deleteBooking(id) {
-      try {
-        await db.collection("prenotazioni").doc(id).delete();
-      } catch (err) {
-        alert("Errore nell'eliminazione della prenotazione: " + err.message);
-      }
-    }
-    function closeMasterReport() {
-      document.getElementById("master-report-section").classList.add("hidden");
-      document.querySelector(".main-content").classList.remove("hidden");
-      renderRooms();
-    }
-    function getRoomName(roomId) {
-      const room = ROOMS.find(r => r.id === roomId);
-      return room ? room.name : `${roomId}`;
+
+    function closeImageViewer() {
+      document.getElementById("image-viewer-modal").classList.add("hidden");
+      document.getElementById("enlarged-receipt-img").src = "";
     }
   </script>
 </body>
