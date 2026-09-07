@@ -349,7 +349,7 @@
       border-radius: 8px;
       padding: 8px;
       display: flex;
-      justify-style: space-around;
+      justify-content: space-around;
       align-items: center;
       margin-top: 4px;
       text-align: center;
@@ -814,9 +814,9 @@
         <button id="ep-tab-btn-fatture" class="btn-cancel" style="flex:1; padding:6px; font-size:0.85rem;" onclick="switchEpTab('fatture')">🧾 Incrocio Fatture & Non Saldate</button>
       </div>
 
-      <!-- SEZIONE 1: ALLEGATO PDF ESTRATTO CONTO CON ZONA DRAG & DROP -->
-      <div id="ep-section-pdf" class="no-print" style="margin-top:8px;">
-        <div class="card-dark" style="padding:10px;">
+      <!-- SEZIONE 1: ALLEGATO PDF ESTRATTO CONTO CON ZONA DRAG & DROP E GRIGLIA MOVIMENTI ESTRATTI -->
+      <div id="ep-section-pdf" style="margin-top:8px;">
+        <div class="card-dark no-print" style="padding:10px;">
           <h4 style="color:#ff9f43; font-size:0.9rem; margin-bottom:8px;">📎 Allegare PDF Estratto Conto Bancario</h4>
           
           <div class="dropzone-box" id="ep-ec-dropzone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleEcDrop(event)">
@@ -829,6 +829,33 @@
             <input type="file" id="ep-pdf-file-input" accept="application/pdf" onchange="handleEstrattoPdfUpload(event)">
           </div>
           <div id="ep-pdf-info" style="margin-top:10px; font-size:0.85rem; color:#2ecc71;"></div>
+        </div>
+
+        <!-- GRIGLIA MOVIMENTI ESTRATTI DAL PDF ESTRATTO CONTO -->
+        <div id="ep-movimenti-container" class="card-dark" style="padding:10px; margin-top:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+            <h4 style="color:#ff9f43; font-size:0.95rem; margin:0;">📊 Movimenti Estratto Conto (<span id="ep-movimenti-count">0</span> rilevati)</h4>
+            <div class="no-print" style="display:flex; gap:6px; align-items:center;">
+              <input type="text" id="ep-movimenti-search" placeholder="🔍 Cerca descrizione, data o importo..." oninput="renderEstrattoMovimentiGrid()" style="padding:5px 8px; font-size:0.8rem; width:230px;">
+            </div>
+          </div>
+          <div style="overflow-x:auto; max-height:360px; overflow-y:auto;">
+            <table class="report-table" style="width:100%;">
+              <thead>
+                <tr>
+                  <th style="width:110px;">Data Contabile</th>
+                  <th style="width:110px;">Data Valuta</th>
+                  <th style="width:130px;">Importo</th>
+                  <th>Descrizione</th>
+                </tr>
+              </thead>
+              <tbody id="ep-movimenti-tbody">
+                <tr>
+                  <td colspan="4" style="text-align:center; color:#a0a8b5;">Allega un PDF di Estratto Conto per visualizzare i movimenti estratti.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -1284,7 +1311,7 @@
     }
 
     // ==========================================
-    // ESTRATTORE E MOTORE DI INCROCIO TESTO PDF
+    // ESTRATTORE E MOTORE DI INCROCIO TESTO PDF + PARSER MOVIMENTI EC
     // ==========================================
     async function extractTextFromPdfDataUrl(dataUrl) {
       if (!window.pdfjsLib) return "";
@@ -1303,6 +1330,142 @@
         console.error("Errore estrazione testo PDF:", e);
         return "";
       }
+    }
+
+    // Estrae i singoli movimenti (Data Contabile, Data Valuta, Importo, Descrizione) dal PDF Estratto Conto
+    async function extractMovimentiFromPdfDataUrl(dataUrl) {
+      if (!window.pdfjsLib) return [];
+      try {
+        const loadingTask = pdfjsLib.getDocument(dataUrl);
+        const pdf = await loadingTask.promise;
+        let allLines = [];
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          
+          // Raggruppa gli elementi per riga (coordinata Y con tolleranza di 4px)
+          const rowMap = new Map();
+          textContent.items.forEach(item => {
+            if (!item.str || !item.str.trim()) return;
+            const y = Math.round(item.transform[5] / 4) * 4;
+            if (!rowMap.has(y)) rowMap.set(y, []);
+            rowMap.get(y).push({ x: item.transform[4], text: item.str.trim() });
+          });
+
+          // Ordina righe dall'alto verso il basso (Y decrescente) e gli elementi da sinistra a destra (X crescente)
+          const sortedY = Array.from(rowMap.keys()).sort((a, b) => b - a);
+          sortedY.forEach(y => {
+            const rowItems = rowMap.get(y).sort((a, b) => a.x - b.x);
+            const lineStr = rowItems.map(i => i.text).join(" ");
+            allLines.push(lineStr);
+          });
+        }
+
+        const movimenti = [];
+        // Regex per individuare Data Contabile e Data Valuta (es. 12/03/2026 o 12.03.26)
+        const twoDatesRegex = /\b(\d{2}[\/\.\-]\d{2}[\/\.\-]\d{2,4})\s+(\d{2}[\/\.\-]\d{2}[\/\.\-]\d{2,4})\b/;
+        // Regex per individuare un importo in formato italiano (es. - 1.250,00 o 340,50 o +150,00)
+        const amountRegex = /([-+]?\s*(?:\d{1,3}(?:\.\d{3})*|\d+),\d{2})(?!\d)/g;
+
+        let currentMov = null;
+
+        for (let i = 0; i < allLines.length; i++) {
+          const line = allLines[i].trim();
+          const dateMatch = line.match(twoDatesRegex);
+
+          if (dateMatch) {
+            if (currentMov) {
+              movimenti.push(currentMov);
+            }
+
+            const dataContabile = dateMatch[1];
+            const dataValuta = dateMatch[2];
+
+            // Cerca importo sulla stessa riga
+            const amounts = [...line.matchAll(amountRegex)].map(m => m[1]);
+            let importo = amounts.length > 0 ? amounts[amounts.length - 1].trim() : "";
+
+            // Pulisce la riga da date e importo per ottenere la Descrizione
+            let desc = line
+              .replace(dateMatch[0], "")
+              .replace(importo, "")
+              .replace(/\s+/g, " ")
+              .trim();
+
+            currentMov = {
+              dataContabile,
+              dataValuta,
+              importo: importo || "-",
+              descrizione: desc || "Movimento Bancario"
+            };
+          } else if (currentMov) {
+            // Se la riga successiva non inizia con nuove date ed è parte della descrizione o contiene l'importo
+            const isFooterOrHeader = /pagina|estratto conto|saldo iniziale|saldo finale|totale dare|totale avere|riporto/i.test(line);
+            if (!isFooterOrHeader && line.length > 1) {
+              if (currentMov.importo === "-") {
+                const amountsNext = [...line.matchAll(amountRegex)].map(m => m[1]);
+                if (amountsNext.length > 0) {
+                  currentMov.importo = amountsNext[amountsNext.length - 1].trim();
+                  const cleanedLine = line.replace(currentMov.importo, "").trim();
+                  if (cleanedLine) currentMov.descrizione += " " + cleanedLine;
+                  continue;
+                }
+              }
+              currentMov.descrizione += " " + line;
+            }
+          }
+        }
+
+        if (currentMov) {
+          movimenti.push(currentMov);
+        }
+
+        return movimenti;
+      } catch (e) {
+        console.error("Errore estrazione movimenti EC:", e);
+        return [];
+      }
+    }
+
+    function renderEstrattoMovimentiGrid() {
+      const tbody = document.getElementById("ep-movimenti-tbody");
+      const countSpan = document.getElementById("ep-movimenti-count");
+      const searchInput = document.getElementById("ep-movimenti-search");
+      if (!tbody) return;
+
+      const movimenti = (pdfEstrattoData && pdfEstrattoData.movimenti) ? pdfEstrattoData.movimenti : [];
+      const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : "";
+
+      const filtered = movimenti.filter(m => {
+        if (!searchTerm) return true;
+        return (
+          (m.dataContabile && m.dataContabile.toLowerCase().includes(searchTerm)) ||
+          (m.dataValuta && m.dataValuta.toLowerCase().includes(searchTerm)) ||
+          (m.importo && m.importo.toLowerCase().includes(searchTerm)) ||
+          (m.descrizione && m.descrizione.toLowerCase().includes(searchTerm))
+        );
+      });
+
+      if (countSpan) countSpan.innerText = filtered.length;
+      tbody.innerHTML = "";
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#a0a8b5;">Nessun movimento rilevato o corrispondente alla ricerca.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(m => {
+        const isNegative = m.importo && m.importo.includes("-");
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="font-weight:bold;">${m.dataContabile || '-'}</td>
+          <td>${m.dataValuta || '-'}</td>
+          <td style="font-weight:bold; color:${isNegative ? '#e74c3c' : '#2ecc71'};">€ ${m.importo}</td>
+          <td>${m.descrizione || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     function checkMatchWithEC(fornitore, numFattura, importo, extraText = "") {
@@ -1494,6 +1657,7 @@
         btnFatture.className = "btn-cancel";
         secPdf.classList.remove("hidden");
         secFatture.classList.add("hidden");
+        renderEstrattoMovimentiGrid();
       } else {
         btnFatture.className = "btn-gold";
         btnPdf.className = "btn-cancel";
@@ -1512,20 +1676,24 @@
       reader.onload = async (e) => {
         const dataUrl = e.target.result;
         let extractedText = "";
+        let movimenti = [];
         try {
           extractedText = await extractTextFromPdfDataUrl(dataUrl);
-        } catch(err) { console.warn("Estrazione testo PDF fallita:", err); }
+          movimenti = await extractMovimentiFromPdfDataUrl(dataUrl);
+        } catch(err) { console.warn("Estrazione testo/movimenti PDF fallita:", err); }
 
         pdfEstrattoData = {
           name: file.name,
           size: (file.size / 1024).toFixed(1) + " KB",
           date: new Date().toLocaleDateString('it-IT'),
           dataUrl: dataUrl,
-          extractedText: extractedText || ""
+          extractedText: extractedText || "",
+          movimenti: movimenti || []
         };
         localStorage.setItem("agri_pdf_estratto", JSON.stringify(pdfEstrattoData));
         displayEstrattoPdfInfo();
-        alert("PDF Estratto Conto allegato e analizzato con successo!");
+        renderEstrattoMovimentiGrid();
+        alert(`PDF Estratto Conto allegato! Estratti ${movimenti.length} movimenti bancari.`);
         if (!document.getElementById("ep-section-fatture").classList.contains("hidden")) {
           renderFattureReport();
         }
@@ -1546,18 +1714,19 @@
         try { pdfEstrattoData = JSON.parse(stored); } catch(e){}
       }
       if (pdfEstrattoData && pdfEstrattoData.name) {
-        const textLen = pdfEstrattoData.extractedText ? pdfEstrattoData.extractedText.length : 0;
+        const movCount = pdfEstrattoData.movimenti ? pdfEstrattoData.movimenti.length : 0;
         infoDiv.innerHTML = `
           ✅ <strong>PDF Estratto Conto Attualmente Allegato e Analizzato:</strong><br>
           📄 <strong>Nome File:</strong> ${pdfEstrattoData.name} (${pdfEstrattoData.size})<br>
           📅 <strong>Data Caricamento:</strong> ${pdfEstrattoData.date}<br>
-          🟢 <strong>Testo Estratto:</strong> ${textLen > 0 ? textLen + ' caratteri analizzati per incrocio' : 'Standard PDF'}<br>
+          📊 <strong>Movimenti Estratti:</strong> ${movCount} movimenti (Data Contabile, Data Valuta, Importo, Descrizione)<br>
           <a href="#" onclick="openEstrattoPdfQuick(); return false;" style="color:#3498db; text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;">🔍 Apri / Visualizza PDF Estratto Conto</a>
           <button onclick="deleteEstrattoPdf()" style="background:#e74c3c; color:white; border:none; padding:3px 8px; border-radius:4px; margin-left:10px; cursor:pointer;">🗑️ Rimuovi PDF</button>
         `;
       } else {
         infoDiv.innerHTML = `<em>Nessun PDF di Estratto Conto allegato attualmente.</em>`;
       }
+      renderEstrattoMovimentiGrid();
     }
 
     function deleteEstrattoPdf() {
@@ -1565,6 +1734,7 @@
         localStorage.removeItem("agri_pdf_estratto");
         pdfEstrattoData = null;
         displayEstrattoPdfInfo();
+        renderEstrattoMovimentiGrid();
         updateEcQuickBar();
       }
     }
