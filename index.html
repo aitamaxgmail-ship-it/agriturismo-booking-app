@@ -1332,94 +1332,111 @@
       }
     }
 
-    // Estrae i singoli movimenti (Data Contabile, Data Valuta, Importo, Descrizione) dal PDF Estratto Conto
+    // Converte un Data URL Base64 in Uint8Array (lettura PDF più affidabile e precisa)
+    function dataUrlToUint8Array(dataUrl) {
+      try {
+        const base64 = dataUrl.split(',')[1];
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return bytes;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Righe di intestazione / piè di pagina bancarie da IGNORARE nell'estrazione movimenti
+    function isNoiseEcLine(line) {
+      const l = (line || "").toLowerCase().trim();
+      if (!l) return true;
+      const patterns = [
+        /^stampa da relax banking/,
+        /pagina\s+\d+\s+di\s+\d+/,
+        /^dati del conto/,
+        /^data contabile/,
+        /^movimenti$/,
+        /^iban/,
+        /^conto\s+\d/,
+        /^saldo contabile/,
+        /^saldo disponibile/,
+        /^dati aggiornati al/,
+        /^periodo$/,
+        /^tipo movimento/,
+        /^causale$/,
+        /^importo$/,
+        /^visto$/,
+        /^ultimi tre mesi/,
+        /^accredito$/,
+        /^addebito$/,
+        /^credito cooperativo/,
+        /^filiale di/,
+        /^it\d{2}[a-z0-9]{8,}$/,
+        /^\d{2}\/\d{2}\/\d{4}\s+\d{2}[\.:]\d{2}[\.:]\d{2}$/
+      ];
+      return patterns.some(p => p.test(l));
+    }
+
+    // Estrae SOLO i movimenti (Data Contabile, Data Valuta, Importo, Descrizione) dal PDF Estratto Conto
     async function extractMovimentiFromPdfDataUrl(dataUrl) {
       if (!window.pdfjsLib) return [];
       try {
-        const loadingTask = pdfjsLib.getDocument(dataUrl);
+        const bytes = dataUrlToUint8Array(dataUrl);
+        const loadingTask = pdfjsLib.getDocument(bytes ? { data: bytes } : dataUrl);
         const pdf = await loadingTask.promise;
-        let allLines = [];
+
+        const movimenti = [];
+        // Riconosce: DataContabile [DataValuta opzionale] Importo (formato italiano 1.234,56)
+        const MOV_REGEX = /(?:^|\s)(\d{2}[\/\.\-]\d{2}[\/\.\-]\d{4})(?:\s+(\d{2}[\/\.\-]\d{2}[\/\.\-]\d{4}))?\s+(-?\d{1,3}(?:\.\d{3})*,\d{2})(?:\s|$)/;
 
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
           const page = await pdf.getPage(pageNum);
           const textContent = await page.getTextContent();
-          
-          // Raggruppa gli elementi per riga (coordinata Y con tolleranza di 4px)
-          const rowMap = new Map();
+
+          // 1) Ricostruzione delle righe reali della tabella tramite coordinate Y (tolleranza 3px)
+          const rows = [];
           textContent.items.forEach(item => {
             if (!item.str || !item.str.trim()) return;
-            const y = Math.round(item.transform[5] / 4) * 4;
-            if (!rowMap.has(y)) rowMap.set(y, []);
-            rowMap.get(y).push({ x: item.transform[4], text: item.str.trim() });
-          });
-
-          // Ordina righe dall'alto verso il basso (Y decrescente) e gli elementi da sinistra a destra (X crescente)
-          const sortedY = Array.from(rowMap.keys()).sort((a, b) => b - a);
-          sortedY.forEach(y => {
-            const rowItems = rowMap.get(y).sort((a, b) => a.x - b.x);
-            const lineStr = rowItems.map(i => i.text).join(" ");
-            allLines.push(lineStr);
-          });
-        }
-
-        const movimenti = [];
-        // Regex per individuare Data Contabile e Data Valuta (es. 12/03/2026 o 12.03.26)
-        const twoDatesRegex = /\b(\d{2}[\/\.\-]\d{2}[\/\.\-]\d{2,4})\s+(\d{2}[\/\.\-]\d{2}[\/\.\-]\d{2,4})\b/;
-        // Regex per individuare un importo in formato italiano (es. - 1.250,00 o 340,50 o +150,00)
-        const amountRegex = /([-+]?\s*(?:\d{1,3}(?:\.\d{3})*|\d+),\d{2})(?!\d)/g;
-
-        let currentMov = null;
-
-        for (let i = 0; i < allLines.length; i++) {
-          const line = allLines[i].trim();
-          const dateMatch = line.match(twoDatesRegex);
-
-          if (dateMatch) {
-            if (currentMov) {
-              movimenti.push(currentMov);
+            const x = item.transform[4];
+            const y = item.transform[5];
+            let row = rows.find(r => Math.abs(r.y - y) < 3);
+            if (!row) {
+              row = { y: y, cells: [] };
+              rows.push(row);
             }
+            row.cells.push({ x: x, text: item.str.trim() });
+          });
+          rows.sort((a, b) => b.y - a.y);
+          const lines = rows.map(r =>
+            r.cells.sort((a, b) => a.x - b.x).map(c => c.text).join(" ").replace(/\s+/g, " ").trim()
+          );
 
-            const dataContabile = dateMatch[1];
-            const dataValuta = dateMatch[2];
-
-            // Cerca importo sulla stessa riga
-            const amounts = [...line.matchAll(amountRegex)].map(m => m[1]);
-            let importo = amounts.length > 0 ? amounts[amounts.length - 1].trim() : "";
-
-            // Pulisce la riga da date e importo per ottenere la Descrizione
-            let desc = line
-              .replace(dateMatch[0], "")
-              .replace(importo, "")
-              .replace(/\s+/g, " ")
-              .trim();
-
-            currentMov = {
-              dataContabile,
-              dataValuta,
-              importo: importo || "-",
-              descrizione: desc || "Movimento Bancario"
-            };
-          } else if (currentMov) {
-            // Se la riga successiva non inizia con nuove date ed è parte della descrizione o contiene l'importo
-            const isFooterOrHeader = /pagina|estratto conto|saldo iniziale|saldo finale|totale dare|totale avere|riporto/i.test(line);
-            if (!isFooterOrHeader && line.length > 1) {
-              if (currentMov.importo === "-") {
-                const amountsNext = [...line.matchAll(amountRegex)].map(m => m[1]);
-                if (amountsNext.length > 0) {
-                  currentMov.importo = amountsNext[amountsNext.length - 1].trim();
-                  const cleanedLine = line.replace(currentMov.importo, "").trim();
-                  if (cleanedLine) currentMov.descrizione += " " + cleanedLine;
-                  continue;
-                }
-              }
+          // 2) Analisi riga per riga: nuovo movimento oppure continuazione della descrizione
+          let currentMov = null;
+          lines.forEach(line => {
+            if (isNoiseEcLine(line)) return;
+            const m = line.match(MOV_REGEX);
+            if (m) {
+              const prefix = line.slice(0, m.index).trim();
+              if (prefix && currentMov) currentMov.descrizione += " " + prefix;
+              if (currentMov) movimenti.push(currentMov);
+              currentMov = {
+                dataContabile: m[1],
+                dataValuta: m[2] || "-",
+                importo: m[3],
+                descrizione: line.slice(m.index + m[0].length).trim()
+              };
+            } else if (currentMov) {
               currentMov.descrizione += " " + line;
             }
-          }
+          });
+          if (currentMov) movimenti.push(currentMov);
         }
 
-        if (currentMov) {
-          movimenti.push(currentMov);
-        }
+        // 3) Pulizia finale delle descrizioni multi-riga
+        movimenti.forEach(mv => {
+          mv.descrizione = (mv.descrizione || "").replace(/\s+/g, " ").trim();
+          if (!mv.descrizione) mv.descrizione = "Movimento Bancario";
+        });
 
         return movimenti;
       } catch (e) {
@@ -1457,12 +1474,13 @@
 
       filtered.forEach(m => {
         const isNegative = m.importo && m.importo.includes("-");
+        const isSaldo = /^saldo/i.test(m.descrizione || "");
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td style="font-weight:bold;">${m.dataContabile || '-'}</td>
           <td>${m.dataValuta || '-'}</td>
-          <td style="font-weight:bold; color:${isNegative ? '#e74c3c' : '#2ecc71'};">€ ${m.importo}</td>
-          <td>${m.descrizione || '-'}</td>
+          <td style="font-weight:bold; color:${isSaldo ? '#ff9f43' : (isNegative ? '#e74c3c' : '#2ecc71')};">€ ${m.importo}</td>
+          <td${isSaldo ? ' style="color:#ff9f43; font-weight:bold;"' : ''}>${m.descrizione || '-'}</td>
         `;
         tbody.appendChild(tr);
       });
