@@ -67,6 +67,7 @@ window.entraStaffSicuro = function () {
   }
   if (err) { err.textContent = ""; err.classList.remove("login-errore-visibile"); }
   modal.classList.add("hidden");
+  modal.setAttribute("hidden", "hidden");
   modal.style.display = "none";
   // La finestra del codice sorgente deve restare chiusa: in alcuni visualizzatori
   // la sola classe CSS "hidden" viene ignorata quando sparisce il login.
@@ -78,6 +79,7 @@ window.entraStaffSicuro = function () {
     sorgente.setAttribute("aria-hidden", "true");
   }
   app.classList.remove("hidden");
+  app.removeAttribute("hidden");
   app.style.display = "block";
   // I moduli seguenti sono facoltativi: nessuno può bloccare l'ingresso.
   try { if (typeof TG !== "undefined" && TG.setOperator) TG.setOperator(nome); } catch (e) {}
@@ -1106,6 +1108,10 @@ body.modal-open { overflow: hidden !important; }
      comunque leggibili i documenti se il browser usa il fallback window.print. */
   #docs-global-table-body img { width:35px !important; height:35px !important; }
 }
+
+/* Compatibilità con file HTML scaricati da una sessione già aperta. */
+.modal:not(.hidden)[hidden] { display: flex !important; }
+#app-container:not(.hidden)[hidden] { display: block !important; }
 </style>
 </head>
 <body class="">
@@ -1128,7 +1134,7 @@ body.modal-open { overflow: hidden !important; }
   <span class="logo-vf" role="img" aria-label="Logo Vecchio Frantoio"></span>
   <div>
     <div class="testata-nome">Agriturismo Vecchio Frantoio</div>
-    <div class="testata-sotto" id="testata-data">stampato il 11/09/2026, 16:13 · max</div>
+    <div class="testata-sotto" id="testata-data">stampato il 11/09/2026, 16:27 · max</div>
   </div>
 </div>
 
@@ -1751,7 +1757,7 @@ color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; fo
 
 
 <!-- MODALE PRANZI CENE DITTE & SCONTRINI -->
-<div id="pranzi-cene-modal" class="modal hidden" hidden="hidden" aria-hidden="true">
+<div id="pranzi-cene-modal" class="modal hidden" aria-hidden="true">
 <div class="modal-box" style="max-width: 680px;">
 
  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
@@ -1900,7 +1906,7 @@ color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; fo
 
 
 <!-- MODALE DOCUMENTI IDENTITA GLOBALI -->
-<div id="documenti-identita-modal" class="modal hidden" hidden="hidden" aria-hidden="true">
+<div id="documenti-identita-modal" class="modal hidden" aria-hidden="true">
 <div class="modal-box" style="max-width: 750px;">
 
  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
@@ -1938,7 +1944,7 @@ color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; fo
 
 
 <!-- MODALE ESTRATTO E PAGAMENTI CON INCROCIO AUTOMATICO E DRAG & DROPFATTURE -->
-<div id="estratto-pagamenti-modal" class="modal hidden" hidden="hidden" aria-hidden="true">
+<div id="estratto-pagamenti-modal" class="modal hidden" aria-hidden="true">
 <div class="modal-box" style="max-width: 880px;">
 
  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #2d333d; padding-bottom:8px;" class="no-print">
@@ -2133,9 +2139,9 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
 
 
 <!-- MODALE DETTAGLIO CAMERA (CALENDARIO & LISTA PRENOTAZIONI) -->
-<div id="room-detail-modal" class="modal hidden" hidden="hidden" style="z-index: 10000;" aria-hidden="true">
+<div id="room-detail-modal" class="modal hidden" aria-hidden="true">
 <div class="modal-box">
-<h3 id="detail-room-title" class="modal-title">🛏️ Camera 104 (Matrimoniale)</h3>
+<h3 id="detail-room-title" class="modal-title">Dettaglio Camera</h3>
 
  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
 <h4 style="color:#ff9f43; font-size:0.9rem;">📅 Calendario Disponibilità</h4>
@@ -2144,133 +2150,16 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
 <div class="month-nav">
 <button class="btn-nav-cal" onclick="changeMonth(-1)">◀ Mese Prec.</button>
 
- <span id="cal-month-title" style="font-weight:bold; color:#ff9f43; font-size:0.85rem;">Settembre2026</span>
+ <span id="cal-month-title" style="font-weight:bold; color:#ff9f43; font-size:0.85rem;"></span>
 <button class="btn-nav-cal" onclick="changeMonth(1)">Mese Succ. ▶</button>
 </div>
 <div class="cal-header-grid">
 
 <div>LUN</div><div>MAR</div><div>MER</div><div>GIO</div><div>VEN</div><div>SAB</div><div>DOM</div>
 </div>
-<div id="room-calendar-grid" class="cal-grid"><div class="cal-day-cell empty"></div><div class="cal-day-cell free" title="1/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">1</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="2/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">2</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="3/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">3</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="4/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">4</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="5/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">5</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="6/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">6</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell busy" title="Occupata da: Massai">
-<div style="font-size:0.75rem; font-weight:bold;">7</div>
-<div style="font-size:0.5rem;">🔴</div>
-</div><div class="cal-day-cell busy" title="Occupata da: Massai">
-<div style="font-size:0.75rem; font-weight:bold;">8</div>
-<div style="font-size:0.5rem;">🔴</div>
-</div><div class="cal-day-cell busy" title="Occupata da: Massai">
-<div style="font-size:0.75rem; font-weight:bold;">9</div>
-<div style="font-size:0.5rem;">🔴</div>
-</div><div class="cal-day-cell busy" title="Occupata da: Massai">
-<div style="font-size:0.75rem; font-weight:bold;">10</div>
-<div style="font-size:0.5rem;">🔴</div>
-</div><div class="cal-day-cell free" title="11/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">11</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell busy" title="Occupata da: Enrica">
-<div style="font-size:0.75rem; font-weight:bold;">12</div>
-<div style="font-size:0.5rem;">🔴</div>
-</div><div class="cal-day-cell free" title="13/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">13</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="14/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">14</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="15/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">15</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="16/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">16</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="17/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">17</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="18/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">18</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="19/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">19</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="20/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">20</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="21/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">21</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="22/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">22</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="23/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">23</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="24/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">24</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="25/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">25</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="26/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">26</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="27/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">27</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="28/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">28</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="29/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">29</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div><div class="cal-day-cell free" title="30/9/2026: Libera">
-<div style="font-size:0.75rem; font-weight:bold;">30</div>
-<div style="font-size:0.5rem;">🟢</div>
-</div></div>
+<div id="room-calendar-grid" class="cal-grid"></div>
 <h4 style="color:#ff9f43; margin-top:8px; font-size:0.9rem;">📋 Prenotazioni dellaCamera</h4>
-<div id="room-bookings-list" style="max-height:160px; overflow-y:auto;"><div class="stay-group-title" style="border-left-color: rgb(74, 82, 97); color: rgb(127, 140, 141);"><span>⬅️ CHI C'ERA</span><small class="stay-description">Ultima prenotazione conclusa</small><span class="stay-count">1</span></div><div class="detail-booking-card stay-past">
-    <div style="flex:1;">
-      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-        <span style="font-weight:bold; color:#ff9f43; font-size:0.85rem;">👤 Massai </span>
-        <span class="stay-badge past">CONCLUSO</span>
-      </div>
-      <div style="font-size:0.75rem; margin-top:2px;">📅 07/09/2026 ➔ 11/09/2026 (4 notti)</div>
-      <div style="font-size:0.75rem; color:#abb3c0; margin-top:1px;">👥 1 Adulti </div>
-      
-      
-    </div>
-    </div><div class="stay-group-title" style="border-left-color: rgb(168, 100, 26); color: rgb(255, 159, 67);"><span>🟠 CHI C'È ORA</span><small class="stay-description">Ospiti presenti oggi</small><span class="stay-count">0</span></div><div class="stay-empty">Camera libera in questo momento.</div><div class="stay-group-title" style="border-left-color: rgb(30, 132, 73); color: rgb(46, 204, 113);"><span>➡️ CHI ARRIVA</span><small class="stay-description">Prossime prenotazioni</small><span class="stay-count">1</span></div><div class="detail-booking-card stay-future">
-    <div style="flex:1;">
-      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-        <span style="font-weight:bold; color:#ff9f43; font-size:0.85rem;">👤 Enrica </span>
-        <span class="stay-badge future">IN ARRIVO</span>
-      </div>
-      <div style="font-size:0.75rem; margin-top:2px;">📅 12/09/2026 ➔ 13/09/2026 (1 notte)</div>
-      <div style="font-size:0.75rem; color:#abb3c0; margin-top:1px;">👥 2 Adulti </div>
-      
-      
-    </div>
-    
-    <div style="display:flex; flex-direction:column; gap:4px;">
-      
-      <button onclick="requestEditBooking('UuL4ME3snZ922BH0PgNT')" style="background:#ff9f43; color:#121417; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.75rem;">✏️ Modifica</button>
-      <button onclick="requestReleaseRoomDirect('UuL4ME3snZ922BH0PgNT')" style="background:#e74c3c; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.75rem;">🗑️ Elimina</button>
-    </div></div></div>
+<div id="room-bookings-list" style="max-height:160px; overflow-y:auto;"></div>
 <div class="modal-buttons" style="margin-top:10px;">
 <button class="btn-cancel" style="width:100%;" onclick="closeRoomDetailModal()">Chiudi</button>
 </div>
@@ -2279,7 +2168,7 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
 
 
 <!-- MODALE NUOVA / MODIFICA PRENOTAZIONE -->
-<div id="booking-modal" class="modal hidden" hidden="hidden" aria-hidden="true">
+<div id="booking-modal" class="modal hidden" aria-hidden="true">
 <div class="modal-box">
 <h3 id="modal-room-title" class="modal-title">Gestione Prenotazione</h3>
 <input type="hidden" id="book-id">
@@ -2418,7 +2307,7 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
 
 
   <!-- ================= MODALE PULIZIE CAMERA ================= -->
-  <div id="pulizie-modal" class="modal hidden" hidden="hidden" aria-hidden="true">
+  <div id="pulizie-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-box pul-box">
       <h3 class="modal-title" id="pul-titolo">🧹 Pulizie camere — 0 da fare, 1 sistemate oggi</h3>
 
@@ -2454,7 +2343,7 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
     </div>
   </div>
   <!-- ================= MODALE IMPOSTAZIONI AVVISI TELEGRAM ================= -->
-  <div id="settings-modal" class="modal hidden" hidden="hidden" aria-hidden="true">
+  <div id="settings-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-box">
       <h3 class="modal-title">⚙️ Avvisi e Operatore</h3>
 
@@ -2495,6 +2384,21 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
 
       <h4 style="color:#ff9f43; font-size:0.82rem; margin-top:12px;">📜 Ultimi avvisi di questa postazione</h4>
       <div id="tg-log-list" class="tg-log-box">
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:27:31</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: report</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:27:24</span>
+      <span class="tg-log-act">ACCESSO AL GESTIONALE</span>
+      <span class="tg-log-det">Accesso staff eseguito</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:21:49</span>
+      <span class="tg-log-act">ACCESSO AL GESTIONALE</span>
+      <span class="tg-log-det">Accesso staff eseguito</span>
+    </div>
     <div class="tg-log-row">
       <span class="tg-log-time">🕒 11/09/2026 16:14:24</span>
       <span class="tg-log-act">ACCESSO AREA MASTER</span>
@@ -2540,7 +2444,7 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
     </div>
   </div>
 <!-- MODALE PIN MASTER -->
-<div id="master-modal" class="modal hidden" hidden="hidden" style="z-index: 10000;" aria-hidden="true">
+<div id="master-modal" class="modal hidden" style="z-index: 10000;" aria-hidden="true">
 <div class="modal-box login-box">
 <div class="brand-title">🔐 Autorizzazione Master</div>
 <p id="master-prompt-text" class="sub-text">Inserisci il PIN Master per accedere all'area riservata:<br><span style="font-size:0.75rem; color:#ff9f43;">💰 Registro Economico &nbsp;•&nbsp; 💳 Estratto e Pagamenti</span></p>
@@ -2557,7 +2461,7 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
 
 
 <!-- MODALE INGRANDIMENTO FOTO SCONTRINO / DOCUMENTO -->
-<div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()" hidden="hidden" aria-hidden="true">
+<div id="image-viewer-modal" class="modal hidden" onclick="closeImageViewer()" aria-hidden="true">
 <div style="max-width:90%; max-height:90%;">
 <img id="enlarged-receipt-img" src="" style="width:100%; height:auto; border-radius:8px;border:2px solid #ff9f43;">
 </div>
@@ -3656,8 +3560,12 @@ const Sorgente = {
     const errore = doc.querySelector("#login-error");
 
     doc.querySelectorAll(".modal").forEach(m => {
+      // Le funzioni storiche aprono le finestre togliendo la classe .hidden.
+      // Non lasciamo quindi l'attributo HTML hidden sulle modali nel file
+      // scaricato, altrimenti un tap potrebbe togliere la classe ma non farle
+      // comunque apparire su Safari/iOS.
       m.classList.add("hidden");
-      m.setAttribute("hidden", "hidden");
+      m.removeAttribute("hidden");
       m.setAttribute("aria-hidden", "true");
     });
     if (login) {
@@ -3884,12 +3792,15 @@ ${clone.outerHTML}
 
 // ==========================================================
 // PROTEZIONE MODALI / TOUCH
-// Evita che un tocco passi alla home quando una finestra è in primo piano.
+// Evita che lo sfondo scorra o riceva tocchi mentre una finestra è aperta.
+// La superficie .modal a schermo intero blocca naturalmente i click sotto:
+// non usiamo un listener globale in capture, che su alcune PWA iOS può
+// intercettare anche i pulsanti validi dell'app.
 // ==========================================================
 (function installModalGuard() {
   function attive() {
     return Array.from(document.querySelectorAll(".modal"))
-      .filter(m => !m.classList.contains("hidden") && !m.hasAttribute("hidden"));
+      .filter(m => !m.classList.contains("hidden"));
   }
 
   function aggiornaBlocco() {
@@ -3908,25 +3819,6 @@ ${clone.outerHTML}
     aggiornaBlocco();
     const observer = new MutationObserver(aggiornaBlocco);
     observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class", "hidden", "style"] });
-
-    // Se per un problema del browser l'evento viene consegnato all'elemento
-    // sottostante, lo fermiamo: il pannello aperto resta davvero davanti.
-    document.addEventListener("pointerdown", (e) => {
-      const aperte = attive();
-      const top = aperte[aperte.length - 1];
-      if (top && !top.contains(e.target)) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }, true);
-    document.addEventListener("click", (e) => {
-      const aperte = attive();
-      const top = aperte[aperte.length - 1];
-      if (top && !top.contains(e.target)) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }, true);
   }
 
   if (document.body) install();
@@ -4148,7 +4040,11 @@ function loginStaff() {
   if (password === CONFIG.STAFF_PASS) {
     if (errore) { errore.textContent = ""; errore.classList.remove("login-errore-visibile"); }
     document.getElementById("login-modal").classList.add("hidden");
-    document.getElementById("app-container").classList.remove("hidden");
+    document.getElementById("login-modal").setAttribute("hidden", "hidden");
+    const appStaff = document.getElementById("app-container");
+    appStaff.classList.remove("hidden");
+    appStaff.removeAttribute("hidden");
+    appStaff.style.display = "block";
     try { refreshSoundButton(); } catch (e) {}
     try { refreshTelegramBadge(); } catch (e) {}
     renderRooms();
