@@ -1112,6 +1112,300 @@ body.modal-open { overflow: hidden !important; }
 /* Compatibilità con file HTML scaricati da una sessione già aperta. */
 .modal:not(.hidden)[hidden] { display: flex !important; }
 #app-container:not(.hidden)[hidden] { display: block !important; }
+
+/* ==========================================================
+   PROMEMORIA FATTURE CLIENTI
+   ========================================================== */
+.fatture-reminder {
+  background: #202631;
+  border: 1px solid #d99a2b;
+  border-left: 5px solid #ff9f43;
+  border-radius: 8px;
+  padding: 9px 11px;
+  margin: 0 0 12px 0;
+  color: #e1e6ed;
+}
+.fatture-titolo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffcf70;
+  font-weight: bold;
+  font-size: .92rem;
+  margin-bottom: 7px;
+}
+.fatture-count {
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: .72rem;
+}
+.fatture-vuoto {
+  color: #8ed7a9;
+  font-size: .78rem;
+  padding: 4px 0;
+}
+.fattura-riga {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  padding: 7px 0;
+  border-top: 1px solid #343b48;
+}
+.fattura-riga-testo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fattura-riga-testo strong { color: #ffb45e; font-size: .78rem; }
+.fattura-dest { color: #e1e6ed; font-size: .76rem; font-weight: bold; }
+.fattura-dettagli { color: #aab4c2; font-size: .68rem; line-height: 1.25; }
+.fattura-riga-azioni {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+.fattura-importo { color: #7fe0a8; white-space: nowrap; font-size: .78rem; }
+.fattura-check { color: #e1e6ed; white-space: nowrap; font-size: .7rem; cursor: pointer; }
+.fattura-check input { width: auto; accent-color: #2ecc71; }
+.fattura-fai-btn { white-space: nowrap; }
+.fattura-fatta { opacity: .72; }
+.fatture-fatte-box { border-top: 1px solid #343b48; margin-top: 5px; padding-top: 5px; }
+.fatture-fatte-box summary { color: #8ed7a9; cursor: pointer; font-size: .74rem; }
+.fatture-fatte-intestazione { color: #8ed7a9; font-size: .74rem; font-weight: bold; padding-bottom: 4px; }
+.fattura-box { max-width: 560px; }
+.fattura-dati-collegati {
+  background: #12151a;
+  border: 1px solid #3d4553;
+  border-left: 4px solid #ff9f43;
+  border-radius: 6px;
+  padding: 8px;
+  color: #cbd3df;
+  font-size: .78rem;
+  line-height: 1.4;
+}
+.fattura-dati-collegati strong { color: #ffb45e; }
+
+@media (max-width: 600px) {
+  .fatture-reminder { padding: 8px; }
+  .fattura-riga { align-items: stretch; flex-direction: column; }
+  .fattura-riga-azioni { justify-content: flex-start; gap: 6px; }
+  .fattura-fai-btn { flex: 1 1 auto; }
+  .fattura-check { flex: 1 1 auto; }
+  .fattura-importo { margin-right: auto; }
+  .fattura-box { max-width: calc(100vw - 8px); }
+}
+
+/* Home compatta: il dettaglio fatture è riservato all'Area Master. */
+.fatture-home-avviso {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.fatture-home-testo { color: #ffcf70; font-weight: bold; font-size: .82rem; }
+.fatture-home-fatte { color: #8ed7a9; font-size: .72rem; }
+.fatture-home-avviso .btn-mini { margin-left: auto; }
+.fatture-master-titolo { border-bottom: 1px solid #343b48; padding-bottom: 7px; }
+.fatture-master-fatte { color: #8ed7a9; font-size: .72rem; font-weight: normal; }
+.fatture-master-list { max-height: 68vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.master-fatture-sottotitolo { color: #aab4c2; font-size: .76rem; margin: 5px 0 10px; }
+
+@media (max-width: 600px) {
+  .fatture-home-avviso { gap: 6px; }
+  .fatture-home-avviso .btn-mini { margin-left: 0; width: 100%; }
+  .fatture-master-list { max-height: 62vh; }
+}
+
+/* Area Master fatture: ricerca, sezioni richiudibili e anagrafica clienti. */
+.fatture-master-controlli {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+  padding: 9px;
+  background: #171b22;
+  border: 1px solid #343b48;
+  border-radius: 8px;
+}
+.fatture-ricerca-box { flex: 1 1 280px; }
+.fatture-ricerca-box label,
+.fatture-stampa-scelta label { display: block; color: #cbd3df; font-size: .72rem; margin-bottom: 4px; }
+.fatture-ricerca-riga { display: flex; gap: 5px; }
+.fatture-ricerca-riga input { flex: 1; min-width: 0; }
+.fatture-stampa-scelta { flex: 0 1 210px; }
+.fatture-stampa-scelta select { width: 100%; }
+.fatture-sezione {
+  margin: 8px 0;
+  border: 1px solid #343b48;
+  border-radius: 8px;
+  background: #1a1f28;
+  overflow: hidden;
+}
+.fatture-sezione > summary {
+  cursor: pointer;
+  list-style-position: inside;
+  padding: 9px 10px;
+  color: #ffcf70;
+  font-size: .82rem;
+  font-weight: bold;
+  user-select: none;
+}
+.fatture-sezione > summary:hover { background: #232a35; }
+.fatture-sezione-count {
+  display: inline-flex;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  border-radius: 10px;
+  background: #3d4553;
+  color: #fff;
+  font-size: .7rem;
+}
+.fatture-sezione-corpo { padding: 0 9px 8px; }
+.fatture-sezione-corpo .fattura-riga:first-child { border-top: 1px solid #343b48; }
+.fatture-stampa-area { background: #fff; color: #111; }
+.fatture-stampa-riga {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid #aaa;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.fatture-stampa-testo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fatture-stampa-testo strong { color: #9a5c00; }
+.fatture-stampa-testo .fattura-dest { color: #111; }
+.fatture-stampa-testo .fattura-dettagli,
+.fatture-stampa-testo small { color: #444; font-size: .72rem; line-height: 1.25; }
+.fatture-stampa-esito { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; white-space: nowrap; color: #111; }
+.fatture-stampa-esito b { color: #111; }
+.fatture-stampa-esito span { font-size: .68rem; font-weight: bold; }
+.fatture-stampa-riepilogo { color: #555; font-size: .78rem; margin: 0 0 10px; }
+
+.anagrafica-clienti-box {
+  margin-top: 16px;
+  padding: 11px;
+  border: 1px solid #3d4553;
+  border-left: 4px solid #5bc0be;
+  border-radius: 8px;
+  background: #171b22;
+}
+.anagrafica-clienti-intestazione {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #343b48;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+.anagrafica-clienti-intestazione h3 { color: #8ed7d4; font-size: .95rem; }
+.anagrafica-clienti-intestazione p { color: #aab4c2; font-size: .72rem; margin-top: 3px; }
+.anagrafica-clienti-form {
+  padding: 9px;
+  margin-bottom: 9px;
+  border: 1px solid #3d4553;
+  border-radius: 7px;
+  background: #202631;
+}
+.anagrafica-form-azioni { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 7px; }
+.anagrafica-cliente-riga {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid #343b48;
+}
+.anagrafica-cliente-testo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.anagrafica-cliente-testo strong { color: #8ed7d4; font-size: .8rem; }
+.anagrafica-cliente-testo span,
+.anagrafica-cliente-testo small { color: #aab4c2; font-size: .7rem; line-height: 1.25; overflow-wrap: anywhere; }
+.anagrafica-cliente-azioni { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; flex: 0 0 auto; }
+.anagrafica-elimina { color: #ffd1d1; border-color: #a94848; }
+.anagrafica-vuota { color: #aab4c2; font-size: .74rem; padding: 6px 0; }
+
+@media (max-width: 600px) {
+  .fatture-stampa-scelta { flex-basis: 100%; }
+  .anagrafica-cliente-riga { align-items: stretch; flex-direction: column; }
+  .anagrafica-cliente-azioni { justify-content: flex-start; }
+  .anagrafica-cliente-azioni .btn-mini { flex: 1 1 auto; }
+}
+
+/* Anagrafica clienti disponibile direttamente nella home. */
+.anagrafica-home-box {
+  margin: 0 0 12px;
+  padding: 10px 11px;
+  border: 1px solid #3d4553;
+  border-left: 4px solid #5bc0be;
+  border-radius: 8px;
+  background: #171b22;
+}
+.anagrafica-home-intestazione,
+.anagrafica-modal-intestazione {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.anagrafica-home-intestazione { padding-bottom: 8px; border-bottom: 1px solid #343b48; }
+.anagrafica-home-intestazione h3 { color: #8ed7d4; font-size: .95rem; }
+.anagrafica-home-intestazione p { color: #aab4c2; font-size: .72rem; margin-top: 3px; }
+.anagrafica-home-controlli {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+.anagrafica-home-ricerca { flex: 1 1 280px; }
+.anagrafica-home-ordine { flex: 0 1 210px; }
+.anagrafica-home-controlli label { display: block; color: #cbd3df; font-size: .7rem; margin-bottom: 4px; }
+.anagrafica-home-ricerca-riga { display: flex; gap: 5px; }
+.anagrafica-home-ricerca-riga input { flex: 1; min-width: 0; }
+.anagrafica-home-ordine select { width: 100%; }
+.anagrafica-home-elenco {
+  border: 1px solid #343b48;
+  border-radius: 7px;
+  background: #1a1f28;
+  overflow: hidden;
+}
+.anagrafica-home-elenco > summary {
+  cursor: pointer;
+  padding: 7px 9px;
+  color: #8ed7d4;
+  font-weight: bold;
+  font-size: .76rem;
+}
+.anagrafica-home-elenco > summary:hover { background: #232a35; }
+.anagrafica-home-elenco > div { max-height: 270px; overflow-y: auto; padding: 0 9px; }
+.anagrafica-home-risultati { color: #aab4c2; font-weight: normal; margin-left: 4px; }
+.anagrafica-modal-box { max-width: 820px; }
+.anagrafica-modal-intestazione { border-bottom: 1px solid #2d333d; margin-bottom: 9px; }
+.anagrafica-modal-intestazione .modal-title { border: 0; padding: 0 0 7px; }
+
+@media (max-width: 600px) {
+  .anagrafica-home-ordine { flex-basis: 100%; }
+  .anagrafica-modal-box { max-width: calc(100vw - 8px); }
+}
 </style>
 </head>
 <body class="">
@@ -1134,7 +1428,7 @@ body.modal-open { overflow: hidden !important; }
   <span class="logo-vf" role="img" aria-label="Logo Vecchio Frantoio"></span>
   <div>
     <div class="testata-nome">Agriturismo Vecchio Frantoio</div>
-    <div class="testata-sotto" id="testata-data">stampato il 11/09/2026, 16:27 · max</div>
+    <div class="testata-sotto" id="testata-data">stampato il 11/09/2026, 17:48 · max</div>
   </div>
 </div>
 
@@ -1165,6 +1459,42 @@ body.modal-open { overflow: hidden !important; }
 <button class="btn-mini audio-top-right" id="sfx-toggle-btn" onclick="toggleSound()">🔊 Audio</button>
 </div>
 </header>
+<div id="fatture-da-fare-box" class="fatture-reminder no-print" aria-live="polite"><div class="fatture-home-avviso">
+      <span class="fatture-home-testo">🧾 ⚠️ Ci sono 14 fatture da fare</span>
+      <span class="fatture-home-fatte">✅ Fatte: 9</span>
+      <button type="button" class="btn-mini" onclick="openMasterModal('fatture')">Apri Area Master</button>
+    </div></div>
+<!-- ================= ANAGRAFICA CLIENTI HOME ================= -->
+<section id="anagrafica-home-box" class="anagrafica-home-box no-print">
+  <div class="anagrafica-home-intestazione">
+    <div>
+      <h3>👥 Anagrafica clienti <span id="anagrafica-home-count" class="stay-count">(0)</span></h3>
+      <p>Registra subito nome, dati fiscali e codice cliente per ritrovarli negli scontrini e nelle fatture.</p>
+    </div>
+    <button type="button" class="btn-gold" onclick="AnagraficaClienti.apriNuovo()">➕ Nuovo cliente</button>
+  </div>
+  <div class="anagrafica-home-controlli">
+    <div class="anagrafica-home-ricerca">
+      <label for="anagrafica-home-ricerca-input">🔍 Cerca nome, codice o dati fiscali</label>
+      <div class="anagrafica-home-ricerca-riga">
+        <input type="search" id="anagrafica-home-ricerca-input" placeholder="Nome, cognome, codice, P.IVA, C.F.…" oninput="AnagraficaClienti.cercaHome(this.value)">
+        <button type="button" class="btn-mini" onclick="document.getElementById('anagrafica-home-ricerca-input').value=''; AnagraficaClienti.cercaHome('')">✕</button>
+      </div>
+    </div>
+    <div class="anagrafica-home-ordine">
+      <label for="anagrafica-home-ordine-select">Ordina per</label>
+      <select id="anagrafica-home-ordine-select" onchange="AnagraficaClienti.ordinaHome(this.value)">
+        <option value="nome">Nome / alfabetico</option>
+        <option value="data">Data registrazione</option>
+        <option value="codice">Codice cliente</option>
+      </select>
+    </div>
+  </div>
+  <details id="anagrafica-home-elenco" class="anagrafica-home-elenco">
+    <summary>Elenco clienti <span id="anagrafica-home-risultati" class="anagrafica-home-risultati">0 risultati</span></summary>
+    <div id="anagrafica-clienti-home-list"><div class="anagrafica-vuota">Nessun cliente in anagrafica. Premi «Nuovo cliente» per inserirne uno.</div></div>
+  </details>
+</section>
 <main class="main-content no-print">
 
 
@@ -1240,6 +1570,48 @@ body.modal-open { overflow: hidden !important; }
 </main>
 
 
+<!-- ================= AREA MASTER: FATTURE CLIENTI ================= -->
+<div id="fatture-clienti-section" class="hidden master-view">
+  <div class="report-header no-print">
+    <button class="btn-back" onclick="closeFattureClientiArea()">⬅️ Torna alla home</button>
+    <div class="master-report-actions">
+      <button class="btn-gold" onclick="Fatturazione.stampaSelezione(document.getElementById('fatture-stampa-filtro').value)">🖨️ Stampa elenco</button>
+    </div>
+  </div>
+  <h2>🧾 Fatture clienti</h2>
+  <p class="master-fatture-sottotitolo">Qui trovi tutti i pernotti e le consumazioni caricati con ditta o camera. Usa «Fai fattura» per registrare numero, data e note, oppure la spunta rapida.</p>
+  <div class="fatture-master-controlli no-print">
+    <div class="fatture-ricerca-box">
+      <label for="fatture-ricerca-nome">🔍 Cerca per nome, ditta o codice</label>
+      <div class="fatture-ricerca-riga">
+        <input type="search" id="fatture-ricerca-nome" placeholder="Nome cliente, ditta, codice…" oninput="Fatturazione.cercaNome(this.value)">
+        <button type="button" class="btn-mini" onclick="document.getElementById('fatture-ricerca-nome').value=''; Fatturazione.cercaNome('')">✕</button>
+      </div>
+    </div>
+    <div class="fatture-stampa-scelta">
+      <label for="fatture-stampa-filtro">🖨️ Stampa</label>
+      <select id="fatture-stampa-filtro">
+        <option value="da-fare">Solo da fare</option>
+        <option value="fatte">Solo già fatte</option>
+        <option value="tutte" selected="">Da fare e già fatte</option>
+      </select>
+    </div>
+  </div>
+  <div id="fatture-master-list" class="fatture-master-list"></div>
+  <div id="fatture-stampa-area" class="hidden" aria-hidden="true"></div>
+
+  <!-- ================= ANAGRAFICA CLIENTI ================= -->
+  <section id="anagrafica-clienti-box" class="anagrafica-clienti-box no-print">
+    <div class="anagrafica-clienti-intestazione">
+      <div>
+        <h3>👥 Anagrafica clienti</h3>
+        <p>Archivio clienti visibile nell’Area Master. Le modifiche valgono anche per il datalist degli scontrini.</p>
+      </div>
+      <button type="button" class="btn-gold" onclick="AnagraficaClienti.apriNuovo()">➕ Nuovo cliente</button>
+    </div>
+    <div id="anagrafica-clienti-list"><div class="anagrafica-vuota">Nessun cliente in anagrafica. Premi «Nuovo cliente» per inserirne uno.</div></div>
+  </section>
+</div>
 <!-- VISTA REGISTRO ECONOMICO & STAMPA -->
 <div id="master-report-section" class="master-view hidden">
 <div class="report-header no-print">
@@ -1795,7 +2167,7 @@ color:white; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; fo
 <label>Destinazione Addebito / Dati:</label>
 <div style="display:flex; gap:15px; margin:4px 0;">
 <label style="color:white; cursor:pointer; font-size:0.85rem;">
-<input type="radio" name="pd-target-type" value="ditta" checkedonchange="togglePdTargetType()"> Ditta / Dati Fiscali
+<input type="radio" name="pd-target-type" value="ditta" checked="" onchange="togglePdTargetType()"> Ditta / Dati Fiscali
 </label>
 <label style="color:white; cursor:pointer; font-size:0.85rem;">
 <input type="radio" name="pd-target-type" value="camera" onchange="togglePdTargetType()"> Numero Camera
@@ -2385,6 +2757,116 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
       <h4 style="color:#ff9f43; font-size:0.82rem; margin-top:12px;">📜 Ultimi avvisi di questa postazione</h4>
       <div id="tg-log-list" class="tg-log-box">
     <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:49:31</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: report</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:48:51</span>
+      <span class="tg-log-act">ACCESSO AL GESTIONALE</span>
+      <span class="tg-log-det">Accesso staff eseguito</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:32:32</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: fatture</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:30:15</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: fatture</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:29:32</span>
+      <span class="tg-log-act">ACCESSO AL GESTIONALE</span>
+      <span class="tg-log-det">Accesso staff eseguito</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:12:12</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: fatture</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:11:40</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: report</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:10:08</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: fatture</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 17:09:53</span>
+      <span class="tg-log-act">ACCESSO AL GESTIONALE</span>
+      <span class="tg-log-det">Accesso staff eseguito</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:52:11</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: report</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:46:06</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🛏️ Pernotto · Camera 101 — Camera 101 — € 360.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:46:06</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🛏️ Pernotto · Camera 103 — Camera 103 — € 40.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:46:05</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🛏️ Pernotto · Camera 102 — Camera 102 — € 150.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:46:04</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🛏️ Pernotto · Camera 103 — Camera 103 — € 240.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:46:02</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🍽️ Cena — Giuseppe S.Francesco stanza 107 doppia — € 110.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:46:01</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🍽️ Cena — Giuseppe S.Francesco stanza 107 — € 110.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:45:55</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🍽️ Cena — Giuseppe S.Francesco stanza 107 — € 110.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:45:36</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🛏️ Pernotto · Camera 101 — Camera 101 — € 480.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:45:35</span>
+      <span class="tg-log-act">FATTURA CLIENTE SEGNATA COME FATTA</span>
+      <span class="tg-log-det">🛏️ Pernotto · Camera 109 — Camera 109 — € 665.00</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:44:26</span>
+      <span class="tg-log-act">ACCESSO AREA MASTER</span>
+      <span class="tg-log-det">PIN Master accettato — azione: report</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:44:02</span>
+      <span class="tg-log-act">ACCESSO AL GESTIONALE</span>
+      <span class="tg-log-det">Accesso staff eseguito</span>
+    </div>
+    <div class="tg-log-row">
+      <span class="tg-log-time">🕒 11/09/2026 16:30:48</span>
+      <span class="tg-log-act">ACCESSO AL GESTIONALE</span>
+      <span class="tg-log-det">Accesso staff eseguito</span>
+    </div>
+    <div class="tg-log-row">
       <span class="tg-log-time">🕒 11/09/2026 16:27:31</span>
       <span class="tg-log-act">ACCESSO AREA MASTER</span>
       <span class="tg-log-det">PIN Master accettato — azione: report</span>
@@ -2430,6 +2912,100 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
       </div>
     </div>
   </div>
+  <!-- ================= PROMEMORIA / FATTURA CLIENTE ================= -->
+  <div id="fattura-cliente-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-box fattura-box">
+      <h3 class="modal-title">🧾 Fai fattura</h3>
+      <input type="hidden" id="fattura-source-index">
+      <div id="fattura-dati-collegati" class="fattura-dati-collegati"></div>
+      <div class="form-group">
+        <label>Cliente / Ditta / Camera</label>
+        <input type="text" id="fattura-cliente" readonly="">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Numero fattura</label>
+          <input type="text" id="fattura-numero" placeholder="Es. 12/2026">
+        </div>
+        <div class="form-group">
+          <label>Data fattura</label>
+          <input type="date" id="fattura-data">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Importo precompilato (€)</label>
+        <input type="number" id="fattura-importo" step="0.01" readonly="">
+      </div>
+      <div class="form-group">
+        <label>Note fattura</label>
+        <textarea id="fattura-note" rows="2" placeholder="Eventuali note…"></textarea>
+      </div>
+      <div class="modal-buttons">
+        <button type="button" class="btn-gold" onclick="Fatturazione.salva()">✅ Segna fattura fatta</button>
+        <button type="button" class="btn-cancel" onclick="Fatturazione.chiudi()">Annulla</button>
+      </div>
+    </div>
+  </div>
+<!-- ================= MODALE ANAGRAFICA CLIENTE ================= -->
+<div id="anagrafica-cliente-modal" class="modal hidden" aria-hidden="true">
+  <div class="modal-box anagrafica-modal-box">
+    <div class="anagrafica-modal-intestazione">
+      <h3 class="modal-title">👥 Anagrafica cliente</h3>
+      <button type="button" class="btn-cancel" onclick="AnagraficaClienti.chiudiModal()">✕ Chiudi</button>
+    </div>
+    <input type="hidden" id="anagrafica-modal-id">
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <label>Nome / Ditta *</label>
+        <input type="text" id="anagrafica-modal-nome" placeholder="Es. Mario">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>Cognome</label>
+        <input type="text" id="anagrafica-modal-cognome" placeholder="Es. Rossi">
+      </div>
+      <div class="form-group" style="flex:1.5;">
+        <label>Ragione sociale</label>
+        <input type="text" id="anagrafica-modal-ragione" placeholder="Es. Rossi Srl">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <label>Codice cliente *</label>
+        <input type="text" id="anagrafica-modal-codice" placeholder="Es. CLI-001">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>Partita IVA</label>
+        <input type="text" id="anagrafica-modal-piva">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>Codice fiscale</label>
+        <input type="text" id="anagrafica-modal-cf">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Telefono</label>
+        <input type="text" id="anagrafica-modal-telefono">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="anagrafica-modal-email">
+      </div>
+      <div class="form-group" style="flex:2;">
+        <label>Indirizzo</label>
+        <input type="text" id="anagrafica-modal-indirizzo">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Note</label>
+      <textarea id="anagrafica-modal-note" rows="2" placeholder="Note utili per fatture e consumazioni…"></textarea>
+    </div>
+    <div class="anagrafica-form-azioni">
+      <button type="button" class="btn-gold" onclick="AnagraficaClienti.salva()">✅ Salva cliente</button>
+      <button type="button" class="btn-cancel" onclick="AnagraficaClienti.chiudiModal()">Annulla</button>
+    </div>
+  </div>
+</div>
   <!-- ================= MODALE SORGENTE </> ================= -->
   <div id="sorgente-modal" class="modal hidden" aria-hidden="true" hidden="hidden">
     <div class="modal-box Sorg-box">
@@ -2450,6 +3026,7 @@ padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem; display:f
 <p id="master-prompt-text" class="sub-text">Inserisci il PIN Master per accedere all'area riservata:<br><span style="font-size:0.75rem; color:#ff9f43;">💰 Registro Economico &nbsp;•&nbsp; 💳 Estratto e Pagamenti</span></p>
       <div style="margin:8px 0; display:flex; gap:8px; flex-wrap:wrap;">
         <button class="btn-mini" onclick="masterMenuGo('report')">💰 Registro Economico</button>
+        <button class="btn-mini" onclick="masterMenuGo('fatture')">🧾 Fatture Clienti</button>
         <button class="btn-mini" onclick="masterMenuGo('estratto')">💳 Estratto e Pagamenti</button>
       </div>
 <input type="password" id="master-pin-input" placeholder="PIN Master">
@@ -2895,7 +3472,9 @@ function masterMenuGo(action) {
   const t = document.getElementById("master-prompt-text");
   if (t) t.innerHTML = action === 'estratto'
     ? "Inserisci il PIN Master per aprire <b>Estratto e Pagamenti</b>:"
-    : "Inserisci il PIN Master per aprire il <b>Registro Economico</b>:";
+    : action === 'fatture'
+      ? "Inserisci il PIN Master per aprire <b>Fatture Clienti</b>:"
+      : "Inserisci il PIN Master per aprire il <b>Registro Economico</b>:";
   const inp = document.getElementById("master-pin-input");
   if (inp) inp.focus();
 }
@@ -3041,7 +3620,7 @@ const DemoStore = {
   },
 
   svuotaArchivio() {
-    ["prenotazioni", "pranzi_cene_ditte", "fatture_pagamenti", "pulizie"].forEach(n => {
+    ["prenotazioni", "pranzi_cene_ditte", "fatture_pagamenti", "pulizie", "clienti_anagrafica"].forEach(n => {
       try { localStorage.removeItem(this.key(n)); } catch (e) {}
       this._tracciate.add(n);
     });
@@ -3191,7 +3770,7 @@ const DemoStore = {
   },
 
   reset() {
-    ["prenotazioni", "pranzi_cene_ditte", "fatture_pagamenti", "pulizie"].forEach(k =>
+    ["prenotazioni", "pranzi_cene_ditte", "fatture_pagamenti", "pulizie", "clienti_anagrafica"].forEach(k =>
       localStorage.removeItem(this.key(k)));
     this.seed();
     this.specchia();
@@ -3204,7 +3783,7 @@ const DemoStore = {
 function aggiornaArchivioInfo() {
   const el = document.getElementById("set-archivio-info");
   if (!el) return;
-  const conti = ["prenotazioni", "pranzi_cene_ditte", "fatture_pagamenti", "pulizie"]
+  const conti = ["prenotazioni", "pranzi_cene_ditte", "fatture_pagamenti", "pulizie", "clienti_anagrafica"]
     .map(n => n.replace("_", " ") + ": <b>" + DemoStore.read(n).length + "</b>");
   const dove = DemoStore.siPuòSpecchiare()
     ? "su questa postazione e sull'archivio del server (resiste ai caricamenti)"
@@ -3214,7 +3793,7 @@ function aggiornaArchivioInfo() {
 }
 
 async function svuotaArchivioProva() {
-  if (!confirm("Cancello i dati di prova di questa postazione (prenotazioni, pasti, fatture, pulizie)?")) return;
+  if (!confirm("Cancello i dati di prova di questa postazione (prenotazioni, pasti, fatture, pulizie e anagrafica clienti)?")) return;
   await DemoStore.svuotaArchivio();
   aggiornaArchivioInfo();
   if (typeof renderRooms === "function") renderRooms();
@@ -3537,6 +4116,615 @@ const Logo = {
 };
 
 // ==========================================================
+// 🧾 PROMEMORIA FATTURE CLIENTI
+// Collega i pernotti e le consumazioni (ditta/camera) alla spunta
+// "Fattura fatta". Non sostituisce una fattura elettronica SDI: prepara e
+// conserva i dati della fattura e rende visibile ciò che manca.
+// ==========================================================
+const Fatturazione = {
+  vociCorrenti: [],
+  ricerca: "",
+
+  esc(v) {
+    return String(v == null ? "" : v)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  },
+
+  numero(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  },
+
+  fatta(v) {
+    return v && (v.fatturaFatta === true || v.fatturaFatta === "true" || v.fatturaStato === "FATTA");
+  },
+
+  data(v) {
+    try { return typeof formatDate === "function" ? formatDate(v) : String(v || "-"); }
+    catch (e) { return String(v || "-"); }
+  },
+
+  tutte() {
+    const righe = [];
+    const elencoPrenotazioni = Array.isArray(bookings) ? bookings : [];
+    const elencoConsumazioni = Array.isArray(pranziCeneList) ? pranziCeneList : [];
+
+    elencoPrenotazioni.forEach(b => {
+      const camera = typeof getRoomName === "function" ? getRoomName(b.roomId) : b.roomId;
+      const soggiorno = this.numero(b.stayTotal);
+      const pasti = this.numero(b.mealsTotal);
+      const importo = soggiorno + pasti;
+      const notePernotto = b.notes || b.note || b.clientNotes || "";
+      const pastiDettaglio = Array.isArray(b.meals) && b.meals.length
+        ? " · Consumazioni: " + b.meals.map(m => `${m.type || "Pasto"} € ${this.numero(m.amount).toFixed(2)}`).join(", ")
+        : "";
+      righe.push({
+        origine: "pernottamento",
+        collection: "prenotazioni",
+        id: b.id,
+        cliente: b.guestName || "Ospite non indicato",
+        destinazione: `Camera ${camera}`,
+        titolo: `🛏️ Pernotto · Camera ${camera}`,
+        periodo: `${this.data(b.checkIn)} ➔ ${this.data(b.checkOut)}`,
+        data: b.checkOut || b.checkIn || "",
+        importo,
+        dettagli: `${b.guestName || "Ospite"} · ${this.data(b.checkIn)} ➔ ${this.data(b.checkOut)} · Pernotto € ${soggiorno.toFixed(2)}${pastiDettaglio}${notePernotto ? " · Note: " + notePernotto : ""}`, 
+        fatta: this.fatta(b),
+        numero: b.fatturaNumero || "",
+        dataFattura: b.fatturaData || "",
+        noteFattura: b.fatturaNote || ""
+      });
+    });
+
+    elencoConsumazioni.forEach(item => {
+      const nomeDitta = item.dittaName || item.ditta || (item.targetType === "ditta" ? item.targetName : "");
+      const codiceCliente = item.clientCode || item.codiceCliente || item.codiceFiscale || "";
+      const eDitta = item.targetType === "ditta" || !!nomeDitta;
+      const roomId = item.roomId || item.cameraId || item.camera || item.room;
+      const camera = roomId && typeof getRoomName === "function" ? getRoomName(roomId) : roomId;
+      const tipoConsumazione = item.mealType || item.categoria || item.type || item.servizio || "Consumazione";
+      const importoConsumazione = item.amount != null ? item.amount : (item.importo != null ? item.importo : item.total);
+      const noteConsumazione = item.notes || item.note || item.dettagli || "";
+      const destinazione = eDitta
+        ? (codiceCliente ? `[${codiceCliente}] ${nomeDitta || "Ditta"}` : (nomeDitta || "Ditta"))
+        : `Camera ${camera || "-"}`;
+      righe.push({
+        origine: "consumazione",
+        collection: "pranzi_cene_ditte",
+        id: item.id,
+        cliente: destinazione,
+        destinazione,
+        titolo: `🍽️ ${tipoConsumazione}`,
+        periodo: this.data(item.date),
+        data: item.date || "",
+        importo: this.numero(importoConsumazione),
+        dettagli: `${tipoConsumazione} · ${destinazione} · ${this.data(item.date)} · € ${this.numero(importoConsumazione).toFixed(2)}${noteConsumazione ? " · Note: " + noteConsumazione : ""}`, 
+        fatta: this.fatta(item),
+        numero: item.fatturaNumero || "",
+        dataFattura: item.fatturaData || "",
+        noteFattura: item.fatturaNote || ""
+      });
+    });
+
+    return righe.sort((a, b) => String(b.data).localeCompare(String(a.data)));
+  },
+
+  riga(v, indice, completata) {
+    const stato = completata ? " fattura-fatta" : "";
+    const testoBottone = completata ? "✏️ Modifica dati" : "🧾 Fai fattura";
+    return `<div class="fattura-riga${stato}">
+      <div class="fattura-riga-testo">
+        <strong>${this.esc(v.titolo)}</strong>
+        <span class="fattura-dest">${this.esc(v.destinazione)}</span>
+        <span class="fattura-dettagli">${this.esc(v.dettagli)}</span>
+      </div>
+      <div class="fattura-riga-azioni">
+        <b class="fattura-importo">€ ${v.importo.toFixed(2)}</b>
+        <label class="fattura-check"><input type="checkbox" ${completata ? "checked" : ""} onchange="Fatturazione.spunta(${indice}, this.checked)"> Fattura fatta</label>
+        <button type="button" class="btn-mini fattura-fai-btn" onclick="Fatturazione.apri(${indice})">${testoBottone}</button>
+      </div>
+    </div>`;
+  },
+
+  // Sulla home resta solo un avviso compatto. I dati completi sono nell'Area Master.
+  render() {
+    const box = document.getElementById("fatture-da-fare-box");
+    if (!box) return;
+    this.vociCorrenti = this.tutte();
+    const daFare = this.vociCorrenti.filter(v => !v.fatta).length;
+    const fatte = this.vociCorrenti.filter(v => v.fatta).length;
+    const messaggio = daFare
+      ? `⚠️ Ci sono ${daFare} fatture da fare`
+      : "✅ Nessuna fattura da fare";
+    box.innerHTML = `<div class="fatture-home-avviso">
+      <span class="fatture-home-testo">🧾 ${messaggio}</span>
+      <span class="fatture-home-fatte">✅ Fatte: ${fatte}</span>
+      <button type="button" class="btn-mini" onclick="openMasterModal('fatture')">Apri Area Master</button>
+    </div>`;
+  },
+
+  rigaStampa(v, completata) {
+    const stato = completata ? "✅ FATTURA FATTA" : "⚠️ DA FARE";
+    const datiFattura = completata
+      ? [v.numero ? `N. ${this.esc(v.numero)}` : "", v.dataFattura ? `Data ${this.esc(this.data(v.dataFattura))}` : "", v.noteFattura ? `Note: ${this.esc(v.noteFattura)}` : ""]
+          .filter(Boolean).join(" · ")
+      : "";
+    return `<div class="fatture-stampa-riga">
+      <div class="fatture-stampa-testo">
+        <strong>${this.esc(v.titolo)}</strong>
+        <span class="fattura-dest">${this.esc(v.destinazione)}</span>
+        <span class="fattura-dettagli">${this.esc(v.dettagli)}</span>
+        ${datiFattura ? `<small>${datiFattura}</small>` : ""}
+      </div>
+      <div class="fatture-stampa-esito"><b>€ ${v.importo.toFixed(2)}</b><span>${stato}</span></div>
+    </div>`;
+  },
+
+  filtra(voci) {
+    const cerca = String(this.ricerca || "").trim().toLowerCase();
+    if (!cerca) return voci;
+    return voci.filter(v => [v.cliente, v.destinazione, v.titolo, v.dettagli].join(" ").toLowerCase().includes(cerca));
+  },
+
+  cercaNome(valore) {
+    this.ricerca = String(valore || "");
+    this.renderMaster();
+  },
+
+  // Elenco completo, visibile soltanto dopo il PIN nell'Area Master.
+  renderMaster() {
+    const box = document.getElementById("fatture-master-list");
+    if (!box) return;
+    const precedenteDaFare = box.querySelector("#fatture-sezione-da-fare");
+    const precedenteFatte = box.querySelector("#fatture-sezione-fatte");
+    const daFareAperte = precedenteDaFare ? precedenteDaFare.open : true;
+    const fatteAperte = precedenteFatte ? precedenteFatte.open : true;
+    const tutte = this.tutte();
+    this.vociCorrenti = this.filtra(tutte);
+    const daFare = this.vociCorrenti.filter(v => !v.fatta);
+    const fatte = this.vociCorrenti.filter(v => v.fatta);
+    let html = `<div class="fatture-titolo fatture-master-titolo"><span>🧾 Fatture clienti</span><span class="fatture-count">${daFare.length} da fare</span><span class="fatture-master-fatte">✅ ${fatte.length} fatte</span></div>`;
+    if (!tutte.length) {
+      html += `<div class="fatture-vuoto">Nessun pernotto o consumo registrato.</div>`;
+    } else if (!this.vociCorrenti.length) {
+      html += `<div class="fatture-vuoto">Nessuna fattura corrisponde alla ricerca «${this.esc(this.ricerca)}».</div>`;
+    } else {
+      html += `<details id="fatture-sezione-da-fare" class="fatture-sezione"${daFareAperte ? " open" : ""}>
+        <summary>⚠️ Fatture da fare <span class="fatture-sezione-count">${daFare.length}</span></summary>
+        <div class="fatture-sezione-corpo">${daFare.length ? daFare.map(v => this.riga(v, this.vociCorrenti.indexOf(v), false)).join("") : `<div class="fatture-vuoto">Nessuna fattura da fare.</div>`}</div>
+      </details>`;
+      html += `<details id="fatture-sezione-fatte" class="fatture-sezione"${fatteAperte ? " open" : ""}>
+        <summary>✅ Fatture già fatte <span class="fatture-sezione-count">${fatte.length}</span></summary>
+        <div class="fatture-sezione-corpo">${fatte.length ? fatte.map(v => this.riga(v, this.vociCorrenti.indexOf(v), true)).join("") : `<div class="fatture-vuoto">Nessuna fattura già fatta.</div>`}</div>
+      </details>`;
+    }
+    box.innerHTML = html;
+  },
+
+  stampaSelezione(filtro) {
+    const area = document.getElementById("fatture-stampa-area");
+    if (!area) return;
+    const selezione = filtro || "tutte";
+    const voci = this.filtra(this.tutte()).filter(v =>
+      selezione === "da-fare" ? !v.fatta : selezione === "fatte" ? v.fatta : true
+    );
+    const etichetta = selezione === "da-fare" ? "Fatture da fare" : selezione === "fatte" ? "Fatture già fatte" : "Tutte le fatture";
+    const daFare = voci.filter(v => !v.fatta);
+    const fatte = voci.filter(v => v.fatta);
+    area.innerHTML = `<div class="fatture-stampa-contenuto">
+      <h2>🧾 ${this.esc(etichetta)}</h2>
+      <p class="fatture-stampa-riepilogo">${voci.length} voci · ${daFare.length} da fare · ${fatte.length} già fatte${this.ricerca.trim() ? ` · Ricerca: ${this.esc(this.ricerca.trim())}` : ""}</p>
+      ${voci.length ? voci.map(v => this.rigaStampa(v, v.fatta)).join("") : `<div class="fatture-vuoto">Nessuna voce da stampare.</div>`}
+    </div>`;
+    area.classList.remove("hidden");
+    try { stampaArea("fatture-stampa-area", `Fatture clienti — ${etichetta}`); }
+    finally {
+      setTimeout(() => { area.innerHTML = ""; area.classList.add("hidden"); }, 1200);
+    }
+  },
+
+  async spunta(indice, valore) {
+    const v = this.vociCorrenti[indice];
+    if (!v) return;
+    try {
+      const dati = {
+        fatturaFatta: !!valore,
+        fatturaStato: valore ? "FATTA" : "DA_FARE",
+        fatturaFattaAt: valore ? new Date().toISOString() : null
+      };
+      await db.collection(v.collection).doc(v.id).update(dati);
+      try {
+        TG.notify(valore ? "FATTURA CLIENTE SEGNATA COME FATTA" : "FATTURA CLIENTE RIAPERTA",
+          `${v.titolo} — ${v.destinazione} — € ${v.importo.toFixed(2)}`);
+      } catch (e) {}
+      this.render();
+      this.renderMaster();
+    } catch (e) {
+      alert("Impossibile aggiornare lo stato della fattura: " + (e.message || e));
+      this.render();
+      this.renderMaster();
+    }
+  },
+
+  apri(indice) {
+    const v = this.vociCorrenti[indice];
+    if (!v) return;
+    const modal = document.getElementById("fattura-cliente-modal");
+    if (!modal) return;
+    document.getElementById("fattura-source-index").value = String(indice);
+    document.getElementById("fattura-dati-collegati").innerHTML =
+      `<strong>${this.esc(v.titolo)}</strong><br>${this.esc(v.dettagli)}<br><b>Totale precompilato: € ${v.importo.toFixed(2)}</b>`;
+    document.getElementById("fattura-cliente").value = v.cliente || v.destinazione || "";
+    document.getElementById("fattura-importo").value = v.importo.toFixed(2);
+    document.getElementById("fattura-numero").value = v.numero || "";
+    document.getElementById("fattura-data").value = v.dataFattura || new Date().toISOString().slice(0, 10);
+    document.getElementById("fattura-note").value = v.noteFattura || "";
+    modal.classList.remove("hidden");
+    modal.removeAttribute("hidden");
+    modal.setAttribute("aria-hidden", "false");
+  },
+
+  chiudi() {
+    const modal = document.getElementById("fattura-cliente-modal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.setAttribute("hidden", "hidden");
+    modal.setAttribute("aria-hidden", "true");
+  },
+
+  async salva() {
+    const indice = Number(document.getElementById("fattura-source-index").value);
+    const v = this.vociCorrenti[indice];
+    if (!v) return;
+    const dati = {
+      fatturaFatta: true,
+      fatturaStato: "FATTA",
+      fatturaNumero: document.getElementById("fattura-numero").value.trim(),
+      fatturaData: document.getElementById("fattura-data").value,
+      fatturaNote: document.getElementById("fattura-note").value.trim(),
+      fatturaFattaAt: new Date().toISOString()
+    };
+    try {
+      await db.collection(v.collection).doc(v.id).update(dati);
+      this.chiudi();
+      this.render();
+      this.renderMaster();
+      try {
+        TG.notify("FATTURA CLIENTE REGISTRATA",
+          `${v.titolo} — ${v.destinazione} — € ${v.importo.toFixed(2)}${dati.fatturaNumero ? " — n. " + dati.fatturaNumero : ""}`);
+      } catch (e) {}
+    } catch (e) {
+      alert("Impossibile salvare la fattura: " + (e.message || e));
+    }
+  }
+};
+
+// ==========================================================
+// 👥 ANAGRAFICA CLIENTI
+// Registro clienti utilizzabile dalla home e dall'Area Master.
+// ==========================================================
+const AnagraficaClienti = {
+  COL: "clienti_anagrafica",
+  elenco: [],
+  _ascolto: false,
+  ricercaHome: "",
+  ordinamentoHome: "nome",
+
+  esc(v) {
+    return String(v == null ? "" : v)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  },
+
+  normalizza(row) {
+    row = row || {};
+    return {
+      id: row.id || "",
+      nome: row.nome || row.nomeCliente || row.dittaName || row.ditta || "",
+      cognome: row.cognome || row.surname || "",
+      ragioneSociale: row.ragioneSociale || row.ragione_sociale || row.company || "",
+      codiceCliente: row.codiceCliente || row.clientCode || row.codice || "",
+      partitaIva: row.partitaIva || row.piva || row.partitaIVA || "",
+      codiceFiscale: row.codiceFiscale || row.cf || "",
+      telefono: row.telefono || row.phone || "",
+      email: row.email || "",
+      indirizzo: row.indirizzo || row.address || "",
+      note: row.note || row.notes || "",
+      creatoIl: row.creatoIl || row.createdAt || "",
+      aggiornatoIl: row.aggiornatoIl || row.updatedAt || ""
+    };
+  },
+
+  nomeVisualizzato(v) {
+    v = this.normalizza(v);
+    const persona = [v.nome, v.cognome].filter(Boolean).join(" ").trim();
+    if (persona && v.ragioneSociale && v.ragioneSociale.toLowerCase() !== persona.toLowerCase()) {
+      return `${persona} — ${v.ragioneSociale}`;
+    }
+    return persona || v.ragioneSociale || "Cliente senza nome";
+  },
+
+  testoRicerca(v) {
+    return [
+      this.nomeVisualizzato(v), v.nome, v.cognome, v.ragioneSociale,
+      v.codiceCliente, v.partitaIva, v.codiceFiscale,
+      v.telefono, v.email, v.indirizzo, v.note
+    ].join(" ").toLowerCase();
+  },
+
+  suggerimenti() {
+    return this.elenco
+      .map(v => ({ name: this.nomeVisualizzato(v), code: v.codiceCliente }))
+      .filter(v => v.name && v.name !== "Cliente senza nome");
+  },
+
+  trova(valore) {
+    const cerca = String(valore || "").trim().toLowerCase();
+    if (!cerca) return null;
+    return this.elenco.find(v => {
+      const campi = [this.nomeVisualizzato(v), v.nome, v.cognome, v.ragioneSociale,
+        v.codiceCliente, v.partitaIva, v.codiceFiscale];
+      return campi.some(x => String(x || "").toLowerCase() === cerca);
+    }) || null;
+  },
+
+  nextCode() {
+    let max = 0;
+    const codici = this.elenco.map(v => v.codiceCliente);
+    if (Array.isArray(pranziCeneList)) {
+      pranziCeneList.forEach(v => codici.push(v.clientCode || v.codiceCliente || v.codice || ""));
+    }
+    codici.forEach(codice => {
+      const match = String(codice || "").match(/(\d+)/);
+      if (match) max = Math.max(max, parseInt(match[1], 10));
+    });
+    return `CLI-${String(max + 1).padStart(3, "0")}`;
+  },
+
+  init() {
+    if (this._ascolto || typeof db === "undefined" || !db) return;
+    this._ascolto = true;
+    db.collection(this.COL).onSnapshot((snapshot) => {
+      this.elenco = [];
+      snapshot.forEach(doc => this.elenco.push(this.normalizza({ id: doc.id, ...doc.data() })));
+      this.render();
+    }, (error) => {
+      console.warn("Anagrafica clienti non disponibile:", error && error.message ? error.message : error);
+      this.render();
+    });
+    this.render();
+  },
+
+  ordinaRighe(righe, ordinamento) {
+    return righe.slice().sort((a, b) => {
+      if (ordinamento === "data") {
+        return String(b.creatoIl || b.aggiornatoIl || "").localeCompare(String(a.creatoIl || a.aggiornatoIl || ""));
+      }
+      if (ordinamento === "codice") {
+        return String(a.codiceCliente || "").localeCompare(String(b.codiceCliente || ""), "it", { numeric: true, sensitivity: "base" });
+      }
+      return this.nomeVisualizzato(a).localeCompare(this.nomeVisualizzato(b), "it", { sensitivity: "base" });
+    });
+  },
+
+  dataRegistrazione(v) {
+    if (!v.creatoIl) return "";
+    try { return new Date(v.creatoIl).toLocaleDateString("it-IT"); }
+    catch (e) { return ""; }
+  },
+
+  renderLista(targetId, home) {
+    const box = document.getElementById(targetId);
+    if (!box) return;
+    let righe = this.elenco.slice();
+    if (home && this.ricercaHome.trim()) {
+      const query = this.ricercaHome.trim().toLowerCase();
+      righe = righe.filter(v => this.testoRicerca(v).includes(query));
+    }
+    righe = this.ordinaRighe(righe, home ? this.ordinamentoHome : "nome");
+    const count = document.getElementById(home ? "anagrafica-home-count" : "anagrafica-master-count");
+    if (count) count.textContent = `(${this.elenco.length})`;
+    const risultati = document.getElementById("anagrafica-home-risultati");
+    if (home && risultati) risultati.textContent = `${righe.length} risultati`;
+    if (!righe.length) {
+      box.innerHTML = `<div class="anagrafica-vuota">${home && this.ricercaHome.trim() ? "Nessun cliente corrisponde alla ricerca." : "Nessun cliente in anagrafica. Premi «Nuovo cliente» per inserirne uno."}</div>`;
+      return;
+    }
+    box.innerHTML = righe.map(v => {
+      const dati = [
+        v.codiceCliente ? `Cod. ${this.esc(v.codiceCliente)}` : "",
+        v.partitaIva ? `P.IVA ${this.esc(v.partitaIva)}` : "",
+        v.codiceFiscale ? `C.F. ${this.esc(v.codiceFiscale)}` : "",
+        this.dataRegistrazione(v) ? `Registrato ${this.dataRegistrazione(v)}` : ""
+      ].filter(Boolean).join(" · ");
+      const recapiti = [v.telefono, v.email, v.indirizzo].filter(Boolean).map(x => this.esc(x)).join(" · ");
+      return `<div class="anagrafica-cliente-riga">
+        <div class="anagrafica-cliente-testo">
+          <strong>${this.esc(this.nomeVisualizzato(v))}</strong>
+          <span>${dati || "Nessun dato fiscale aggiuntivo"}</span>
+          ${recapiti ? `<small>${recapiti}</small>` : ""}
+          ${v.note ? `<small>Note: ${this.esc(v.note)}</small>` : ""}
+        </div>
+        <div class="anagrafica-cliente-azioni">
+          <button type="button" class="btn-mini" onclick="AnagraficaClienti.apriModifica('${this.esc(v.id)}')">✏️ Modifica</button>
+          <button type="button" class="btn-mini anagrafica-elimina" onclick="AnagraficaClienti.elimina('${this.esc(v.id)}')">🗑️ Elimina</button>
+        </div>
+      </div>`;
+    }).join("");
+  },
+
+  render() {
+    this.renderLista("anagrafica-clienti-list", false);
+    this.renderLista("anagrafica-clienti-home-list", true);
+    try { updateDittaDatalist(); } catch (e) {}
+  },
+
+  cercaHome(valore) {
+    this.ricercaHome = String(valore || "");
+    this.render();
+  },
+
+  ordinaHome(valore) {
+    this.ordinamentoHome = valore || "nome";
+    this.render();
+  },
+
+  apriNuovo() {
+    this.compila({ codiceCliente: this.nextCode() });
+  },
+
+  apriModifica(id) {
+    const v = this.elenco.find(x => x.id === id);
+    if (v) this.compila(v);
+  },
+
+  compila(v) {
+    v = v || {};
+    const modal = document.getElementById("anagrafica-cliente-modal");
+    if (!modal) return;
+    document.getElementById("anagrafica-modal-id").value = v.id || "";
+    document.getElementById("anagrafica-modal-nome").value = v.nome || "";
+    document.getElementById("anagrafica-modal-cognome").value = v.cognome || "";
+    document.getElementById("anagrafica-modal-ragione").value = v.ragioneSociale || "";
+    document.getElementById("anagrafica-modal-codice").value = v.codiceCliente || this.nextCode();
+    document.getElementById("anagrafica-modal-piva").value = v.partitaIva || "";
+    document.getElementById("anagrafica-modal-cf").value = v.codiceFiscale || "";
+    document.getElementById("anagrafica-modal-telefono").value = v.telefono || "";
+    document.getElementById("anagrafica-modal-email").value = v.email || "";
+    document.getElementById("anagrafica-modal-indirizzo").value = v.indirizzo || "";
+    document.getElementById("anagrafica-modal-note").value = v.note || "";
+    modal.classList.remove("hidden");
+    modal.removeAttribute("hidden");
+    modal.setAttribute("aria-hidden", "false");
+    document.getElementById("anagrafica-modal-nome").focus();
+  },
+
+  chiudiModal() {
+    const modal = document.getElementById("anagrafica-cliente-modal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.setAttribute("hidden", "hidden");
+    modal.setAttribute("aria-hidden", "true");
+  },
+
+  async salva() {
+    const id = document.getElementById("anagrafica-modal-id").value.trim();
+    const nome = document.getElementById("anagrafica-modal-nome").value.trim();
+    const cognome = document.getElementById("anagrafica-modal-cognome").value.trim();
+    const ragioneSociale = document.getElementById("anagrafica-modal-ragione").value.trim();
+    const codiceCliente = document.getElementById("anagrafica-modal-codice").value.trim() || this.nextCode();
+    if (!nome && !ragioneSociale) {
+      alert("Inserisci almeno il nome del cliente o la ragione sociale.");
+      return;
+    }
+    const duplicato = this.elenco.find(v => v.id !== id && (
+      (v.codiceCliente && v.codiceCliente.toLowerCase() === codiceCliente.toLowerCase()) ||
+      (nome && v.nome && v.nome.toLowerCase() === nome.toLowerCase() && v.cognome.toLowerCase() === cognome.toLowerCase()) ||
+      (ragioneSociale && v.ragioneSociale && v.ragioneSociale.toLowerCase() === ragioneSociale.toLowerCase())
+    ));
+    if (duplicato) {
+      alert("Esiste già un cliente con questo nome, codice o ragione sociale.");
+      return;
+    }
+    const ora = new Date().toISOString();
+    const dati = {
+      nome,
+      cognome,
+      ragioneSociale,
+      nomeCliente: this.nomeVisualizzato({ nome, cognome, ragioneSociale }),
+      dittaName: ragioneSociale || [nome, cognome].filter(Boolean).join(" "),
+      codiceCliente,
+      clientCode: codiceCliente,
+      partitaIva: document.getElementById("anagrafica-modal-piva").value.trim(),
+      codiceFiscale: document.getElementById("anagrafica-modal-cf").value.trim(),
+      telefono: document.getElementById("anagrafica-modal-telefono").value.trim(),
+      email: document.getElementById("anagrafica-modal-email").value.trim(),
+      indirizzo: document.getElementById("anagrafica-modal-indirizzo").value.trim(),
+      note: document.getElementById("anagrafica-modal-note").value.trim(),
+      aggiornatoIl: ora
+    };
+    try {
+      if (id) {
+        await db.collection(this.COL).doc(id).update(dati);
+      } else {
+        dati.creatoIl = ora;
+        await db.collection(this.COL).add(dati);
+      }
+      this.chiudiModal();
+      this.render();
+    } catch (e) {
+      alert("Impossibile salvare il cliente: " + (e.message || e));
+    }
+  },
+
+  async elimina(id) {
+    const v = this.elenco.find(x => x.id === id);
+    if (!v) return;
+    if (!confirm(`Eliminare dall'anagrafica «${this.nomeVisualizzato(v)}»? I dati storici delle fatture e degli scontrini resteranno conservati.`)) return;
+    try {
+      await db.collection(this.COL).doc(id).delete();
+      this.chiudiModal();
+      this.render();
+    } catch (e) {
+      alert("Impossibile eliminare il cliente: " + (e.message || e));
+    }
+  },
+
+  async assicuraDaDitta(nome, codice) {
+    nome = String(nome || "").trim();
+    codice = String(codice || "").trim();
+    if (!nome || !codice || typeof db === "undefined" || !db) return;
+    const esistente = this.elenco.find(v =>
+      this.nomeVisualizzato(v).toLowerCase() === nome.toLowerCase() ||
+      (v.codiceCliente && v.codiceCliente.toLowerCase() === codice.toLowerCase())
+    );
+    if (esistente) {
+      if (this.nomeVisualizzato(esistente) === nome && esistente.codiceCliente === codice) return;
+      await db.collection(this.COL).doc(esistente.id).update({
+        nome, cognome: "", ragioneSociale: nome, nomeCliente: nome, dittaName: nome,
+        codiceCliente: codice, clientCode: codice, aggiornatoIl: new Date().toISOString()
+      });
+      return;
+    }
+    const ora = new Date().toISOString();
+    await db.collection(this.COL).add({
+      nome, cognome: "", ragioneSociale: nome, nomeCliente: nome, dittaName: nome,
+      codiceCliente: codice, clientCode: codice,
+      creatoIl: ora, aggiornatoIl: ora, origine: "scontrino"
+    });
+  }
+};
+
+// Funzioni della vista riservata: vengono chiamate dopo il PIN Master.
+function openFattureClientiArea() {
+  document.querySelectorAll(".modal").forEach(m => {
+    m.classList.add("hidden");
+    m.removeAttribute("hidden");
+  });
+  const principale = document.querySelector(".main-content");
+  const report = document.getElementById("master-report-section");
+  const area = document.getElementById("fatture-clienti-section");
+  if (principale) principale.classList.add("hidden");
+  if (report) report.classList.add("hidden");
+  if (area) {
+    area.classList.remove("hidden");
+    area.removeAttribute("hidden");
+  }
+  try { Fatturazione.renderMaster(); } catch (e) {}
+  try { AnagraficaClienti.render(); } catch (e) {}
+}
+
+function closeFattureClientiArea() {
+  const area = document.getElementById("fatture-clienti-section");
+  const principale = document.querySelector(".main-content");
+  if (area) area.classList.add("hidden");
+  if (principale) principale.classList.remove("hidden");
+}
+
+// ==========================================================
 // </> SORGENTE — permette di leggere, copiare e scaricare il codice
 // dell'intera app da qualsiasi postazione (basta un solo file HTML).
 // ==========================================================
@@ -3767,6 +4955,9 @@ function stampaArea(id, titolo) {
   th { background:#eee !important; font-weight:bold; }
   img { max-width:42px !important; max-height:42px !important; object-fit:contain; }
   .detail-booking-card { color:#111 !important; border-color:#555 !important; break-inside:avoid; }
+  .fatture-stampa-area { max-height:none !important; height:auto !important; overflow:visible !important; }
+  .fatture-stampa-area .fatture-stampa-contenuto { max-height:none !important; height:auto !important; overflow:visible !important; }
+  .fatture-stampa-area .fatture-stampa-riga { break-inside:avoid !important; page-break-inside:avoid !important; }
   .hidden, .no-print { display:none !important; }
 </style>
 </head>
@@ -3935,6 +5126,8 @@ if (window.DB_MODE !== "live" && typeof DemoStore !== "undefined") {
   try { DemoStore.avviaSincronia(); } catch (e) {}
 }
 try { Logo.ascolta(); Logo.applica(); } catch (e) { console.warn("logo non attivo:", e.message); }
+try { Fatturazione.render(); } catch (e) { console.warn("promemoria fatture non attivo:", e.message); }
+try { AnagraficaClienti.init(); } catch (e) { console.warn("anagrafica clienti non attiva:", e.message); }
 document.getElementById("home-date-from").value = today;
 document.getElementById("home-date-to").value = tomorrowStr;
 
@@ -3979,6 +5172,7 @@ snapshot.forEach((doc) => {
 pranziCeneList.push({ id: doc.id, ...doc.data() });
 });
 updateDittaDatalist();
+try { Fatturazione.render(); } catch (e) {}
 if (!document.getElementById("pranzi-cene-modal").classList.contains("hidden")) {
 renderPranziCeneReport();
 
@@ -4065,6 +5259,7 @@ function loginStaff() {
 
 
 function renderRooms() {
+try { Fatturazione.render(); } catch (e) {}
 const from = document.getElementById("home-date-from").value;
 const to = document.getElementById("home-date-to").value;
 const grid = document.getElementById("rooms-grid");
@@ -4875,8 +6070,9 @@ alert("Errore eliminazione fattura: " + err.message);
 function getNextClientCode() {
 let maxNum = 0;
 pranziCeneList.forEach(item => {
-if (item.clientCode) {
-const match = item.clientCode.match(/\d+/);
+const code = item.clientCode || item.codiceCliente || item.codiceFiscale || "";
+if (code) {
+const match = String(code).match(/\d+/);
 if (match) {
 const num = parseInt(match[0], 10);
 if (num > maxNum) maxNum = num;
@@ -4884,6 +6080,7 @@ if (num > maxNum) maxNum = num;
 }
 });
 
+if (typeof AnagraficaClienti !== "undefined") return AnagraficaClienti.nextCode();
 const nextNum = maxNum + 1;
 return `CLI-${String(nextNum).padStart(3, '0')}`;
 }
@@ -4894,9 +6091,27 @@ if (!nameInput) {
 codeInput.value = "";
 return;
 }
-const existing = pranziCeneList.find(item => item.dittaName &&item.dittaName.toLowerCase() === nameInput.toLowerCase() && item.clientCode);
+const anagrafica = typeof AnagraficaClienti !== "undefined" ? AnagraficaClienti.trova(nameInput) : null;
+if (anagrafica) {
+if (anagrafica.nome && nameInput.toLowerCase() === String(anagrafica.codiceCliente || "").toLowerCase()) {
+  document.getElementById("pd-ditta-input").value = anagrafica.nome;
+}
+codeInput.value = anagrafica.codiceCliente || "";
+return;
+}
+const existing = pranziCeneList.find(item => {
+const nome = item.dittaName || item.ditta || "";
+const codice = item.clientCode || item.codiceCliente || item.codiceFiscale || "";
+const valore = nameInput.toLowerCase();
+return (nome && nome.toLowerCase() === valore) || (codice && String(codice).toLowerCase() === valore);
+});
 if (existing) {
-codeInput.value = existing.clientCode;
+const nomeEsistente = existing.dittaName || existing.ditta || "";
+const codiceEsistente = existing.clientCode || existing.codiceCliente || existing.codiceFiscale || "";
+if (nomeEsistente && nameInput.toLowerCase() === String(codiceEsistente).toLowerCase()) {
+  document.getElementById("pd-ditta-input").value = nomeEsistente;
+}
+codeInput.value = codiceEsistente;
 } else {
 if (!codeInput.value || codeInput.value.startsWith("CLI-")) {
 codeInput.value = getNextClientCode();
@@ -4909,16 +6124,29 @@ if (!datalist) return;
 datalist.innerHTML = "";
 const ditteMap = new Map();
 pranziCeneList.forEach(item => {
-if (item.dittaName && !ditteMap.has(item.dittaName.toLowerCase())) {
-ditteMap.set(item.dittaName.toLowerCase(), { name: item.dittaName, code:item.clientCode || '' });
+const nomeDitta = item.dittaName || item.ditta || (item.targetType === 'ditta' ? item.targetName : '');
+const codiceDitta = item.clientCode || item.codiceCliente || item.codiceFiscale || '';
+if (nomeDitta && !ditteMap.has(nomeDitta.toLowerCase())) {
+ditteMap.set(nomeDitta.toLowerCase(), { name: nomeDitta, code: codiceDitta });
 
 }
 });
+if (typeof AnagraficaClienti !== "undefined") {
+AnagraficaClienti.suggerimenti().forEach(v => {
+if (v.name) ditteMap.set(v.name.toLowerCase(), { name: v.name, code: v.code || "" });
+});
+}
 ditteMap.forEach(v => {
 const opt = document.createElement("option");
 opt.value = v.name;
 opt.label = v.code ? `[${v.code}] ${v.name}` : v.name;
 datalist.appendChild(opt);
+if (v.code && v.code !== v.name) {
+const codeOpt = document.createElement("option");
+codeOpt.value = v.code;
+codeOpt.label = `${v.name} — ${v.code}`;
+datalist.appendChild(codeOpt);
+}
 });
 }
 function openPranziCeneModal() {
@@ -4930,6 +6158,11 @@ document.getElementById("pd-client-code").value = "";
 document.getElementById("pd-notes").value = "";
 document.getElementById("pd-photo-input").value = "";
 updateDittaDatalist();
+const radioDitta = document.querySelector('input[name="pd-target-type"][value="ditta"]');
+const radioCamera = document.querySelector('input[name="pd-target-type"][value="camera"]');
+if (radioDitta) radioDitta.checked = true;
+if (radioCamera) radioCamera.checked = false;
+togglePdTargetType();
 const camSelect = document.getElementById("pd-camera-select");
 camSelect.innerHTML = "";
 ROOMS.forEach(r => {
@@ -5038,10 +6271,16 @@ roomId: targetType === 'camera' ? roomId : null,
 amount,
 notes,
 photo: photoBase64 || null,
+// La consumazione entra nel promemoria Fatture da fare finché non viene spuntata.
+fatturaFatta: false,
+fatturaStato: "DA_FARE",
 createdAt: new Date().toISOString()
 };
 try {
 await db.collection("pranzi_cene_ditte").add(entryData);
+if (targetType === 'ditta' && typeof AnagraficaClienti !== "undefined") {
+  try { await AnagraficaClienti.assicuraDaDitta(dittaName, clientCode); } catch (e) {}
+}
 document.getElementById("pd-amount").value = "";
 document.getElementById("pd-ditta-input").value = "";
 document.getElementById("pd-client-code").value = "";
@@ -5361,6 +6600,8 @@ document.getElementById("master-error").innerText = "";
 const promptText = document.getElementById("master-prompt-text");
 if (action === 'report') {
 promptText.innerHTML = "Inserisci il PIN Master per accedere all'area riservata:<br><span style=\"font-size:0.75rem; color:#ff9f43;\">💰 Registro Economico &nbsp;•&nbsp; 💳 Estratto e Pagamenti</span>";
+} else if (action === 'fatture') {
+promptText.innerHTML = "Inserisci il PIN Master per aprire <b>Fatture Clienti</b>:";
 } else if (action === 'edit') {
 promptText.innerText = "Inserisci il PIN Master per modificare la prenotazione:";
 } else if (action === 'delete') {
@@ -5397,6 +6638,8 @@ if (action === 'report') {
 showMasterReport();
 } else if (action === 'estratto') {
 openEstrattoPagamentiModal();
+} else if (action === 'fatture') {
+openFattureClientiArea();
 } else if (action === 'edit' && bId) {
 openBookingModal(bId);
 } else if (action === 'delete' && bId) {
@@ -5875,6 +7118,9 @@ deposit,
 notes,
 meals: currentTempMeals,
 guestDocs: currentTempDocs,
+// Un soggiorno nuovo entra nel promemoria finché la fattura non viene chiusa.
+fatturaFatta: id ? !!((bookings.find(x => x.id === id) || {}).fatturaFatta) : false,
+fatturaStato: id ? (((bookings.find(x => x.id === id) || {}).fatturaFatta) ? "FATTA" : "DA_FARE") : "DA_FARE",
 updatedAt: new Date().toISOString()
 };
 
